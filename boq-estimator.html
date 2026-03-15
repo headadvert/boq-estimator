@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BOQ Quick Estimator — Professional Construction Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300;1,600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0c0c0b;--s1:#161614;--s2:#1e1e1b;--s3:#262622;
+  --border:#2a2a26;--border2:#363630;
+  --gold:#c8a84b;--gold2:#e8c96a;--gold-bg:rgba(200,168,75,.08);
+  --text:#e4e2da;--muted:#6e6c63;--muted2:#9a9890;
+  --green:#5aad7e;--red:#d45f5f;
+  --head:'Cormorant Garamond',serif;--mono:'DM Mono',monospace;
+}
+html,body{height:100%}
+body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:13px;line-height:1.5;overflow-x:hidden}
+
+/* MOBILE BAR */
+.mob-bar{display:none;position:fixed;top:0;left:0;right:0;height:52px;background:var(--s1);border-bottom:1px solid var(--border);z-index:200;align-items:center;justify-content:space-between;padding:0 16px}
+.mob-logo{font-family:var(--head);font-size:18px;font-weight:600;color:var(--gold);font-style:italic}
+.burger{background:none;border:none;color:var(--muted2);font-size:22px;cursor:pointer;padding:4px 8px;line-height:1;display:flex;align-items:center}
+
+/* OVERLAY */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:150;display:none}
+.overlay.open{display:block}
+
+/* SHELL */
+.shell{display:flex;min-height:100vh}
+
+/* SIDEBAR */
+.sidebar{width:220px;flex-shrink:0;background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;transition:transform .25s ease}
+.logo{padding:22px 18px 16px;border-bottom:1px solid var(--border)}
+.logo-mark{font-family:var(--head);font-size:21px;font-weight:600;color:var(--gold);font-style:italic}
+.logo-sub{font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:3px}
+.nav{padding:12px 8px;flex:1}
+.nav-lbl{font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;padding:8px 10px 5px}
+.ni{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:5px;cursor:pointer;color:var(--muted2);transition:.15s;margin-bottom:2px;font-size:12px;border:1px solid transparent;user-select:none}
+.ni:hover{background:var(--s2);color:var(--text)}
+.ni.on{background:var(--gold-bg);color:var(--gold);border-color:rgba(200,168,75,.2)}
+.ni-icon{width:15px;text-align:center;font-size:13px;flex-shrink:0}
+.nav-sep{height:1px;background:var(--border);margin:8px 10px}
+.cfg{padding:12px 14px 18px;border-top:1px solid var(--border)}
+.cfg-l{font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px;margin-top:10px}
+.cfg-l:first-child{margin-top:0}
+.cfg select{width:100%;background:var(--s2);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:11px;padding:7px 8px;border-radius:4px;cursor:pointer;appearance:none}
+.cfg select:focus{outline:none;border-color:var(--gold)}
+
+/* MAIN */
+.main{flex:1;min-width:0;padding:32px 30px 80px;max-width:820px}
+
+/* PAGE HEADER */
+.ph{margin-bottom:22px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.ph h1{font-family:var(--head);font-size:30px;font-weight:300;font-style:italic;line-height:1.05;letter-spacing:-.5px}
+.ph h1 em{color:var(--gold);font-style:italic}
+.ph p{font-size:11px;color:var(--muted);margin-top:5px}
+
+/* PANELS */
+.panel{display:none}
+.panel.on{display:block;animation:fi .2s ease}
+@keyframes fi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* SECTION LABEL */
+.sl{font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.sl::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* DASHBOARD */
+.qs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:22px}
+.qs-card{background:var(--s1);border:1px solid var(--border);border-radius:6px;padding:18px 14px;cursor:pointer;transition:.15s;text-align:center}
+.qs-card:hover{border-color:var(--border2);background:var(--s2)}
+.qs-card.dash{border-style:dashed}
+.qs-icon{font-size:20px;color:var(--gold);margin-bottom:8px;line-height:1}
+.qs-title{font-size:13px;font-weight:500;margin-bottom:3px}
+.qs-desc{font-size:11px;color:var(--muted);line-height:1.5}
+.codes-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:22px}
+.cc{background:var(--s1);border:1px solid var(--border);border-radius:5px;padding:11px 8px;text-align:center}
+.cc-flag{font-size:20px;margin-bottom:4px}
+.cc-name{font-size:11px;font-weight:500;color:var(--gold)}
+.cc-country{font-size:10px;color:var(--muted);margin-top:2px}
+
+/* FORM */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.full{grid-column:1/-1}
+.field label{font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:4px}
+.field input,.field select,.field textarea{width:100%;background:var(--s2);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:12px;padding:9px 10px;border-radius:4px;transition:.15s}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--gold);background:var(--s3)}
+.field textarea{resize:vertical;min-height:68px}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.8px;text-transform:uppercase;padding:10px 18px;border-radius:4px;cursor:pointer;transition:.15s;border:none}
+.btn-g{background:var(--gold);color:#0c0c0b}
+.btn-g:hover{background:var(--gold2)}
+.btn-o{background:transparent;border:1px solid var(--border2);color:var(--muted2)}
+.btn-o:hover{border-color:var(--gold);color:var(--gold)}
+.btn-row{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
+
+/* ROOMS */
+.room-card{background:var(--s1);border:1px solid var(--border);border-radius:6px;margin-bottom:8px;overflow:hidden}
+.room-hd{display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;user-select:none}
+.rnum{font-size:10px;color:var(--gold);letter-spacing:1px;flex-shrink:0;min-width:56px}
+.rtitle{font-size:13px;font-weight:500;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.rmeta{font-size:10px;color:var(--muted);background:var(--s2);padding:2px 8px;border-radius:3px;flex-shrink:0;white-space:nowrap}
+.rarr{font-size:14px;color:var(--muted);transition:.2s;flex-shrink:0;margin-left:4px;line-height:1}
+.rarr.op{transform:rotate(45deg);color:var(--gold)}
+.room-body{display:none;padding:14px;border-top:1px solid var(--border);background:var(--s2)}
+.room-body.op{display:block}
+.ri-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr;gap:7px;margin-bottom:12px}
+.ri label{font-size:9px;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;display:block;margin-bottom:3px}
+.ri input{width:100%;background:var(--s1);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:12px;padding:7px 8px;border-radius:3px}
+.ri input:focus{outline:none;border-color:var(--gold)}
+.type-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+.rtype{font-size:10px;padding:4px 9px;border:1px solid var(--border);border-radius:3px;cursor:pointer;color:var(--muted);transition:.12s;user-select:none}
+.rtype:hover{border-color:var(--border2);color:var(--muted2)}
+.rtype.sel{border-color:var(--gold);color:var(--gold);background:var(--gold-bg)}
+.del-room{font-size:10px;color:var(--muted);cursor:pointer;transition:.15s}
+.del-room:hover{color:var(--red)}
+.add-room{width:100%;padding:11px;background:transparent;border:1px dashed var(--border);color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border-radius:5px;transition:.2s;margin-bottom:14px;display:block}
+.add-room:hover{border-color:var(--gold);color:var(--gold)}
+
+/* RESULTS */
+.res-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px}
+.res-top h2{font-family:var(--head);font-size:26px;font-weight:300;font-style:italic;line-height:1.1}
+.badge{font-size:9px;background:var(--s2);color:var(--muted2);padding:3px 9px;border-radius:3px;border:1px solid var(--border);letter-spacing:.8px;white-space:nowrap;margin-top:4px}
+.proj-card-top{background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:14px}
+.proj-card-top-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:6px}
+.proj-name-big{font-family:var(--head);font-size:18px;font-style:italic;color:var(--text);font-weight:300}
+.proj-code-tag{font-size:9px;background:var(--gold-bg);border:1px solid rgba(200,168,75,.25);color:var(--gold);padding:3px 9px;border-radius:3px;letter-spacing:.8px}
+.proj-meta-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.pm-item .pm-lbl{color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:2px}
+.pm-item .pm-val{color:var(--muted2);font-size:12px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px}
+.stat{background:var(--s1);border:1px solid var(--border);border-radius:7px;padding:14px 14px 12px;position:relative;overflow:hidden}
+.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--gold);opacity:.35}
+.stat-l{font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:7px}
+.stat-v{font-size:24px;font-weight:300;color:var(--gold);line-height:1;font-family:var(--head);font-style:italic}
+.stat-u{font-size:10px;color:var(--muted);margin-top:4px}
+.reg-note{background:var(--s1);border-left:3px solid var(--gold);padding:11px 15px;font-size:11px;color:var(--muted2);line-height:1.75;margin-bottom:22px;border-radius:0 6px 6px 0}
+.boq-sec{margin-bottom:20px;background:var(--s1);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.boq-room-hd{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--s2);border-bottom:1px solid var(--border);flex-wrap:wrap;gap:8px}
+.boq-room-title{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.boq-room-num{font-size:9px;color:var(--gold);letter-spacing:1.5px;text-transform:uppercase;background:var(--gold-bg);border:1px solid rgba(200,168,75,.2);padding:2px 8px;border-radius:3px}
+.boq-room-name{font-size:14px;font-weight:500;color:var(--text)}
+.boq-room-type{font-size:10px;color:var(--muted);background:var(--s3);padding:2px 8px;border-radius:3px;border:1px solid var(--border)}
+.boq-room-dims{display:flex;gap:14px;flex-wrap:wrap}
+.boq-dim{font-size:11px;color:var(--muted2)}
+.boq-dim b{color:var(--muted);font-weight:400;font-size:9px;text-transform:uppercase;letter-spacing:.5px;margin-right:3px}
+.trade-group{border-bottom:1px solid var(--border)}
+.trade-group:last-child{border-bottom:none}
+.trade-hd{display:flex;align-items:center;gap:8px;padding:7px 16px 5px;background:rgba(0,0,0,.18)}
+.trade-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.trade-lbl{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;font-weight:500}
+.trade-row{display:grid;grid-template-columns:1fr 80px 50px;align-items:center;padding:10px 16px;border-bottom:1px solid rgba(42,42,38,.45)}
+.trade-row:last-child{border-bottom:none}
+.trade-row:hover{background:rgba(200,168,75,.028)}
+.tr-desc{font-size:12px;color:var(--muted2);line-height:1.4;padding-right:8px}
+.tr-qty{font-size:17px;font-weight:300;color:var(--gold);text-align:right;font-family:var(--head);font-style:italic;white-space:nowrap}
+.tr-unit{font-size:10px;color:var(--muted);text-align:right;white-space:nowrap}
+.td-concrete .trade-dot{background:#5b94d4}.td-concrete .trade-lbl{color:#5b94d4}
+.td-masonry  .trade-dot{background:#c8a84b}.td-masonry  .trade-lbl{color:#c8a84b}
+.td-tiling   .trade-dot{background:#5aad7e}.td-tiling   .trade-lbl{color:#5aad7e}
+.td-finishes .trade-dot{background:#b87bd4}.td-finishes .trade-lbl{color:#b87bd4}
+
+/* SAVED */
+.proj-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+.pc{background:var(--s1);border:1px solid var(--border);border-radius:6px;padding:15px;cursor:pointer;transition:.15s}
+.pc:hover{border-color:var(--gold);background:var(--gold-bg)}
+.pc-name{font-size:13px;font-weight:500;margin-bottom:4px}
+.pc-meta{font-size:11px;color:var(--muted);line-height:1.7}
+.pc-foot{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+.pc-badge{font-size:9px;background:var(--s2);color:var(--muted);padding:2px 7px;border-radius:3px;border:1px solid var(--border)}
+.pc-del{font-size:10px;color:var(--muted);cursor:pointer;transition:.15s}
+.pc-del:hover{color:var(--red)}
+
+/* EMPTY */
+.empty{text-align:center;padding:50px 20px;color:var(--muted)}
+.empty p{font-size:13px;line-height:1.8}
+
+/* DISCLAIMER */
+.disc{font-size:10px;color:var(--muted);text-align:center;margin-top:26px;padding-top:16px;border-top:1px solid var(--border);line-height:1.8;opacity:.7}
+
+/* PRINT */
+@media print{
+  /* hide everything except results panel */
+  .sidebar,.mob-bar,.btn-row,.add-room,.overlay,
+  #panel-dashboard,#panel-project,#panel-rooms,#panel-saved,
+  .shell > aside{display:none!important}
+
+  /* reset layout */
+  html,body{background:#fff!important;color:#000!important;font-size:11pt;font-family:'DM Mono',monospace}
+  .shell{display:block}
+  .main{padding:0!important;max-width:100%!important}
+  #panel-results{display:block!important}
+
+  /* print header */
+  #panel-results::before{
+    content:'BOQ Quick Estimator';
+    display:block;font-size:9pt;color:#aaa;
+    text-align:right;padding-bottom:6pt;
+    border-bottom:1pt solid #ddd;margin-bottom:14pt;
+    letter-spacing:1pt;text-transform:uppercase;
+    font-family:'DM Mono',monospace;
+  }
+
+  /* project info card */
+  .proj-card-top{background:#fafafa!important;border:1pt solid #ddd!important;border-radius:4pt;padding:10pt 12pt;margin-bottom:10pt}
+  .proj-card-top-row{border-color:#ddd!important;padding-bottom:8pt;margin-bottom:8pt}
+  .proj-name-big{color:#111!important;font-size:14pt}
+  .proj-code-tag{background:#fffdf0!important;border-color:#c8a84b!important;color:#7a5c10!important;font-size:8pt}
+  .proj-meta-grid{grid-template-columns:repeat(3,1fr)!important}
+  .pm-item .pm-lbl{color:#999!important;font-size:7pt}
+  .pm-item .pm-val{color:#444!important;font-size:10pt}
+
+  /* compliance note */
+  .reg-note{border-left:3pt solid #c8a84b!important;background:#fffdf5!important;color:#555!important;font-size:9pt;padding:8pt 12pt;margin-bottom:12pt}
+
+  /* summary stats */
+  .stats{grid-template-columns:repeat(3,1fr)!important;gap:6pt;margin-bottom:14pt}
+  .stat{border:1pt solid #ddd!important;background:#fafafa!important;padding:10pt 12pt;break-inside:avoid}
+  .stat::before{background:#c8a84b!important;opacity:1}
+  .stat-l{color:#999!important;font-size:7pt}
+  .stat-v{color:#7a5c10!important;font-size:18pt}
+  .stat-u{color:#bbb!important;font-size:8pt}
+
+  /* room BOQ cards */
+  .boq-sec{border:1pt solid #ddd!important;border-radius:4pt;margin-bottom:14pt;break-inside:avoid;overflow:visible!important}
+  .boq-room-hd{background:#f5f5f5!important;border-bottom:1pt solid #ddd!important;padding:8pt 12pt}
+  .boq-room-num{background:#fffdf0!important;border-color:#c8a84b!important;color:#7a5c10!important;font-size:8pt}
+  .boq-room-name{color:#111!important;font-size:12pt}
+  .boq-room-type{background:#eee!important;border-color:#ddd!important;color:#666!important;font-size:9pt}
+  .boq-dim{color:#555!important;font-size:9pt}
+  .boq-dim b{color:#aaa!important}
+
+  /* trade groups */
+  .trade-group{border-bottom:1pt solid #eee!important}
+  .trade-hd{background:#f9f9f9!important;padding:5pt 12pt}
+  .trade-dot{width:5pt;height:5pt}
+  .trade-lbl{font-size:8pt!important}
+  .td-concrete .trade-lbl{color:#1a4a99!important}
+  .td-concrete .trade-dot{background:#1a4a99!important}
+  .td-masonry  .trade-lbl{color:#7a5c10!important}
+  .td-masonry  .trade-dot{background:#7a5c10!important}
+  .td-tiling   .trade-lbl{color:#1a6a3a!important}
+  .td-tiling   .trade-dot{background:#1a6a3a!important}
+  .td-finishes .trade-lbl{color:#5a2a8a!important}
+  .td-finishes .trade-dot{background:#5a2a8a!important}
+
+  /* trade rows */
+  .trade-row{border-bottom:0.5pt solid #f0f0f0!important;padding:7pt 12pt;grid-template-columns:1fr 70pt 44pt!important}
+  .trade-row:hover{background:none!important}
+  .tr-desc{color:#333!important;font-size:10pt}
+  .tr-qty{color:#7a5c10!important;font-size:13pt}
+  .tr-unit{color:#aaa!important;font-size:9pt}
+
+  /* disclaimer */
+  .disc{color:#aaa!important;border-color:#ddd!important;font-size:8pt;margin-top:16pt;padding-top:10pt}
+
+  /* notes */
+  .proj-notes-box{background:#fafafa!important;border:1pt solid #ddd!important;font-size:9pt;color:#555!important}
+
+  /* page settings */
+  .res-top{margin-bottom:10pt}
+  .res-top h2{font-size:20pt;color:#111}
+  .badge{background:#f5f5f5!important;color:#666!important;border-color:#ddd!important;font-size:8pt}
+  @page{margin:1.8cm 1.5cm;size:A4}
+}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .mob-bar{display:flex}
+  .sidebar{position:fixed;top:0;left:0;bottom:0;z-index:160;transform:translateX(-100%);width:260px;height:100%}
+  .sidebar.open{transform:translateX(0)}
+  .shell{display:block}
+  .main{padding:64px 14px 60px;max-width:100%}
+  .ph h1{font-size:24px}
+  .qs-grid{grid-template-columns:1fr 1fr;gap:7px}
+  .codes-grid{grid-template-columns:repeat(2,1fr)}
+  .g2{grid-template-columns:1fr}
+  .full{grid-column:1}
+  .ri-grid{grid-template-columns:1fr 1fr 1fr}
+  .ri-grid .ri:first-child{grid-column:1/-1}
+  .stats{grid-template-columns:1fr 1fr}
+  .proj-grid{grid-template-columns:1fr}
+  .proj-bar{grid-template-columns:1fr 1fr}
+  .btn-row .btn{flex:1;justify-content:center}
+  .boq-room-hd{flex-direction:column;align-items:flex-start}
+  .trade-row{grid-template-columns:1fr 60px 40px}
+  .tr-qty{font-size:15px}
+  .res-top h2{font-size:20px}
+  .proj-meta-grid{grid-template-columns:1fr 1fr}
+  .stats{grid-template-columns:1fr 1fr}
+}
+@media(max-width:400px){
+  .qs-grid{grid-template-columns:1fr}
+  .ri-grid{grid-template-columns:1fr 1fr}
+  .ri-grid .ri:first-child{grid-column:1/-1}
+  .stats{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- MOBILE BAR -->
+<div class="mob-bar">
+  <div class="mob-logo">BOQ Estimator</div>
+  <button class="burger" onclick="toggleSidebar()">&#9776;</button>
+</div>
+
+<!-- OVERLAY -->
+<div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+<div class="shell">
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="logo">
+    <div class="logo-mark">BOQ</div>
+    <div class="logo-sub">Quick Estimator · v2.0</div>
+  </div>
+  <nav class="nav">
+    <div class="nav-lbl">Workspace</div>
+    <div class="ni on" id="ni-dashboard" onclick="showPanel('dashboard')"><span class="ni-icon">⊞</span>Dashboard</div>
+    <div class="ni" id="ni-project" onclick="showPanel('project')"><span class="ni-icon">◈</span>Project info</div>
+    <div class="ni" id="ni-rooms" onclick="showPanel('rooms')"><span class="ni-icon">⬡</span>Rooms</div>
+    <div class="ni" id="ni-results" onclick="showPanel('results')"><span class="ni-icon">≡</span>BOQ Results</div>
+    <div class="nav-sep"></div>
+    <div class="nav-lbl">Saved</div>
+    <div class="ni" id="ni-saved" onclick="showPanel('saved')"><span class="ni-icon">○</span>Saved projects</div>
+  </nav>
+  <div class="cfg">
+    <div class="cfg-l">Region / code</div>
+    <select id="region">
+      <option value="KSA">🇸🇦 Saudi Arabia (SBC 304)</option>
+      <option value="UAE">🇦🇪 UAE (IBC / ACI)</option>
+      <option value="UK">🇬🇧 United Kingdom (EC2)</option>
+      <option value="US">🇺🇸 United States (ACI 318)</option>
+      <option value="EU">🇪🇺 Europe (Eurocode 2)</option>
+      <option value="IN">🇮🇳 India (IS 456)</option>
+      <option value="AU">🇦🇺 Australia (AS 3600)</option>
+      <option value="INTL">🌐 International</option>
+    </select>
+    <div class="cfg-l">Units</div>
+    <select id="units">
+      <option value="metric">Metric (m, m², kg)</option>
+      <option value="imperial">Imperial (ft, ft², lb)</option>
+    </select>
+    <div class="cfg-l">Currency</div>
+    <select id="currency">
+      <option value="SAR">SAR — Saudi Riyal</option>
+      <option value="AED">AED — UAE Dirham</option>
+      <option value="USD">USD — US Dollar</option>
+      <option value="GBP">GBP — British Pound</option>
+      <option value="EUR">EUR — Euro</option>
+      <option value="INR">INR — Indian Rupee</option>
+      <option value="AUD">AUD — Australian Dollar</option>
+    </select>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- DASHBOARD -->
+  <div class="panel on" id="panel-dashboard">
+    <div class="ph">
+      <h1>Good to see you,<br><em>Estimator.</em></h1>
+      <p>Build accurate bills of quantities for any construction project, worldwide.</p>
+    </div>
+    <div class="sl">Quick start</div>
+    <div class="qs-grid">
+      <div class="qs-card dash" onclick="newProject()">
+        <div class="qs-icon">+</div>
+        <div class="qs-title">New project</div>
+        <div class="qs-desc">Start a fresh estimate</div>
+      </div>
+      <div class="qs-card" onclick="showPanel('saved')">
+        <div class="qs-icon" style="color:var(--muted)">○</div>
+        <div class="qs-title">Saved projects</div>
+        <div class="qs-desc" id="dash-count">0 projects saved</div>
+      </div>
+      <div class="qs-card" onclick="showPanel('results');calculateBOQ()">
+        <div class="qs-icon" style="color:var(--muted)">≡</div>
+        <div class="qs-title">Recalculate</div>
+        <div class="qs-desc">Re-run current BOQ</div>
+      </div>
+    </div>
+    <div class="sl">Supported standards</div>
+    <div class="codes-grid" id="codes-grid"></div>
+  </div>
+
+  <!-- PROJECT INFO -->
+  <div class="panel" id="panel-project">
+    <div class="ph">
+      <h1>Project <em>Information</em></h1>
+      <p>Fill in project details — this appears on your exported BOQ document.</p>
+    </div>
+    <div class="sl">Project details</div>
+    <div class="g2">
+      <div class="field"><label>Project name *</label><input id="pname" placeholder="Villa Al-Noor"></div>
+      <div class="field"><label>Client name</label><input id="pclient" placeholder="Mr. Ahmed Al-Rashid"></div>
+      <div class="field"><label>Site location</label><input id="ploc" placeholder="Riyadh, KSA"></div>
+      <div class="field"><label>Project type</label>
+        <select id="ptype">
+          <option>Residential villa</option>
+          <option>Apartment</option>
+          <option>Commercial building</option>
+          <option>Industrial / warehouse</option>
+          <option>Renovation / fitout</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="field"><label>Number of floors</label><input id="pfloors" type="number" value="2" min="1" max="50"></div>
+      <div class="field"><label>Prepared by</label><input id="pqs" placeholder="Your name"></div>
+      <div class="field full"><label>Project notes</label><textarea id="pnotes" placeholder="Any special conditions, scope limitations, or client requirements…"></textarea></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-o" onclick="showPanel('dashboard')">&#8592; Back</button>
+      <button class="btn btn-g" onclick="showPanel('rooms')">Next: Add rooms &#8594;</button>
+    </div>
+  </div>
+
+  <!-- ROOMS -->
+  <div class="panel" id="panel-rooms">
+    <div class="ph">
+      <h1>Room <em>Schedule</em></h1>
+      <p>Add each room or zone. Enter dimensions and openings for accurate quantities.</p>
+    </div>
+    <div id="rooms-list"></div>
+    <button class="add-room" onclick="addRoom()">+ Add new room</button>
+    <div class="btn-row">
+      <button class="btn btn-o" onclick="showPanel('project')">&#8592; Project info</button>
+      <button class="btn btn-g" onclick="runCalc()">Calculate BOQ &#8594;</button>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="panel" id="panel-results">
+    <div id="results-out"><div class="empty"><p>Add rooms and click<br><strong>Calculate BOQ</strong><br>to generate your bill of quantities.</p></div></div>
+  </div>
+
+  <!-- SAVED -->
+  <div class="panel" id="panel-saved">
+    <div class="ph">
+      <h1>Saved <em>Projects</em></h1>
+      <p>Your projects are stored locally in this browser.</p>
+    </div>
+    <div id="saved-list"></div>
+    <div class="btn-row"><button class="btn btn-g" onclick="newProject()">+ New project</button></div>
+  </div>
+
+</main>
+</div>
+
+<script>
+const REGS={
+  KSA:{name:'Saudi Arabia — SBC 304',slabGnd:.20,rebarSlab:80,rebarCol:160,wasteConc:1.05,bpm:12,wasteBk:1.05,mortarPer:25,twf:1.12,tww:1.10,paintCov:8,plasterCov:1.5,note:'SBC 304 (based on ACI 318). Minimum concrete grade C25. Steel fy=420 MPa (ASTM A615 Gr.60). 40mm cover for exterior/exposed elements. Increase to 50mm for Eastern Province coastal sites.'},
+  UAE:{name:'UAE — IBC / ACI 318',slabGnd:.20,rebarSlab:85,rebarCol:165,wasteConc:1.05,bpm:12,wasteBk:1.05,mortarPer:25,twf:1.12,tww:1.10,paintCov:8,plasterCov:1.5,note:'UAE follows IBC with local amendments. Aggressive chloride/sulfate exposure in coastal zones — increase cover to 50mm for XS/XA exposure classes.'},
+  UK:{name:'UK — BS 8110 / Eurocode 2',slabGnd:.175,rebarSlab:75,rebarCol:150,wasteConc:1.05,bpm:10,wasteBk:1.05,mortarPer:30,twf:1.10,tww:1.08,paintCov:10,plasterCov:2.0,note:'BS 8110 / EC2 EN 1992-1-1. C25/30 typical. 175mm two-way slab for standard residential spans. 10 blocks/m² for 215mm coursing.'},
+  US:{name:'United States — ACI 318-19',slabGnd:.178,rebarSlab:78,rebarCol:155,wasteConc:1.05,bpm:12.5,wasteBk:1.05,mortarPer:28,twf:1.10,tww:1.10,paintCov:9,plasterCov:1.8,note:"ACI 318-19. f'c=4000 psi (28 MPa) typical. fy=60,000 psi (Grade 60). CMU block 8×8×16 in."},
+  EU:{name:'Europe — Eurocode 2',slabGnd:.18,rebarSlab:75,rebarCol:150,wasteConc:1.05,bpm:10,wasteBk:1.04,mortarPer:30,twf:1.10,tww:1.08,paintCov:10,plasterCov:2.0,note:'Eurocode 2 (EN 1992-1-1). C25/30 concrete. fy=500 MPa (B500B). XC1 interior, XC3/XC4 exterior exposure.'},
+  IN:{name:'India — IS 456:2000',slabGnd:.125,rebarSlab:70,rebarCol:145,wasteConc:1.07,bpm:9.5,wasteBk:1.06,mortarPer:22,twf:1.10,tww:1.10,paintCov:8,plasterCov:1.2,note:'IS 456:2000. M20 concrete minimum for moderate exposure. Fe415/Fe500 steel. 125mm slab common for residential.'},
+  AU:{name:'Australia — AS 3600-2018',slabGnd:.18,rebarSlab:75,rebarCol:155,wasteConc:1.05,bpm:12.5,wasteBk:1.05,mortarPer:28,twf:1.10,tww:1.08,paintCov:10,plasterCov:2.0,note:'AS 3600-2018. N32 (32 MPa) typical. D500N rebar fy=500 MPa. 20–30mm cover depending on exposure class.'},
+  INTL:{name:'International / Generic',slabGnd:.20,rebarSlab:80,rebarCol:160,wasteConc:1.05,bpm:12,wasteBk:1.05,mortarPer:25,twf:1.12,tww:1.10,paintCov:9,plasterCov:1.5,note:'Generic international factors. Verify against your local building code before use.'},
+};
+const CODES=[['🇸🇦','SBC 304','Saudi Arabia'],['🇦🇪','IBC/ACI','UAE'],['🇬🇧','EC2','United Kingdom'],['🇺🇸','ACI 318','United States'],['🇪🇺','Eurocode 2','Europe'],['🇮🇳','IS 456','India'],['🇦🇺','AS 3600','Australia'],['🌐','Generic','International']];
+const RTYPES=['Bedroom','Living room','Dining','Kitchen','Bathroom','Office','Garage','Store','Hallway','Balcony','Other'];
+let rooms=[],rid=0;
+
+// Build codes grid with plain HTML — no template literals at parse time
+(function(){
+  const g=document.getElementById('codes-grid');
+  CODES.forEach(function(c){
+    const d=document.createElement('div');
+    d.className='cc';
+    d.innerHTML='<div class="cc-flag">'+c[0]+'</div><div class="cc-name">'+c[1]+'</div><div class="cc-country">'+c[2]+'</div>';
+    g.appendChild(d);
+  });
+})();
+
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('open');
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+}
+function getReg(){return REGS[document.getElementById('region').value];}
+function getUnit(){return document.getElementById('units').value;}
+function toM(v){return getUnit()==='imperial'?+v*0.3048:+v;}
+function aU(){return getUnit()==='metric'?'m²':'ft²';}
+function vU(){return getUnit()==='metric'?'m³':'ft³';}
+function dA(v){return getUnit()==='imperial'?(v/0.0929).toFixed(1):v.toFixed(2);}
+function dV(v){return getUnit()==='imperial'?(v/0.0283).toFixed(2):v.toFixed(2);}
+function dK(v){return getUnit()==='imperial'?(v*2.20462).toFixed(0):v.toFixed(0);}
+function kU(){return getUnit()==='imperial'?'lb':'kg';}
+
+function showPanel(id){
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('on');});
+  document.querySelectorAll('.ni').forEach(function(n){n.classList.remove('on');});
+  document.getElementById('panel-'+id).classList.add('on');
+  document.getElementById('ni-'+id).classList.add('on');
+  if(id==='saved')renderSaved();
+  updateCount();
+  closeSidebar();
+  window.scrollTo(0,0);
+}
+
+function addRoom(){
+  rid++;
+  rooms.push({id:rid,name:'Room '+rid,type:'Bedroom',L:5,W:4,H:3,doors:1,windows:2});
+  renderRooms();
+}
+function deleteRoom(id){rooms=rooms.filter(function(r){return r.id!==id;});renderRooms();}
+function toggleRoom(id){
+  const b=document.getElementById('rb-'+id);
+  const a=document.getElementById('ra-'+id);
+  const op=b.classList.toggle('op');
+  a.classList.toggle('op',op);
+  a.textContent=op?'×':'+';
+}
+function setType(i,t,el){
+  rooms[i].type=t;
+  el.closest('.type-row').querySelectorAll('.rtype').forEach(function(e){e.classList.remove('sel');});
+  el.classList.add('sel');
+}
+
+function renderRooms(){
+  const u=getUnit()==='metric'?'m':'ft';
+  const c=document.getElementById('rooms-list');
+  if(!rooms.length){c.innerHTML='';return;}
+  c.innerHTML=rooms.map(function(r,i){
+    return '<div class="room-card">'
+      +'<div class="room-hd" onclick="toggleRoom('+r.id+')">'
+      +'<span class="rnum">ROOM '+String(i+1).padStart(2,'0')+'</span>'
+      +'<span class="rtitle" id="rt-'+r.id+'">'+r.name+'</span>'
+      +'<span class="rmeta">'+r.type+'</span>'
+      +'<span class="rarr" id="ra-'+r.id+'">+</span>'
+      +'</div>'
+      +'<div class="room-body" id="rb-'+r.id+'">'
+      +'<div class="ri-grid">'
+      +'<div class="ri"><label>Room name</label><input value="'+r.name+'" oninput="rooms['+i+'].name=this.value;document.getElementById(\'rt-'+r.id+'\').textContent=this.value"></div>'
+      +'<div class="ri"><label>L ('+u+')</label><input type="number" value="'+r.L+'" step="0.1" min="0.1" oninput="rooms['+i+'].L=+this.value"></div>'
+      +'<div class="ri"><label>W ('+u+')</label><input type="number" value="'+r.W+'" step="0.1" min="0.1" oninput="rooms['+i+'].W=+this.value"></div>'
+      +'<div class="ri"><label>H ('+u+')</label><input type="number" value="'+r.H+'" step="0.1" min="0.1" oninput="rooms['+i+'].H=+this.value"></div>'
+      +'<div class="ri"><label>Doors</label><input type="number" value="'+r.doors+'" min="0" max="10" oninput="rooms['+i+'].doors=+this.value"></div>'
+      +'<div class="ri"><label>Windows</label><input type="number" value="'+r.windows+'" min="0" max="20" oninput="rooms['+i+'].windows=+this.value"></div>'
+      +'</div>'
+      +'<div class="type-row">'
+      +RTYPES.map(function(t){return '<span class="rtype'+(r.type===t?' sel':'')+'" onclick="setType('+i+',\''+t+'\',this)">'+t+'</span>';}).join('')
+      +'</div>'
+      +'<span class="del-room" onclick="deleteRoom('+r.id+')">× Remove room</span>'
+      +'</div></div>';
+  }).join('');
+}
+
+function runCalc(){
+  if(!rooms.length){alert('Please add at least one room first.');return;}
+  calculateBOQ();
+  showPanel('results');
+}
+
+function calculateBOQ(){
+  if(!rooms.length){
+    document.getElementById('results-out').innerHTML='<div class="empty"><p>Add rooms and click<br><strong>Calculate BOQ</strong><br>to generate your bill of quantities.</p></div>';
+    return;
+  }
+  const reg=getReg();
+  const pname=document.getElementById('pname').value||'Untitled Project';
+  const pclient=document.getElementById('pclient').value||'—';
+  const ploc=document.getElementById('ploc').value||'—';
+  const ptype=document.getElementById('ptype').value;
+  const pqs=document.getElementById('pqs').value||'—';
+  const pnotes=document.getElementById('pnotes').value;
+  const cur=document.getElementById('currency').value;
+  const now=new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+  let tF=0,tW=0,tC=0,tR=0,tB=0,tT=0,tP=0,rows='';
+
+  rooms.forEach(function(r,ri){
+    const L=toM(r.L),W=toM(r.W),H=toM(r.H);
+    const fl=L*W;
+    const gw=2*(L+W)*H;
+    const op=r.doors*2+r.windows*1.5;
+    const wl=Math.max(0,gw-op);
+    const cv=fl*reg.slabGnd;
+    const slab=+(cv*reg.wasteConc).toFixed(2);
+    const rebar=Math.round(cv*reg.rebarSlab*reg.wasteConc*1.08);
+    const blk=Math.round(wl*reg.bpm*reg.wasteBk);
+    const mor=+(blk/reg.mortarPer).toFixed(1);
+    const ftl=+(fl*reg.twf).toFixed(2);
+    const wtl=+(wl*reg.tww).toFixed(2);
+    const adh=+((ftl+wtl)/4).toFixed(1);
+    const grt=+((ftl+wtl)/8).toFixed(1);
+    const pls=+(wl/reg.plasterCov).toFixed(1);
+    const prm=+(wl/10).toFixed(1);
+    const pnt=+(wl/reg.paintCov*2).toFixed(1);
+    tF+=fl;tW+=wl;tC+=slab;tR+=rebar;tB+=blk;tT+=ftl;tP+=pnt;
+
+    function trow(desc,qty,unit){
+      return '<div class="trade-row"><div class="tr-desc">'+desc+'</div><div class="tr-qty">'+qty+'</div><div class="tr-unit">'+unit+'</div></div>';
+    }
+
+    rows+='<div class="boq-sec">'
+      // room header
+      +'<div class="boq-room-hd">'
+        +'<div class="boq-room-title">'
+          +'<span class="boq-room-num">Room '+String(ri+1).padStart(2,'0')+'</span>'
+          +'<span class="boq-room-name">'+r.name+'</span>'
+          +'<span class="boq-room-type">'+r.type+'</span>'
+        +'</div>'
+        +'<div class="boq-room-dims">'
+          +'<span class="boq-dim"><b>Floor</b>'+dA(fl)+' '+aU()+'</span>'
+          +'<span class="boq-dim"><b>Wall (net)</b>'+dA(wl)+' '+aU()+'</span>'
+          +'<span class="boq-dim"><b>L&times;W&times;H</b>'+r.L+'&times;'+r.W+'&times;'+r.H+' '+(getUnit()==='metric'?'m':'ft')+'</span>'
+        +'</div>'
+      +'</div>'
+      // Concrete
+      +'<div class="trade-group td-concrete">'
+        +'<div class="trade-hd"><div class="trade-dot"></div><span class="trade-lbl">Concrete &amp; reinforcement</span></div>'
+        +trow('Concrete slab ('+Math.round(reg.slabGnd*1000)+'mm thick, incl. 5% waste)',dV(slab),vU())
+        +trow('Slab rebar — incl. 8% laps &amp; bends',dK(rebar),kU())
+      +'</div>'
+      // Masonry
+      +'<div class="trade-group td-masonry">'
+        +'<div class="trade-hd"><div class="trade-dot"></div><span class="trade-lbl">Masonry &amp; blockwork</span></div>'
+        +trow('Hollow blocks 200mm — net wall less openings',blk.toLocaleString(),'no.')
+        +trow('Mortar (1:6 mix)',mor,'bags')
+      +'</div>'
+      // Tiling
+      +'<div class="trade-group td-tiling">'
+        +'<div class="trade-hd"><div class="trade-dot"></div><span class="trade-lbl">Tiling</span></div>'
+        +trow('Floor tiles — incl. '+Math.round((reg.twf-1)*100)+'% waste allowance',dA(ftl),aU())
+        +trow('Wall tiles — incl. '+Math.round((reg.tww-1)*100)+'% waste allowance',dA(wtl),aU())
+        +trow('Tile adhesive (1 bag covers approx. 4m²)',adh,'bags')
+        +trow('Tile grout (1 bag covers approx. 8m²)',grt,'bags')
+      +'</div>'
+      // Finishes
+      +'<div class="trade-group td-finishes">'
+        +'<div class="trade-hd"><div class="trade-dot"></div><span class="trade-lbl">Plastering &amp; painting</span></div>'
+        +trow('Wall plaster — 10mm coat',pls,'bags')
+        +trow('Primer — 1 coat (before paint)',prm,'litres')
+        +trow('Emulsion paint — 2 coats',pnt,'litres')
+      +'</div>'
+    +'</div>';
+  });
+
+  document.getElementById('results-out').innerHTML=
+    // header
+    '<div class="res-top"><h2>'+pname+'</h2><span class="badge">'+reg.name+'</span></div>'
+    // project info card
+    +'<div class="proj-card-top">'
+      +'<div class="proj-card-top-row">'
+        +'<span class="proj-name-big">'+pname+'</span>'
+        +'<span class="proj-code-tag">'+reg.name+'</span>'
+      +'</div>'
+      +'<div class="proj-meta-grid">'
+        +'<div class="pm-item"><span class="pm-lbl">Client</span><span class="pm-val">'+pclient+'</span></div>'
+        +'<div class="pm-item"><span class="pm-lbl">Location</span><span class="pm-val">'+ploc+'</span></div>'
+        +'<div class="pm-item"><span class="pm-lbl">Project type</span><span class="pm-val">'+ptype+'</span></div>'
+        +'<div class="pm-item"><span class="pm-lbl">Prepared by</span><span class="pm-val">'+pqs+'</span></div>'
+        +'<div class="pm-item"><span class="pm-lbl">Date</span><span class="pm-val">'+now+'</span></div>'
+        +'<div class="pm-item"><span class="pm-lbl">Currency</span><span class="pm-val">'+cur+'</span></div>'
+      +'</div>'
+    +'</div>'
+    // code compliance note
+    +'<div class="reg-note">'+reg.note+'</div>'
+    // summary stats
+    +'<div class="stats">'
+      +'<div class="stat"><div class="stat-l">Total floor area</div><div class="stat-v">'+dA(tF)+'</div><div class="stat-u">'+aU()+'</div></div>'
+      +'<div class="stat"><div class="stat-l">Total net wall</div><div class="stat-v">'+dA(tW)+'</div><div class="stat-u">'+aU()+'</div></div>'
+      +'<div class="stat"><div class="stat-l">Concrete volume</div><div class="stat-v">'+dV(tC)+'</div><div class="stat-u">'+vU()+'</div></div>'
+      +'<div class="stat"><div class="stat-l">Total rebar</div><div class="stat-v">'+dK(tR)+'</div><div class="stat-u">'+kU()+'</div></div>'
+      +'<div class="stat"><div class="stat-l">Total blocks</div><div class="stat-v">'+tB.toLocaleString()+'</div><div class="stat-u">units</div></div>'
+      +'<div class="stat"><div class="stat-l">Floor tiles</div><div class="stat-v">'+dA(tT)+'</div><div class="stat-u">'+aU()+'</div></div>'
+    +'</div>'
+    // room sections
+    +rows
+    // action buttons
+    +'<div class="btn-row">'
+      +'<button class="btn btn-o" onclick="saveProject()">Save project</button>'
+      +'<button class="btn btn-g" onclick="printBOQ()">&#128438; Print / Export PDF</button>'
+      +'<button class="btn btn-o" onclick="showPanel(\'rooms\')">&#8592; Edit rooms</button>'
+    +'</div>'
+    // notes
+    +(pnotes?'<div class="proj-notes-box" style="margin-top:14px;font-size:11px;color:var(--muted2);background:var(--s1);border:1px solid var(--border);border-radius:6px;padding:12px 14px;line-height:1.8"><strong style="color:var(--muted2);text-transform:uppercase;font-size:9px;letter-spacing:1px">Project notes &nbsp;</strong>'+pnotes+'</div>':'')
+    // disclaimer
+    +'<div class="disc">All quantities are preliminary estimates for budgeting purposes only.<br>'
+    +'Final quantities must be verified by a licensed structural engineer or quantity surveyor per the applicable building code.<br>'
+    +'BOQ Quick Estimator &middot; '+reg.name+' &middot; Generated '+now+'</div>';
+}
+
+function printBOQ(){
+  // Ensure results panel is active before printing
+  showPanel('results');
+  setTimeout(function(){ window.print(); }, 200);
+}
+
+function saveProject(){
+  const key='boq_v2';
+  const list=JSON.parse(localStorage.getItem(key)||'[]');
+  const proj={
+    id:'p'+Date.now(),
+    name:document.getElementById('pname').value||'Untitled Project',
+    client:document.getElementById('pclient').value,
+    location:document.getElementById('ploc').value,
+    type:document.getElementById('ptype').value,
+    qs:document.getElementById('pqs').value,
+    notes:document.getElementById('pnotes').value,
+    region:document.getElementById('region').value,
+    units:document.getElementById('units').value,
+    currency:document.getElementById('currency').value,
+    rooms:JSON.parse(JSON.stringify(rooms)),
+    saved:new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})
+  };
+  list.unshift(proj);
+  localStorage.setItem(key,JSON.stringify(list.slice(0,20)));
+  updateCount();
+  alert('Saved: '+proj.name);
+}
+function loadProject(id){
+  const list=JSON.parse(localStorage.getItem('boq_v2')||'[]');
+  const p=list.find(function(x){return x.id===id;});
+  if(!p)return;
+  document.getElementById('pname').value=p.name;
+  document.getElementById('pclient').value=p.client||'';
+  document.getElementById('ploc').value=p.location||'';
+  document.getElementById('ptype').value=p.type||'Residential villa';
+  document.getElementById('pqs').value=p.qs||'';
+  document.getElementById('pnotes').value=p.notes||'';
+  document.getElementById('region').value=p.region||'KSA';
+  document.getElementById('units').value=p.units||'metric';
+  document.getElementById('currency').value=p.currency||'SAR';
+  rooms=p.rooms||[];
+  rid=rooms.reduce(function(m,r){return Math.max(m,r.id);},0);
+  renderRooms();
+  showPanel('rooms');
+}
+function deleteProject(id,e){
+  e.stopPropagation();
+  if(!confirm('Delete this project?'))return;
+  const list=JSON.parse(localStorage.getItem('boq_v2')||'[]');
+  localStorage.setItem('boq_v2',JSON.stringify(list.filter(function(p){return p.id!==id;})));
+  renderSaved();updateCount();
+}
+function renderSaved(){
+  const list=JSON.parse(localStorage.getItem('boq_v2')||'[]');
+  const el=document.getElementById('saved-list');
+  if(!list.length){
+    el.innerHTML='<div class="empty"><p>No saved projects yet.<br>Complete a BOQ and click <strong>Save project</strong>.</p></div>';
+    return;
+  }
+  el.innerHTML='<div class="proj-grid">'+list.map(function(p){
+    return '<div class="pc" onclick="loadProject(\''+p.id+'\')">'
+      +'<div class="pc-name">'+p.name+'</div>'
+      +'<div class="pc-meta">'+(p.client?'Client: '+p.client+'<br>':'')+(p.location?'Location: '+p.location+'<br>':'')+(p.rooms||[]).length+' rooms &middot; '+(REGS[p.region]?REGS[p.region].name:p.region)+'</div>'
+      +'<div class="pc-foot"><span class="pc-badge">'+p.saved+'</span>'
+      +'<span class="pc-del" onclick="deleteProject(\''+p.id+'\',event)">&#215; Delete</span></div>'
+      +'</div>';
+  }).join('')+'</div>';
+}
+function updateCount(){
+  const n=(JSON.parse(localStorage.getItem('boq_v2')||'[]')).length;
+  const el=document.getElementById('dash-count');
+  if(el)el.textContent=n+' project'+(n===1?'':'s')+' saved';
+}
+function newProject(){
+  ['pname','pclient','ploc','pqs','pnotes'].forEach(function(id){document.getElementById(id).value='';});
+  rooms=[];rid=0;renderRooms();showPanel('project');
+}
+
+// Init
+addRoom();
+rooms[0]={id:1,name:'Master bedroom',type:'Bedroom',L:5,W:4.5,H:3,doors:1,windows:2};
+renderRooms();
+updateCount();
+</script>
+</body>
+</html>
