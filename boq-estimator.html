@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BOQ Quick Estimator — Professional Construction Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300;1,600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0c0c0b;
+  --s1:#161614;
+  --s2:#1e1e1b;
+  --s3:#262622;
+  --border:#2a2a26;
+  --border2:#363630;
+  --gold:#c8a84b;
+  --gold2:#e8c96a;
+  --gold-bg:rgba(200,168,75,.07);
+  --text:#e4e2da;
+  --muted:#6e6c63;
+  --muted2:#9a9890;
+  --green:#5aad7e;
+  --red:#d45f5f;
+  --blue:#5b94d4;
+  --head:'Cormorant Garamond',serif;
+  --mono:'DM Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:13px;line-height:1.5;min-height:100vh}
+
+/* ── LAYOUT ── */
+.shell{display:flex;min-height:100vh}
+.sidebar{width:240px;min-height:100vh;background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;flex-shrink:0}
+.main{flex:1;min-width:0;padding:32px 36px 80px;max-width:860px}
+
+/* ── SIDEBAR ── */
+.logo{padding:28px 20px 20px;border-bottom:1px solid var(--border)}
+.logo-mark{font-family:var(--head);font-size:22px;font-weight:600;color:var(--gold);letter-spacing:-.3px;font-style:italic}
+.logo-sub{font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:3px}
+.nav{padding:16px 10px;flex:1}
+.nav-label{font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;padding:8px 10px 6px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:5px;cursor:pointer;color:var(--muted2);transition:.15s;margin-bottom:2px;font-size:12px}
+.nav-item:hover{background:var(--s2);color:var(--text)}
+.nav-item.active{background:var(--gold-bg);color:var(--gold);border:1px solid rgba(200,168,75,.2)}
+.nav-item .icon{width:16px;text-align:center;font-size:14px;opacity:.7}
+.nav-item.active .icon{opacity:1}
+.nav-sep{height:1px;background:var(--border);margin:10px 10px}
+
+.cfg-panel{padding:16px;border-top:1px solid var(--border)}
+.cfg-label{font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px}
+select.cfg-sel{width:100%;background:var(--s2);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:11px;padding:7px 9px;border-radius:4px;cursor:pointer;margin-bottom:10px;appearance:none}
+select.cfg-sel:focus{outline:none;border-color:var(--gold)}
+
+/* ── HEADER ── */
+.page-header{margin-bottom:28px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.page-title{font-family:var(--head);font-size:32px;font-weight:300;font-style:italic;color:var(--text);letter-spacing:-.5px;line-height:1}
+.page-title span{color:var(--gold)}
+.page-sub{font-size:11px;color:var(--muted);margin-top:6px;letter-spacing:.3px}
+
+/* ── PANELS ── */
+.panel{display:none;animation:fadeIn .2s ease}
+.panel.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* ── FORM ── */
+.section-label{font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px}
+.full{grid-column:1/-1}
+.field label{font-size:10px;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;display:block;margin-bottom:5px}
+.field input,.field select,.field textarea{width:100%;background:var(--s2);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:12px;padding:9px 11px;border-radius:4px;transition:.15s}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--gold);background:var(--s3)}
+.field textarea{resize:vertical;min-height:70px}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:1px;text-transform:uppercase;padding:10px 20px;border-radius:4px;cursor:pointer;transition:.15s;border:none}
+.btn-gold{background:var(--gold);color:#0c0c0b}
+.btn-gold:hover{background:var(--gold2)}
+.btn-outline{background:transparent;border:1px solid var(--border2);color:var(--muted2)}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold)}
+.btn-ghost{background:transparent;border:none;color:var(--muted);padding:8px 12px}
+.btn-ghost:hover{color:var(--red)}
+.btn-row{display:flex;gap:8px;justify-content:flex-end;margin-top:20px}
+
+/* ── ROOMS ── */
+.room-card{background:var(--s1);border:1px solid var(--border);border-radius:6px;margin-bottom:10px;overflow:hidden;transition:.15s}
+.room-card:hover{border-color:var(--border2)}
+.room-hd{display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;user-select:none}
+.room-num{font-size:10px;color:var(--gold);letter-spacing:1px;min-width:52px}
+.room-title{font-size:13px;font-weight:500;flex:1}
+.room-meta{font-size:10px;color:var(--muted);background:var(--s2);padding:2px 8px;border-radius:3px}
+.room-arr{font-size:12px;color:var(--muted);transition:.2s}
+.room-arr.open{transform:rotate(45deg)}
+.room-bd{display:none;padding:16px;border-top:1px solid var(--border);background:var(--s2)}
+.room-bd.open{display:block}
+.ri-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.ri label{font-size:9px;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;display:block;margin-bottom:4px}
+.ri input{width:100%;background:var(--s1);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:12px;padding:7px 9px;border-radius:3px;transition:.15s}
+.ri input:focus{outline:none;border-color:var(--gold)}
+.type-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+.rtype{font-size:10px;padding:4px 10px;border:1px solid var(--border);border-radius:3px;cursor:pointer;color:var(--muted);transition:.12s}
+.rtype:hover{border-color:var(--border2);color:var(--muted2)}
+.rtype.sel{border-color:var(--gold);color:var(--gold);background:var(--gold-bg)}
+.del-btn{font-size:10px;color:var(--muted);cursor:pointer;letter-spacing:.5px;transition:.15s}
+.del-btn:hover{color:var(--red)}
+.add-room{width:100%;padding:11px;background:transparent;border:1px dashed var(--border);color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border-radius:5px;transition:.2s;margin-bottom:16px}
+.add-room:hover{border-color:var(--gold);color:var(--gold)}
+
+/* ── RESULTS ── */
+.results-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.results-bar h2{font-family:var(--head);font-size:24px;font-weight:300;font-style:italic}
+.badge{font-size:9px;background:var(--s2);color:var(--muted2);padding:3px 9px;border-radius:3px;border:1px solid var(--border);letter-spacing:.8px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:24px}
+.stat{background:var(--s1);border:1px solid var(--border);border-radius:5px;padding:14px 16px}
+.stat-l{font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px}
+.stat-v{font-size:22px;font-weight:500;color:var(--gold);line-height:1}
+.stat-u{font-size:10px;color:var(--muted);margin-top:2px}
+.reg-note{background:var(--s1);border-left:2px solid var(--gold);padding:11px 15px;font-size:11px;color:var(--muted2);line-height:1.7;margin-bottom:20px;border-radius:0 4px 4px 0}
+.boq-sec{margin-bottom:24px}
+.boq-sec-title{font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;padding-bottom:6px;border-bottom:1px solid var(--border);margin-bottom:0;display:flex;align-items:center;justify-content:space-between}
+.boq-sec-meta{font-size:10px;color:var(--muted);font-style:normal;letter-spacing:.3px}
+table.boq{width:100%;border-collapse:collapse}
+table.boq th{font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;padding:7px 10px;border-bottom:1px solid var(--border);text-align:left;font-weight:400}
+table.boq th:not(:first-child){text-align:right}
+table.boq td{padding:8px 10px;border-bottom:1px solid rgba(42,42,38,.7);font-size:12px}
+table.boq td:not(:first-child){text-align:right}
+table.boq tr:last-child td{border-bottom:none}
+table.boq tr:hover td{background:rgba(200,168,75,.03)}
+.qty{color:var(--gold);font-weight:500}
+.unit{color:var(--muted)}
+.empty{text-align:center;padding:60px 20px;color:var(--muted)}
+.empty p{font-size:13px;line-height:1.8}
+
+/* ── PROJECTS ── */
+.project-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.proj-card{background:var(--s1);border:1px solid var(--border);border-radius:6px;padding:16px;cursor:pointer;transition:.15s}
+.proj-card:hover{border-color:var(--gold);background:var(--gold-bg)}
+.proj-name{font-size:14px;font-weight:500;margin-bottom:4px}
+.proj-meta{font-size:11px;color:var(--muted);line-height:1.7}
+.proj-badge{font-size:9px;background:var(--s2);color:var(--muted);padding:2px 7px;border-radius:3px;border:1px solid var(--border);letter-spacing:.5px;margin-top:8px;display:inline-block}
+.no-projects{text-align:center;padding:50px 20px;color:var(--muted)}
+.no-projects p{font-size:12px;line-height:1.8}
+
+/* ── DISCLAIMER ── */
+.disclaimer{font-size:10px;color:var(--muted);text-align:center;margin-top:32px;padding-top:20px;border-top:1px solid var(--border);line-height:1.8;opacity:.7}
+
+/* ── PRINT / PDF ── */
+@media print{
+  .sidebar,.btn-row,.add-room,.btn{display:none!important}
+  .main{padding:0;max-width:100%}
+  .panel{display:block!important}
+  body{background:#fff;color:#000}
+  .stat{border:1px solid #ccc}
+  .stat-v{color:#8a6010}
+  .boq-sec-title,.table.boq th{color:#555}
+  table.boq td{border-bottom:1px solid #e0e0e0}
+  .reg-note{border-left:3px solid #8a6010;background:#fffdf5;color:#444}
+  .qty{color:#8a6010}
+  .disclaimer{color:#888}
+  @page{margin:1.5cm;size:A4}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-mark">BOQ</div>
+    <div class="logo-sub">Quick Estimator · v2.0</div>
+  </div>
+  <nav class="nav">
+    <div class="nav-label">Workspace</div>
+    <div class="nav-item active" onclick="showPanel('dashboard')" id="nav-dashboard">
+      <span class="icon">⊞</span> Dashboard
+    </div>
+    <div class="nav-item" onclick="showPanel('project')" id="nav-project">
+      <span class="icon">◈</span> Project info
+    </div>
+    <div class="nav-item" onclick="showPanel('rooms')" id="nav-rooms">
+      <span class="icon">⬡</span> Rooms
+    </div>
+    <div class="nav-item" onclick="showPanel('results')" id="nav-results">
+      <span class="icon">≡</span> BOQ Results
+    </div>
+    <div class="nav-sep"></div>
+    <div class="nav-label">Saved</div>
+    <div class="nav-item" onclick="showPanel('saved')" id="nav-saved">
+      <span class="icon">○</span> Saved projects
+    </div>
+  </nav>
+  <div class="cfg-panel">
+    <div class="cfg-label">Region / code</div>
+    <select class="cfg-sel" id="region" onchange="applyRegion()">
+      <option value="KSA">🇸🇦 Saudi Arabia (SBC 304)</option>
+      <option value="UAE">🇦🇪 UAE (IBC / ACI)</option>
+      <option value="UK">🇬🇧 United Kingdom (EC2)</option>
+      <option value="US">🇺🇸 United States (ACI 318)</option>
+      <option value="EU">🇪🇺 Europe (Eurocode 2)</option>
+      <option value="IN">🇮🇳 India (IS 456)</option>
+      <option value="AU">🇦🇺 Australia (AS 3600)</option>
+      <option value="INTL">🌐 International</option>
+    </select>
+    <div class="cfg-label">Units</div>
+    <select class="cfg-sel" id="units">
+      <option value="metric">Metric (m, m², kg)</option>
+      <option value="imperial">Imperial (ft, ft², lb)</option>
+    </select>
+    <div class="cfg-label">Currency</div>
+    <select class="cfg-sel" id="currency">
+      <option value="SAR">SAR — Saudi Riyal</option>
+      <option value="AED">AED — UAE Dirham</option>
+      <option value="USD">USD — US Dollar</option>
+      <option value="GBP">GBP — British Pound</option>
+      <option value="EUR">EUR — Euro</option>
+      <option value="INR">INR — Indian Rupee</option>
+      <option value="AUD">AUD — Australian Dollar</option>
+    </select>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- DASHBOARD -->
+  <div class="panel active" id="panel-dashboard">
+    <div class="page-header">
+      <div class="page-title">Good to see you,<br><span>Estimator.</span></div>
+      <div class="page-sub">Build accurate bills of quantities for any construction project, worldwide.</div>
+    </div>
+    <div class="section-label">Quick start</div>
+    <div class="grid3" style="margin-bottom:28px">
+      <div class="proj-card" onclick="newProject()" style="border-style:dashed;text-align:center;padding:24px 16px">
+        <div style="font-size:22px;margin-bottom:8px;color:var(--gold)">+</div>
+        <div style="font-size:13px;font-weight:500;margin-bottom:4px">New project</div>
+        <div style="font-size:11px;color:var(--muted)">Start a fresh BOQ estimate</div>
+      </div>
+      <div class="proj-card" onclick="showPanel('saved')">
+        <div style="font-size:22px;margin-bottom:8px;color:var(--muted)">○</div>
+        <div style="font-size:13px;font-weight:500;margin-bottom:4px">Saved projects</div>
+        <div style="font-size:11px;color:var(--muted)" id="dash-saved-count">0 projects saved</div>
+      </div>
+      <div class="proj-card" onclick="showPanel('results');calculateBOQ()">
+        <div style="font-size:22px;margin-bottom:8px;color:var(--muted)">≡</div>
+        <div style="font-size:13px;font-weight:500;margin-bottom:4px">Recalculate</div>
+        <div style="font-size:11px;color:var(--muted)">Re-run current project BOQ</div>
+      </div>
+    </div>
+    <div class="section-label">Supported standards</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:28px">
+      ${[['🇸🇦','SBC 304','Saudi Arabia'],['🇦🇪','IBC/ACI','UAE'],['🇬🇧','Eurocode 2','United Kingdom'],['🇺🇸','ACI 318','United States'],['🇪🇺','EC2','Europe'],['🇮🇳','IS 456','India'],['🇦🇺','AS 3600','Australia'],['🌐','Generic','International']].map(([f,c,n])=>`
+      <div style="background:var(--s1);border:1px solid var(--border);border-radius:5px;padding:12px;text-align:center">
+        <div style="font-size:18px;margin-bottom:4px">${f}</div>
+        <div style="font-size:11px;font-weight:500;color:var(--gold)">${c}</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px">${n}</div>
+      </div>`).join('')}
+    </div>
+  </div>
+
+  <!-- PROJECT INFO -->
+  <div class="panel" id="panel-project">
+    <div class="page-header">
+      <div class="page-title">Project <span>Information</span></div>
+      <div class="page-sub">Fill in project details — this appears on your exported BOQ document.</div>
+    </div>
+    <div class="section-label">Project details</div>
+    <div class="grid2">
+      <div class="field"><label>Project name *</label><input id="pname" placeholder="Villa Al-Noor"></div>
+      <div class="field"><label>Client name</label><input id="pclient" placeholder="Mr. Ahmed Al-Rashid"></div>
+      <div class="field"><label>Site location</label><input id="ploc" placeholder="Riyadh, KSA"></div>
+      <div class="field"><label>Project type</label>
+        <select id="ptype">
+          <option>Residential villa</option>
+          <option>Apartment</option>
+          <option>Commercial building</option>
+          <option>Industrial / warehouse</option>
+          <option>Renovation / fitout</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="field"><label>Number of floors</label><input id="pfloors" type="number" value="2" min="1" max="50"></div>
+      <div class="field"><label>Prepared by (QS / Estimator)</label><input id="pqs" placeholder="Your name"></div>
+      <div class="field full"><label>Project notes</label><textarea id="pnotes" placeholder="Any special conditions, scope limitations, or client requirements…"></textarea></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="showPanel('dashboard')">← Back</button>
+      <button class="btn btn-gold" onclick="showPanel('rooms')">Next: Add rooms →</button>
+    </div>
+  </div>
+
+  <!-- ROOMS -->
+  <div class="panel" id="panel-rooms">
+    <div class="page-header">
+      <div class="page-title">Room <span>Schedule</span></div>
+      <div class="page-sub">Add each room or zone. Enter dimensions and openings for accurate quantities.</div>
+    </div>
+    <div id="rooms-container"></div>
+    <button class="add-room" onclick="addRoom()">+ Add new room</button>
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="showPanel('project')">← Project info</button>
+      <button class="btn btn-gold" onclick="runCalc()">Calculate BOQ →</button>
+    </div>
+  </div>
+
+  <!-- BOQ RESULTS -->
+  <div class="panel" id="panel-results">
+    <div id="results-output">
+      <div class="empty"><p>Add rooms and click<br><strong>Calculate BOQ</strong><br>to generate your bill of quantities.</p></div>
+    </div>
+  </div>
+
+  <!-- SAVED PROJECTS -->
+  <div class="panel" id="panel-saved">
+    <div class="page-header">
+      <div class="page-title">Saved <span>Projects</span></div>
+      <div class="page-sub">Your projects are stored locally in this browser.</div>
+    </div>
+    <div id="saved-list"></div>
+    <div class="btn-row">
+      <button class="btn btn-gold" onclick="newProject()">+ New project</button>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<script>
+// ── REGION CONFIGS ──
+const REGIONS = {
+  KSA:{name:'Saudi Arabia — SBC 304',slabGnd:0.20,slabUpr:0.20,coverInt:25,coverExt:40,rebarSlab:80,rebarCol:160,rebarBeam:180,wasteConc:1.05,bpm:12,wasteBk:1.05,mortarPer:25,twf:1.12,tww:1.10,paintCov:8,plasterCov:1.5,note:'SBC 304 (based on ACI 318). Minimum concrete grade C25. Steel fy=420 MPa (ASTM A615 Gr.60). 40mm cover for exterior/exposed elements. Increase to 50mm for Eastern Province coastal sites.'},
+  UAE:{name:'UAE — IBC / ACI 318',slabGnd:0.20,slabUpr:0.20,coverInt:30,coverExt:40,rebarSlab:85,rebarCol:165,rebarBeam:185,wasteConc:1.05,bpm:12,wasteBk:1.05,mortarPer:25,twf:1.12,tww:1.10,paintCov:8,plasterCov:1.5,note:'UAE follows IBC with local amendments. Aggressive chloride/sulfate exposure common in coastal zones — increase cover to 50mm for XS / XA exposure classes.'},
+  UK:{name:'United Kingdom — BS 8110 / Eurocode 2',slabGnd:0.175,slabUpr:0.175,coverInt:25,coverExt:35,rebarSlab:75,rebarCol:150,rebarBeam:175,wasteConc:1.05,bpm:10,wasteBk:1.05,mortarPer:30,twf:1.10,tww:1.08,paintCov:10,plasterCov:2.0,note:'BS 8110 / EC2 EN 1992-1-1. C25/30 typical. 175mm two-way slab for standard residential spans. 10 blocks/m² for 215mm coursing (standard UK block 450×215mm face).'},
+  US:{name:'United States — ACI 318-19',slabGnd:0.178,slabUpr:0.178,coverInt:20,coverExt:38,rebarSlab:78,rebarCol:155,rebarBeam:175,wasteConc:1.05,bpm:12.5,wasteBk:1.05,mortarPer:28,twf:1.10,tww:1.10,paintCov:9,plasterCov:1.8,note:"ACI 318-19. f'c = 4000 psi (28 MPa) typical. fy = 60,000 psi (Grade 60 / 420 MPa). CMU block 8×8×16 in = 12.5 units/m². 3/4 in aggregate standard."},
+  EU:{name:'Europe — Eurocode 2',slabGnd:0.18,slabUpr:0.18,coverInt:25,coverExt:35,rebarSlab:75,rebarCol:150,rebarBeam:170,wasteConc:1.05,bpm:10,wasteBk:1.04,mortarPer:30,twf:1.10,tww:1.08,paintCov:10,plasterCov:2.0,note:'Eurocode 2 (EN 1992-1-1). C25/30 concrete. fy=500 MPa (B500B). XC1 exposure for interior, XC3/XC4 for exterior. 180mm slab typical for 5–6m spans.'},
+  IN:{name:'India — IS 456:2000',slabGnd:0.125,slabUpr:0.125,coverInt:20,coverExt:40,rebarSlab:70,rebarCol:145,rebarBeam:165,wasteConc:1.07,bpm:9.5,wasteBk:1.06,mortarPer:22,twf:1.10,tww:1.10,paintCov:8,plasterCov:1.2,note:'IS 456:2000. M20 concrete minimum for moderate exposure. Fe415 / Fe500 steel standard. 125mm slab common for residential. 7% concrete waste accounts for typical Indian site conditions.'},
+  AU:{name:'Australia — AS 3600-2018',slabGnd:0.18,slabUpr:0.18,coverInt:20,coverExt:30,rebarSlab:75,rebarCol:155,rebarBeam:175,wasteConc:1.05,bpm:12.5,wasteBk:1.05,mortarPer:28,twf:1.10,tww:1.08,paintCov:10,plasterCov:2.0,note:'AS 3600-2018. N32 (32 MPa) typical. D500N rebar (fy=500 MPa). 20–30mm cover standard depending on exposure class. Termite barrier required in most states.'},
+  INTL:{name:'International / Generic',slabGnd:0.20,slabUpr:0.20,coverInt:25,coverExt:40,rebarSlab:80,rebarCol:160,rebarBeam:180,wasteConc:1.05,bpm:12,wasteBk:1.05,mortarPer:25,twf:1.12,tww:1.10,paintCov:9,plasterCov:1.5,note:'Generic international factors based on common practice. All quantities are indicative only. Verify against your local building code and have a licensed structural engineer confirm final design quantities.'},
+};
+
+const RTYPES = ['Bedroom','Living room','Dining room','Kitchen','Bathroom','Office','Garage','Store','Hallway','Balcony','Other'];
+let rooms=[], roomId=0;
+
+function getReg(){return REGIONS[document.getElementById('region').value];}
+function getUnit(){return document.getElementById('units').value;}
+function toM(v){return getUnit()==='imperial'?v*0.3048:+v;}
+function aUnit(){return getUnit()==='metric'?'m²':'ft²';}
+function vUnit(){return getUnit()==='metric'?'m³':'ft³';}
+function dispArea(m2){return getUnit()==='imperial'?(m2/0.0929).toFixed(1):m2.toFixed(2);}
+function dispVol(m3){return getUnit()==='imperial'?(m3/0.0283).toFixed(2):m3.toFixed(2);}
+function dispKg(kg){return getUnit()==='imperial'?(kg*2.20462).toFixed(0)+' lb':kg.toFixed(0)+' kg';}
+
+// ── NAV ──
+function showPanel(id){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  document.getElementById('nav-'+id).classList.add('active');
+  updateDashCounts();
+}
+
+function applyRegion(){}
+
+// ── ROOMS ──
+function addRoom(){
+  roomId++;
+  rooms.push({id:roomId,name:'Room '+roomId,type:'Bedroom',L:5,W:4,H:3,doors:1,windows:2});
+  renderRooms();
+}
+
+function deleteRoom(id){
+  rooms=rooms.filter(r=>r.id!==id);
+  renderRooms();
+}
+
+function toggleRoomBody(id){
+  const bd=document.getElementById('rb-'+id);
+  const ar=document.getElementById('ra-'+id);
+  const open=bd.classList.toggle('open');
+  ar.classList.toggle('open',open);
+  ar.textContent=open?'×':'+';
+}
+
+function setRoomType(roomIdx,type,el){
+  rooms[roomIdx].type=type;
+  el.closest('.type-row').querySelectorAll('.rtype').forEach(e=>e.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+function renderRooms(){
+  const u=getUnit()==='metric'?'m':'ft';
+  document.getElementById('rooms-container').innerHTML=rooms.map((r,i)=>`
+    <div class="room-card">
+      <div class="room-hd" onclick="toggleRoomBody(${r.id})">
+        <span class="room-num">ROOM ${String(i+1).padStart(2,'0')}</span>
+        <span class="room-title">${r.name}</span>
+        <span class="room-meta">${r.type} · ${r.L}×${r.W} ${u}</span>
+        <span class="room-arr" id="ra-${r.id}">+</span>
+      </div>
+      <div class="room-bd" id="rb-${r.id}">
+        <div class="ri-grid">
+          <div class="ri"><label>Room name</label><input value="${r.name}" oninput="rooms[${i}].name=this.value;renderRooms()"></div>
+          <div class="ri"><label>L (${u})</label><input type="number" value="${r.L}" step="0.1" min="0.1" oninput="rooms[${i}].L=+this.value"></div>
+          <div class="ri"><label>W (${u})</label><input type="number" value="${r.W}" step="0.1" min="0.1" oninput="rooms[${i}].W=+this.value"></div>
+          <div class="ri"><label>H (${u})</label><input type="number" value="${r.H}" step="0.1" min="0.1" oninput="rooms[${i}].H=+this.value"></div>
+          <div class="ri"><label>Doors</label><input type="number" value="${r.doors}" min="0" max="10" oninput="rooms[${i}].doors=+this.value"></div>
+          <div class="ri"><label>Windows</label><input type="number" value="${r.windows}" min="0" max="20" oninput="rooms[${i}].windows=+this.value"></div>
+        </div>
+        <div class="type-row">
+          ${RTYPES.map(t=>`<span class="rtype${r.type===t?' sel':''}" onclick="setRoomType(${i},'${t}',this)">${t}</span>`).join('')}
+        </div>
+        <span class="del-btn" onclick="deleteRoom(${r.id})">× Remove room</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── CALCULATE ──
+function runCalc(){
+  if(!rooms.length){alert('Please add at least one room.');return;}
+  calculateBOQ();
+  showPanel('results');
+}
+
+function calculateBOQ(){
+  if(!rooms.length){
+    document.getElementById('results-output').innerHTML=`<div class="empty"><p>Add rooms and click<br><strong>Calculate BOQ</strong><br>to generate your bill of quantities.</p></div>`;
+    return;
+  }
+  const reg=getReg();
+  const pname=document.getElementById('pname').value||'Untitled Project';
+  const pclient=document.getElementById('pclient').value||'—';
+  const ploc=document.getElementById('ploc').value||'—';
+  const ptype=document.getElementById('ptype').value;
+  const pqs=document.getElementById('pqs').value||'—';
+  const pnotes=document.getElementById('pnotes').value;
+  const cur=document.getElementById('currency').value;
+  const now=new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+
+  let totFloor=0,totWall=0,totConc=0,totRebar=0,totBlocks=0,totTile=0,totPaint=0;
+  let roomRows='';
+
+  rooms.forEach((r,i)=>{
+    const L=toM(r.L),W=toM(r.W),H=toM(r.H);
+    const floor=L*W;
+    const grossWall=2*(L+W)*H;
+    const openings=r.doors*2+r.windows*1.5;
+    const netWall=Math.max(0,grossWall-openings);
+    const concVol=floor*reg.slabGnd;
+
+    const slab=+(concVol*reg.wasteConc).toFixed(2);
+    const rebar=Math.round(concVol*reg.rebarSlab*reg.wasteConc*1.08);
+    const blocks=Math.round(netWall*reg.bpm*reg.wasteBk);
+    const mortar=+(blocks/reg.mortarPer).toFixed(1);
+    const ftile=+(floor*reg.twf).toFixed(2);
+    const wtile=+(netWall*reg.tww).toFixed(2);
+    const adhesive=+((ftile+wtile)/4).toFixed(1);
+    const grout=+((ftile+wtile)/8).toFixed(1);
+    const plaster=+(netWall/reg.plasterCov).toFixed(1);
+    const primer=+(netWall/10).toFixed(1);
+    const paint=+(netWall/reg.paintCov*2).toFixed(1);
+
+    totFloor+=floor; totWall+=netWall; totConc+=slab;
+    totRebar+=rebar; totBlocks+=blocks; totTile+=ftile; totPaint+=paint;
+
+    roomRows+=`
+      <div class="boq-sec">
+        <div class="boq-sec-title">
+          ${r.name} — ${r.type}
+          <span class="boq-sec-meta">Floor ${dispArea(floor)} ${aUnit()} · Wall (net) ${dispArea(netWall)} ${aUnit()}</span>
+        </div>
+        <table class="boq">
+          <thead><tr><th>Description</th><th>Qty</th><th>Unit</th></tr></thead>
+          <tbody>
+            <tr><td>Concrete slab (${(reg.slabGnd*1000).toFixed(0)}mm thick)</td><td class="qty">${dispVol(slab)}</td><td class="unit">${vUnit()}</td></tr>
+            <tr><td>Slab reinforcement incl. 8% laps &amp; waste</td><td class="qty">${dispKg(rebar)}</td><td class="unit">${getUnit()==='imperial'?'lb':'kg'}</td></tr>
+            <tr><td>Hollow blocks — 200mm (net wall less openings)</td><td class="qty">${blocks.toLocaleString()}</td><td class="unit">no.</td></tr>
+            <tr><td>Mortar mix (1:6)</td><td class="qty">${mortar}</td><td class="unit">bags</td></tr>
+            <tr><td>Floor tiles incl. ${Math.round((reg.twf-1)*100)}% waste (diagonal cut allowance)</td><td class="qty">${dispArea(ftile)}</td><td class="unit">${aUnit()}</td></tr>
+            <tr><td>Wall tiles incl. ${Math.round((reg.tww-1)*100)}% waste</td><td class="qty">${dispArea(wtile)}</td><td class="unit">${aUnit()}</td></tr>
+            <tr><td>Tile adhesive (1 bag / 4m²)</td><td class="qty">${adhesive}</td><td class="unit">bags</td></tr>
+            <tr><td>Tile grout (1 bag / 8m²)</td><td class="qty">${grout}</td><td class="unit">bags</td></tr>
+            <tr><td>Wall plaster (10mm coat)</td><td class="qty">${plaster}</td><td class="unit">bags</td></tr>
+            <tr><td>Primer — 1 coat</td><td class="qty">${primer}</td><td class="unit">litres</td></tr>
+            <tr><td>Emulsion paint — 2 coats</td><td class="qty">${paint}</td><td class="unit">litres</td></tr>
+          </tbody>
+        </table>
+      </div>`;
+  });
+
+  document.getElementById('results-output').innerHTML=`
+    <div class="results-bar">
+      <h2>${pname}</h2>
+      <span class="badge">${reg.name}</span>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;font-size:11px;color:var(--muted);background:var(--s1);border:1px solid var(--border);border-radius:5px;padding:12px 14px">
+      <div><span style="color:var(--muted)">Client: </span><span style="color:var(--muted2)">${pclient}</span></div>
+      <div><span style="color:var(--muted)">Location: </span><span style="color:var(--muted2)">${ploc}</span></div>
+      <div><span style="color:var(--muted)">Type: </span><span style="color:var(--muted2)">${ptype}</span></div>
+      <div><span style="color:var(--muted)">Prepared by: </span><span style="color:var(--muted2)">${pqs}</span></div>
+      <div><span style="color:var(--muted)">Date: </span><span style="color:var(--muted2)">${now}</span></div>
+      <div><span style="color:var(--muted)">Currency: </span><span style="color:var(--muted2)">${cur}</span></div>
+    </div>
+
+    <div class="reg-note">${reg.note}</div>
+
+    <div class="stats">
+      <div class="stat"><div class="stat-l">Total floor area</div><div class="stat-v">${dispArea(totFloor)}</div><div class="stat-u">${aUnit()}</div></div>
+      <div class="stat"><div class="stat-l">Total net wall</div><div class="stat-v">${dispArea(totWall)}</div><div class="stat-u">${aUnit()}</div></div>
+      <div class="stat"><div class="stat-l">Concrete volume</div><div class="stat-v">${dispVol(totConc)}</div><div class="stat-u">${vUnit()}</div></div>
+      <div class="stat"><div class="stat-l">Total rebar</div><div class="stat-v">${dispKg(totRebar)}</div><div class="stat-u">${getUnit()==='imperial'?'lb':'kg'}</div></div>
+      <div class="stat"><div class="stat-l">Total blocks</div><div class="stat-v">${totBlocks.toLocaleString()}</div><div class="stat-u">units</div></div>
+      <div class="stat"><div class="stat-l">Floor tiles</div><div class="stat-v">${dispArea(totTile)}</div><div class="stat-u">${aUnit()}</div></div>
+    </div>
+
+    ${roomRows}
+
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="saveProject()">Save project</button>
+      <button class="btn btn-outline" onclick="window.print()">Print / Export PDF</button>
+      <button class="btn btn-outline" onclick="showPanel('rooms')">← Edit rooms</button>
+    </div>
+    ${pnotes?`<div style="margin-top:16px;font-size:11px;color:var(--muted);background:var(--s1);border:1px solid var(--border);border-radius:4px;padding:10px 14px"><strong style="color:var(--muted2)">Notes: </strong>${pnotes}</div>`:''}
+    <div class="disclaimer">
+      All quantities are preliminary estimates for budgeting purposes only.<br>
+      Final quantities must be verified by a licensed structural engineer or quantity surveyor per the applicable building code.<br>
+      BOQ Quick Estimator · ${reg.name} · Generated ${now}
+    </div>`;
+}
+
+// ── SAVE / LOAD ──
+function saveProject(){
+  const key='boq_projects';
+  const existing=JSON.parse(localStorage.getItem(key)||'[]');
+  const id='proj_'+Date.now();
+  const proj={
+    id,
+    name:document.getElementById('pname').value||'Untitled Project',
+    client:document.getElementById('pclient').value,
+    location:document.getElementById('ploc').value,
+    type:document.getElementById('ptype').value,
+    qs:document.getElementById('pqs').value,
+    notes:document.getElementById('pnotes').value,
+    region:document.getElementById('region').value,
+    units:document.getElementById('units').value,
+    currency:document.getElementById('currency').value,
+    rooms:JSON.parse(JSON.stringify(rooms)),
+    saved:new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})
+  };
+  existing.unshift(proj);
+  localStorage.setItem(key,JSON.stringify(existing.slice(0,20)));
+  updateDashCounts();
+  alert('Project saved: '+proj.name);
+}
+
+function loadProject(id){
+  const existing=JSON.parse(localStorage.getItem('boq_projects')||'[]');
+  const proj=existing.find(p=>p.id===id);
+  if(!proj)return;
+  document.getElementById('pname').value=proj.name;
+  document.getElementById('pclient').value=proj.client||'';
+  document.getElementById('ploc').value=proj.location||'';
+  document.getElementById('ptype').value=proj.type||'Residential villa';
+  document.getElementById('pqs').value=proj.qs||'';
+  document.getElementById('pnotes').value=proj.notes||'';
+  document.getElementById('region').value=proj.region||'KSA';
+  document.getElementById('units').value=proj.units||'metric';
+  document.getElementById('currency').value=proj.currency||'SAR';
+  rooms=proj.rooms||[];
+  roomId=rooms.reduce((m,r)=>Math.max(m,r.id),0);
+  renderRooms();
+  showPanel('rooms');
+}
+
+function deleteProject(id,e){
+  e.stopPropagation();
+  if(!confirm('Delete this project?'))return;
+  const existing=JSON.parse(localStorage.getItem('boq_projects')||'[]');
+  localStorage.setItem('boq_projects',JSON.stringify(existing.filter(p=>p.id!==id)));
+  renderSaved();
+  updateDashCounts();
+}
+
+function renderSaved(){
+  const existing=JSON.parse(localStorage.getItem('boq_projects')||'[]');
+  const el=document.getElementById('saved-list');
+  if(!existing.length){
+    el.innerHTML=`<div class="no-projects"><p>No saved projects yet.<br>Complete a BOQ and click <strong>Save project</strong>.</p></div>`;
+    return;
+  }
+  el.innerHTML=`<div class="project-grid">${existing.map(p=>`
+    <div class="proj-card" onclick="loadProject('${p.id}')">
+      <div class="proj-name">${p.name}</div>
+      <div class="proj-meta">
+        ${p.client?'Client: '+p.client+'<br>':''}
+        ${p.location?'Location: '+p.location+'<br>':''}
+        ${p.rooms?.length||0} rooms · ${REGIONS[p.region]?.name||p.region}
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+        <span class="proj-badge">${p.saved}</span>
+        <span style="font-size:10px;color:var(--red);cursor:pointer" onclick="deleteProject('${p.id}',event)">× Delete</span>
+      </div>
+    </div>`).join('')}</div>`;
+}
+
+function updateDashCounts(){
+  const n=(JSON.parse(localStorage.getItem('boq_projects')||'[]')).length;
+  const el=document.getElementById('dash-saved-count');
+  if(el) el.textContent=n+' project'+(n===1?'':'s')+' saved';
+}
+
+function newProject(){
+  document.getElementById('pname').value='';
+  document.getElementById('pclient').value='';
+  document.getElementById('ploc').value='';
+  document.getElementById('pqs').value='';
+  document.getElementById('pnotes').value='';
+  rooms=[];roomId=0;
+  renderRooms();
+  showPanel('project');
+}
+
+// ── INIT ──
+document.getElementById('panel-saved').addEventListener('click',()=>{});
+document.querySelector('[onclick="showPanel(\'saved\')"]').addEventListener('click',renderSaved);
+// intercept nav clicks to render saved list
+const savedNavItem = document.getElementById('nav-saved');
+savedNavItem.addEventListener('click', renderSaved);
+
+addRoom();
+rooms[0]={id:1,name:'Master bedroom',type:'Bedroom',L:5,W:4.5,H:3,doors:1,windows:2};
+renderRooms();
+updateDashCounts();
+</script>
+</body>
+</html>
