@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>BOQ Quick Estimator — Professional Construction Calculator</title>
+<meta name="description" content="Generate accurate bills of quantities in minutes. Supports Saudi Arabia (SBC 304), UAE, UK, USA, Europe, India & Australia. Used by QS professionals worldwide.">
+
+<!-- PWA: install as app on phone and desktop -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#c8a84b">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BOQ Estimator">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.png">
+<link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" sizes="512x512" href="icons/icon-512.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
+<!-- /PWA -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#09090a;
+  --s1:#111112;
+  --s2:#18181a;
+  --s3:#202022;
+  --border:#252527;
+  --border2:#333336;
+  --gold:#c9a84c;
+  --gold2:#e2c06a;
+  --gold-dim:rgba(201,168,76,.12);
+  --text:#eceae2;
+  --muted:#6a6868;
+  --muted2:#9e9c94;
+  --green:#52a875;
+  --mono:'DM Mono',monospace;
+  --serif:'Cormorant Garamond',serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:13px;line-height:1.6;overflow-x:hidden}
+
+/* ── GRAIN OVERLAY ── */
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.4}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 6%;display:flex;align-items:center;justify-content:space-between;height:60px;background:rgba(9,9,10,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.nav-logo{font-family:var(--serif);font-size:20px;font-weight:600;font-style:italic;color:var(--gold);letter-spacing:-.3px}
+.nav-links{display:flex;align-items:center;gap:28px}
+.nav-links a{font-size:11px;color:var(--muted2);text-decoration:none;letter-spacing:.8px;text-transform:uppercase;transition:.15s}
+.nav-links a:hover{color:var(--text)}
+.nav-cta{background:var(--gold);color:#09090a;font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:1px;text-transform:uppercase;padding:8px 18px;border-radius:3px;text-decoration:none;transition:.15s}
+.nav-cta:hover{background:var(--gold2);color:#09090a !important}
+
+/* ── HERO ── */
+.hero{position:relative;min-height:100vh;display:flex;align-items:center;padding:0 6%;padding-top:60px;overflow:hidden}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:60px 60px;opacity:.3;mask-image:radial-gradient(ellipse 80% 60% at 50% 50%,black 40%,transparent 100%)}
+.hero-content{position:relative;z-index:1;max-width:680px}
+.hero-eyebrow{font-size:10px;color:var(--gold);letter-spacing:3px;text-transform:uppercase;margin-bottom:20px;display:flex;align-items:center;gap:10px}
+.hero-eyebrow::before{content:'';width:24px;height:1px;background:var(--gold)}
+.hero-h1{font-family:var(--serif);font-size:clamp(44px,6vw,72px);font-weight:300;line-height:1.05;letter-spacing:-1px;margin-bottom:24px;color:var(--text)}
+.hero-h1 em{font-style:italic;color:var(--gold)}
+.hero-sub{font-size:14px;color:var(--muted2);line-height:1.8;max-width:480px;margin-bottom:36px}
+.hero-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.btn-primary{background:var(--gold);color:#09090a;font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:1.2px;text-transform:uppercase;padding:14px 28px;border-radius:3px;text-decoration:none;transition:.15s;display:inline-flex;align-items:center;gap:8px;border:none;cursor:pointer}
+.btn-primary:hover{background:var(--gold2)}
+.btn-secondary{background:transparent;color:var(--muted2);font-family:var(--mono);font-size:12px;letter-spacing:.8px;text-transform:uppercase;padding:14px 20px;border:1px solid var(--border2);border-radius:3px;text-decoration:none;transition:.15s;cursor:pointer}
+.btn-secondary:hover{border-color:var(--gold);color:var(--gold)}
+.hero-proof{margin-top:48px;display:flex;align-items:center;gap:20px;padding-top:32px;border-top:1px solid var(--border)}
+.proof-stat{text-align:center}
+.proof-num{font-family:var(--serif);font-size:28px;font-weight:600;color:var(--gold);font-style:italic;line-height:1}
+.proof-lbl{font-size:10px;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;margin-top:4px}
+.proof-div{width:1px;height:36px;background:var(--border2)}
+
+/* ── FLOATING BOQ PREVIEW ── */
+.hero-visual{position:absolute;right:6%;top:50%;transform:translateY(-50%);width:340px;z-index:1}
+.preview-card{background:var(--s1);border:1px solid var(--border2);border-radius:8px;padding:20px;animation:float 6s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.preview-title{font-size:10px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:14px;display:flex;justify-content:space-between}
+.preview-title span{color:var(--gold)}
+.preview-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:11px}
+.preview-row:last-child{border:none}
+.preview-row .lbl{color:var(--muted2)}
+.preview-row .val{color:var(--gold);font-weight:500}
+.preview-row .unit{color:var(--muted);font-size:10px;margin-left:4px}
+.preview-tag{display:inline-block;font-size:9px;background:var(--gold-dim);color:var(--gold);padding:2px 7px;border-radius:2px;letter-spacing:.5px;margin-bottom:12px;border:1px solid rgba(201,168,76,.2)}
+
+/* ── SECTION ── */
+section{position:relative;z-index:1;padding:80px 6%}
+.section-label{font-size:10px;color:var(--gold);letter-spacing:3px;text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.section-label::before{content:'';width:20px;height:1px;background:var(--gold)}
+.section-h2{font-family:var(--serif);font-size:clamp(32px,4vw,48px);font-weight:300;font-style:italic;line-height:1.1;margin-bottom:16px}
+.section-sub{font-size:13px;color:var(--muted2);max-width:520px;line-height:1.8}
+
+/* ── HOW IT WORKS ── */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-top:48px}
+.step{background:var(--s1);padding:28px 24px;position:relative}
+.step-num{font-family:var(--serif);font-size:42px;font-weight:300;font-style:italic;color:var(--border2);line-height:1;margin-bottom:12px}
+.step-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:8px}
+.step-desc{font-size:11px;color:var(--muted);line-height:1.7}
+.step-accent{position:absolute;top:0;left:0;right:0;height:2px;background:var(--border)}
+.step:first-child .step-accent{background:var(--gold)}
+
+/* ── FEATURES ── */
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:48px}
+.feat{background:var(--s1);border:1px solid var(--border);border-radius:6px;padding:24px}
+.feat-icon{width:32px;height:32px;background:var(--gold-dim);border:1px solid rgba(201,168,76,.2);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:14px;margin-bottom:14px}
+.feat-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:6px}
+.feat-desc{font-size:11px;color:var(--muted);line-height:1.7}
+
+/* ── CODES ── */
+.codes-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:40px}
+.code-card{background:var(--s1);border:1px solid var(--border);border-radius:5px;padding:16px;text-align:center;transition:.15s}
+.code-card:hover{border-color:var(--border2);background:var(--s2)}
+.code-flag{font-size:24px;margin-bottom:6px}
+.code-name{font-size:11px;font-weight:500;color:var(--gold);margin-bottom:2px}
+.code-country{font-size:10px;color:var(--muted)}
+
+/* ── PRICING ── */
+#pricing{background:var(--s1);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.pricing-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:700px;margin:48px auto 0}
+.plan{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:28px;position:relative}
+.plan.featured{border-color:var(--gold);background:var(--gold-dim)}
+.plan-badge{position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:var(--gold);color:#09090a;font-size:10px;font-weight:500;letter-spacing:1px;text-transform:uppercase;padding:3px 12px;border-radius:20px;white-space:nowrap}
+.plan-name{font-size:11px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px}
+.plan-price{font-family:var(--serif);font-size:48px;font-weight:300;font-style:italic;color:var(--text);line-height:1;margin-bottom:4px}
+.plan-price sup{font-size:18px;font-family:var(--mono);font-style:normal;vertical-align:super}
+.plan-period{font-size:11px;color:var(--muted);margin-bottom:20px}
+.plan-features{list-style:none;margin-bottom:24px}
+.plan-features li{font-size:12px;color:var(--muted2);padding:6px 0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;line-height:1.4}
+.plan-features li:last-child{border:none}
+.plan-features li::before{content:'✓';color:var(--green);font-size:11px;flex-shrink:0}
+.plan-features li.no::before{content:'—';color:var(--muted)}
+.plan-features li.no{color:var(--muted)}
+.plan-cta{display:block;text-align:center;padding:12px;border-radius:4px;font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:1px;text-transform:uppercase;text-decoration:none;transition:.15s;cursor:pointer;border:none;width:100%}
+.plan-cta.gold{background:var(--gold);color:#09090a}
+.plan-cta.gold:hover{background:var(--gold2)}
+.plan-cta.outline{background:transparent;border:1px solid var(--border2);color:var(--muted2)}
+.plan-cta.outline:hover{border-color:var(--gold);color:var(--gold)}
+
+/* ── FAQ ── */
+.faq{max-width:640px;margin:48px auto 0}
+.faq-item{border-bottom:1px solid var(--border);padding:16px 0;cursor:pointer}
+.faq-q{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--text)}
+.faq-q span{color:var(--muted);font-size:16px;transition:.2s}
+.faq-a{font-size:12px;color:var(--muted2);line-height:1.8;margin-top:10px;display:none}
+.faq-item.open .faq-a{display:block}
+.faq-item.open .faq-q span{transform:rotate(45deg);color:var(--gold)}
+
+/* ── CTA SECTION ── */
+.cta-section{text-align:center;padding:100px 6%}
+.cta-section .section-label{justify-content:center}
+.cta-section .section-label::before{display:none}
+.cta-section .section-h2{margin-left:auto;margin-right:auto;max-width:500px}
+
+/* ── FOOTER ── */
+footer{padding:32px 6%;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.footer-logo{font-family:var(--serif);font-size:16px;font-weight:600;font-style:italic;color:var(--gold)}
+.footer-links{display:flex;gap:20px}
+.footer-links a{font-size:11px;color:var(--muted);text-decoration:none;transition:.15s}
+.footer-links a:hover{color:var(--muted2)}
+.footer-copy{font-size:10px;color:var(--muted);letter-spacing:.5px}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--s1);border:1px solid var(--border2);border-radius:10px;padding:36px;width:100%;max-width:440px;position:relative;animation:modalIn .25s ease}
+@keyframes modalIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
+.modal-close{position:absolute;top:16px;right:16px;background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;line-height:1;transition:.15s}
+.modal-close:hover{color:var(--text)}
+.modal-title{font-family:var(--serif);font-size:26px;font-weight:300;font-style:italic;margin-bottom:4px}
+.modal-sub{font-size:12px;color:var(--muted2);margin-bottom:24px}
+.modal-plan-sel{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px}
+.mplan{border:1px solid var(--border);border-radius:5px;padding:12px;cursor:pointer;text-align:center;transition:.15s}
+.mplan:hover,.mplan.sel{border-color:var(--gold);background:var(--gold-dim)}
+.mplan-name{font-size:11px;font-weight:500;color:var(--text);margin-bottom:2px}
+.mplan-price{font-size:13px;color:var(--gold)}
+.form-field{margin-bottom:14px}
+.form-field label{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:5px}
+.form-field input{width:100%;background:var(--s2);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:12px;padding:10px 12px;border-radius:4px;transition:.15s}
+.form-field input:focus{outline:none;border-color:var(--gold);background:var(--s3)}
+.form-note{font-size:10px;color:var(--muted);text-align:center;margin-top:12px;line-height:1.6}
+.stripe-note{display:flex;align-items:center;justify-content:center;gap:6px;font-size:10px;color:var(--muted);margin-top:14px}
+.stripe-note::before,.stripe-note::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ── FREE UNLOCK ── */
+.free-banner{background:var(--gold-dim);border:1px solid rgba(201,168,76,.25);border-radius:5px;padding:12px 16px;margin-bottom:20px;font-size:12px;color:var(--muted2);text-align:center;line-height:1.6}
+.free-banner strong{color:var(--gold)}
+
+/* ── ANIMATIONS ── */
+.reveal{opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .6s ease}
+.reveal.visible{opacity:1;transform:none}
+
+@media(max-width:768px){
+  .hero-visual{display:none}
+  .steps{grid-template-columns:1fr 1fr}
+  .features{grid-template-columns:1fr}
+  .codes-grid{grid-template-columns:repeat(2,1fr)}
+  .pricing-grid{grid-template-columns:1fr}
+  .nav-links{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">BOQ Estimator</div>
+  <div class="nav-links">
+    <a href="#how">How it works</a>
+    <a href="#features">Features</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#faq">FAQ</a>
+  </div>
+  <a href="access.html" class="nav-cta">Get access →</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-content reveal">
+    <div class="hero-eyebrow">Professional Construction Estimating</div>
+    <h1 class="hero-h1">Generate accurate<br><em>bills of quantities</em><br>in minutes.</h1>
+    <p class="hero-sub">Stop spending hours on manual takeoffs. BOQ Quick Estimator calculates concrete, rebar, blockwork, tiles, paint and more — calibrated to your local building code.</p>
+    <div class="hero-actions">
+      <button class="btn-primary" onclick="openModal('pro')">Start estimating →</button>
+      <a href="#how" class="btn-secondary">See how it works</a>
+    </div>
+    <div class="hero-proof">
+      <div class="proof-stat"><div class="proof-num">8</div><div class="proof-lbl">Building codes</div></div>
+      <div class="proof-div"></div>
+      <div class="proof-stat"><div class="proof-num">11</div><div class="proof-lbl">Items per room</div></div>
+      <div class="proof-div"></div>
+      <div class="proof-stat"><div class="proof-num">30s</div><div class="proof-lbl">Per estimate</div></div>
+    </div>
+  </div>
+
+  <!-- Floating preview card -->
+  <div class="hero-visual reveal" style="animation-delay:.2s">
+    <div class="preview-card">
+      <div class="preview-title">Master bedroom <span>SBC 304</span></div>
+      <div class="preview-tag">5.0 × 4.5 m · 3.0m height</div>
+      <div class="preview-row"><span class="lbl">Concrete slab</span><span><span class="val">4.73</span><span class="unit">m³</span></span></div>
+      <div class="preview-row"><span class="lbl">Slab rebar</span><span><span class="val">410</span><span class="unit">kg</span></span></div>
+      <div class="preview-row"><span class="lbl">Hollow blocks</span><span><span class="val">624</span><span class="unit">no.</span></span></div>
+      <div class="preview-row"><span class="lbl">Floor tiles</span><span><span class="val">25.2</span><span class="unit">m²</span></span></div>
+      <div class="preview-row"><span class="lbl">Emulsion paint</span><span><span class="val">14.6</span><span class="unit">litres</span></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how" style="border-top:1px solid var(--border)">
+  <div class="section-label">How it works</div>
+  <h2 class="section-h2">From dimensions to full BOQ<br>in four steps.</h2>
+  <div class="steps reveal">
+    <div class="step"><div class="step-accent"></div><div class="step-num">01</div><div class="step-title">Select your region</div><div class="step-desc">Choose from 8 building codes — SBC 304, ACI 318, Eurocode 2, IS 456 and more. Factors auto-adjust.</div></div>
+    <div class="step"><div class="step-accent"></div><div class="step-num">02</div><div class="step-title">Enter project info</div><div class="step-desc">Project name, client, location and type. Appears on your exported PDF document.</div></div>
+    <div class="step"><div class="step-accent"></div><div class="step-num">03</div><div class="step-title">Add your rooms</div><div class="step-desc">Length, width, height, doors and windows. Opening deductions calculated automatically.</div></div>
+    <div class="step"><div class="step-accent"></div><div class="step-num">04</div><div class="step-title">Get your BOQ</div><div class="step-desc">11 material quantities per room, project totals, and a print-ready PDF — instantly.</div></div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features" style="background:var(--s1);border-top:1px solid var(--border)">
+  <div class="section-label">Features</div>
+  <h2 class="section-h2">Everything a QS needs.<br>Nothing they don't.</h2>
+  <div class="features reveal">
+    <div class="feat"><div class="feat-icon">⊞</div><div class="feat-title">11 items per room</div><div class="feat-desc">Concrete, rebar, blocks, mortar, floor tiles, wall tiles, adhesive, grout, plaster, primer and paint — all calculated from dimensions.</div></div>
+    <div class="feat"><div class="feat-icon">◎</div><div class="feat-title">Opening deductions</div><div class="feat-desc">Enter number of doors and windows. Net wall area is calculated automatically, so your blockwork and paint quantities are always accurate.</div></div>
+    <div class="feat"><div class="feat-icon">≡</div><div class="feat-title">Print-ready PDF</div><div class="feat-desc">One click exports a clean, professional PDF with project info, room schedule, quantities table and code compliance note.</div></div>
+    <div class="feat"><div class="feat-icon">◈</div><div class="feat-title">Save 20 projects</div><div class="feat-desc">Projects save locally in your browser — no server, no account, no data leaving your device. Access your estimates anytime.</div></div>
+    <div class="feat"><div class="feat-icon">⬡</div><div class="feat-title">Metric &amp; imperial</div><div class="feat-desc">Toggle between metric (m, kg) and imperial (ft, lb) at any time. All quantities recalculate instantly.</div></div>
+    <div class="feat"><div class="feat-icon">◉</div><div class="feat-title">Works offline</div><div class="feat-desc">No internet required after loading. Use it on site, in a remote area, or wherever the job takes you.</div></div>
+  </div>
+</section>
+
+<!-- BUILDING CODES -->
+<section id="codes" style="border-top:1px solid var(--border)">
+  <div class="section-label">Supported standards</div>
+  <h2 class="section-h2">Your local code,<br>built in.</h2>
+  <p class="section-sub">Every region uses the correct slab thickness, rebar ratios, block counts, waste factors and cover requirements for that code.</p>
+  <div class="codes-grid reveal">
+    <div class="code-card"><div class="code-flag">🇸🇦</div><div class="code-name">SBC 304</div><div class="code-country">Saudi Arabia</div></div>
+    <div class="code-card"><div class="code-flag">🇦🇪</div><div class="code-name">IBC / ACI</div><div class="code-country">UAE</div></div>
+    <div class="code-card"><div class="code-flag">🇬🇧</div><div class="code-name">EC2 / BS 8110</div><div class="code-country">United Kingdom</div></div>
+    <div class="code-card"><div class="code-flag">🇺🇸</div><div class="code-name">ACI 318-19</div><div class="code-country">United States</div></div>
+    <div class="code-card"><div class="code-flag">🇪🇺</div><div class="code-name">Eurocode 2</div><div class="code-country">Europe</div></div>
+    <div class="code-card"><div class="code-flag">🇮🇳</div><div class="code-name">IS 456:2000</div><div class="code-country">India</div></div>
+    <div class="code-card"><div class="code-flag">🇦🇺</div><div class="code-name">AS 3600-2018</div><div class="code-country">Australia</div></div>
+    <div class="code-card"><div class="code-flag">🌐</div><div class="code-name">Generic</div><div class="code-country">International</div></div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing">
+  <div style="text-align:center">
+    <div class="section-label" style="justify-content:center"><span style="width:20px;height:1px;background:var(--gold);display:inline-block"></span> Pricing</div>
+    <h2 class="section-h2">Simple, honest pricing.</h2>
+    <p class="section-sub" style="margin:0 auto">One flat fee. Full access. No subscriptions, no per-project charges.</p>
+  </div>
+  <div class="pricing-grid">
+
+    <div class="plan">
+      <div class="plan-name">Free preview</div>
+      <div class="plan-price"><sup></sup>SAR 0</div>
+      <div class="plan-period">try before you buy</div>
+      <ul class="plan-features">
+        <li>1 project at a time</li>
+        <li>All 8 building codes</li>
+        <li>Metric &amp; imperial</li>
+        <li class="no">Save projects</li>
+        <li class="no">PDF export</li>
+        <li class="no">Unlimited rooms</li>
+      </ul>
+      <button class="plan-cta outline" onclick="window.location.href='boq-estimator.html'">Try free →</button>
+    </div>
+
+    <div class="plan featured">
+      <div class="plan-badge">Most popular</div>
+      <div class="plan-name">Pro</div>
+      <div class="plan-price"><sup>SAR </sup>71</div>
+      <div class="plan-period">one-time payment · lifetime access</div>
+      <ul class="plan-features">
+        <li>Unlimited projects</li>
+        <li>All 8 building codes</li>
+        <li>Metric &amp; imperial</li>
+        <li>Save up to 20 projects</li>
+        <li>PDF export</li>
+        <li>Unlimited rooms</li>
+        <li>All future updates</li>
+      </ul>
+      <button class="plan-cta gold" onclick="openModal('pro')">Order on WhatsApp →</button>
+    </div>
+
+  </div>
+  <p style="text-align:center;font-size:11px;color:var(--muted);margin-top:20px;">Pay via STC Pay or bank transfer · Access code sent within 1 hour · No subscription</p>
+</section>
+
+<!-- FAQ -->
+<section id="faq" style="border-top:1px solid var(--border)">
+  <div style="text-align:center;margin-bottom:0">
+    <div class="section-label" style="justify-content:center"><span style="width:20px;height:1px;background:var(--gold);display:inline-block"></span> FAQ</div>
+    <h2 class="section-h2">Common questions.</h2>
+  </div>
+  <div class="faq">
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">Are the quantities accurate enough for tendering? <span>+</span></div>
+      <div class="faq-a">BOQ Quick Estimator produces preliminary budget quantities suitable for early-stage costing, client budgeting and feasibility. All quantities should be verified by a licensed structural engineer or quantity surveyor before final tender. The app clearly states this on every export.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">Where is my data stored? <span>+</span></div>
+      <div class="faq-a">Everything stays on your device. Projects are saved in your browser's local storage — nothing is sent to any server. This means your client data is completely private and you can use the app with no internet connection after the first load.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">Which building code should I use for my country? <span>+</span></div>
+      <div class="faq-a">Select the code that governs construction in your jurisdiction. Saudi Arabia uses SBC 304, UAE uses IBC/ACI, the UK uses Eurocode 2 (formerly BS 8110), the US uses ACI 318, Europe uses Eurocode 2, India uses IS 456, and Australia uses AS 3600. If your country isn't listed, select International for generic industry-average factors.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">Can I use this on my phone on-site? <span>+</span></div>
+      <div class="faq-a">Yes. The app is fully responsive and works on any device — phone, tablet or desktop. It also works offline once loaded, so you can use it anywhere on site without a data connection.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">What payment methods are accepted? <span>+</span></div>
+      <div class="faq-a">Payment is accepted via STC Pay or bank transfer (IBAN). After confirming your payment of SAR 71, we send you a unique access code on WhatsApp within 1 hour. Enter the code at the access page to unlock the full app.</div>
+    </div>
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">Is this a subscription? <span>+</span></div>
+      <div class="faq-a">No. It is a one-time payment of SAR 71 for lifetime access including all future updates. You will never be charged again.</div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="cta-section" style="border-top:1px solid var(--border)">
+  <div class="section-label">Get started</div>
+  <h2 class="section-h2 reveal">Stop doing takeoffs by hand.</h2>
+  <p class="section-sub reveal" style="margin:0 auto 32px;text-align:center">Join quantity surveyors and estimators worldwide who use BOQ Quick Estimator to produce accurate preliminary quantities in minutes.</p>
+  <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap" class="reveal">
+    <button class="btn-primary" onclick="openModal('pro')">Order on WhatsApp — SAR 71 →</button>
+    <button class="btn-secondary" onclick="window.location.href='boq-estimator.html'">Try free — no code needed →</button>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">BOQ Estimator</div>
+  <div class="footer-links">
+    <a href="#how">How it works</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#faq">FAQ</a>
+  </div>
+  <div class="footer-copy">© 2025 BOQ Quick Estimator · All rights reserved</div>
+</footer>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div class="modal-title">Get access</div>
+    <div class="modal-sub">Lifetime Pro access — pay once, use forever.</div>
+
+    <div class="free-banner">
+      <strong>Try it free first.</strong> Open the app now with no payment.<br>Upgrade to Pro when you're ready to save &amp; export.
+    </div>
+
+    <div class="modal-plan-sel">
+      <div class="mplan" id="mplan-free" onclick="selectPlan('free')">
+        <div class="mplan-name">Free</div>
+        <div class="mplan-price">$0</div>
+      </div>
+      <div class="mplan sel" id="mplan-pro" onclick="selectPlan('pro')">
+        <div class="mplan-name">Pro</div>
+        <div class="mplan-price">$19 once</div>
+      </div>
+    </div>
+
+    <div id="modal-form-area">
+      <div style="background:rgba(37,211,102,.08);border:1px solid rgba(37,211,102,.2);border-radius:6px;padding:12px 14px;margin-bottom:16px;font-size:12px;color:#72be92;line-height:1.6;text-align:center">
+        Pay SAR 71 via STC Pay or bank transfer<br>
+        and receive your access code on WhatsApp — usually within 1 hour.
+      </div>
+      <button class="btn-primary" style="width:100%;justify-content:center;margin-top:4px;background:#25D366" onclick="handlePayment()" id="modal-pay-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Order on WhatsApp — SAR 71 →
+      </button>
+      <button class="btn-primary" style="width:100%;justify-content:center;margin-top:8px;background:transparent;border:1px solid var(--border2);color:var(--muted2)" onclick="window.location.href='access.html'">
+        Already have a code? Enter it →
+      </button>
+      <div class="form-note" style="margin-top:12px">
+        One-time payment · Lifetime access · No subscription<br>
+        Access code sent within 1 hour via WhatsApp
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── MODAL ──
+let selectedPlan = 'pro';
+
+function openModal(plan){
+  selectedPlan = plan || 'pro';
+  selectPlan(selectedPlan);
+  document.getElementById('modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(){
+  document.getElementById('modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function closeModalOutside(e){
+  if(e.target === document.getElementById('modal')) closeModal();
+}
+
+function selectPlan(plan){
+  selectedPlan = plan;
+  document.getElementById('mplan-free').classList.toggle('sel', plan==='free');
+  document.getElementById('mplan-pro').classList.toggle('sel', plan==='pro');
+  const btn = document.getElementById('modal-pay-btn');
+  const formArea = document.getElementById('modal-form-area');
+  if(plan === 'free'){
+    btn.textContent = 'Open free app →';
+    btn.onclick = ()=>{ closeModal(); goToApp(); };
+  } else {
+    btn.textContent = 'Pay $19 — Get instant access →';
+    btn.onclick = handlePayment;
+  }
+}
+
+function handlePayment(){
+  window.location.href = 'https://wa.me/966511759092?text=Hi%2C%20I%20want%20to%20buy%20BOQ%20Quick%20Estimator%20Pro%20%28SAR%2071%29.%20Please%20send%20me%20payment%20details.';
+}
+
+function goToApp(){
+  window.location.href = 'access.html';
+}
+
+// ── FAQ ──
+function toggleFaq(el){
+  el.classList.toggle('open');
+}
+
+// ── SCROLL REVEAL ──
+const observer = new IntersectionObserver((entries)=>{
+  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+}, {threshold: 0.1});
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// ── SMOOTH NAV ──
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click', e=>{
+    e.preventDefault();
+    const t = document.querySelector(a.getAttribute('href'));
+    if(t) t.scrollIntoView({behavior:'smooth'});
+  });
+});
+
+// Keyboard close
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+
+// ── PWA: Register service worker ──
+if('serviceWorker' in navigator){
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('sw.js')
+      .then(function(reg){ console.log('[PWA] Service worker registered'); })
+      .catch(function(err){ console.warn('[PWA] SW registration failed:', err); });
+  });
+}
+
+// ── PWA: Install prompt (Android Chrome / Desktop) ──
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', function(e){
+  e.preventDefault();
+  deferredPrompt = e;
+  // Show install banner after 3 seconds if not dismissed
+  setTimeout(showInstallBanner, 3000);
+});
+
+function showInstallBanner(){
+  if(!deferredPrompt) return;
+  if(localStorage.getItem('pwa-dismissed')) return;
+  var banner = document.getElementById('pwa-banner');
+  if(banner) banner.style.display = 'flex';
+}
+
+function installApp(){
+  if(!deferredPrompt) return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(function(result){
+    deferredPrompt = null;
+    document.getElementById('pwa-banner').style.display = 'none';
+  });
+}
+
+function dismissInstall(){
+  localStorage.setItem('pwa-dismissed','1');
+  document.getElementById('pwa-banner').style.display = 'none';
+}
+
+// App installed event
+window.addEventListener('appinstalled', function(){
+  deferredPrompt = null;
+  var banner = document.getElementById('pwa-banner');
+  if(banner) banner.style.display = 'none';
+  console.log('[PWA] App installed');
+});
+</script>
+
+<!-- PWA INSTALL BANNER -->
+<style>
+#pwa-banner{
+  display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+  background:#161614;border:1px solid rgba(200,168,75,.35);border-radius:12px;
+  padding:14px 18px;z-index:9999;box-shadow:0 8px 32px rgba(0,0,0,.6);
+  align-items:center;gap:14px;max-width:420px;width:calc(100% - 32px);
+  animation:slideUp .4s ease;
+}
+@keyframes slideUp{from{opacity:0;transform:translateX(-50%) translateY(20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+#pwa-banner .pwa-icon{width:42px;height:42px;border-radius:10px;background:rgba(200,168,75,.12);border:1px solid rgba(200,168,75,.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:700;font-size:15px;color:#c8a84b}
+#pwa-banner .pwa-text{flex:1}
+#pwa-banner .pwa-title{font-size:13px;font-weight:500;color:#e4e2da;margin-bottom:2px;font-family:'DM Mono',monospace}
+#pwa-banner .pwa-sub{font-size:11px;color:#6e6c63;font-family:'DM Mono',monospace}
+#pwa-banner .pwa-install{background:#c8a84b;color:#0c0c0b;border:none;padding:8px 16px;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'DM Mono',monospace;letter-spacing:.5px;text-transform:uppercase}
+#pwa-banner .pwa-install:hover{background:#e8c96a}
+#pwa-banner .pwa-close{background:none;border:none;color:#6e6c63;font-size:18px;cursor:pointer;padding:0 4px;flex-shrink:0;line-height:1}
+#pwa-banner .pwa-close:hover{color:#e4e2da}
+</style>
+
+<div id="pwa-banner">
+  <div class="pwa-icon">BOQ</div>
+  <div class="pwa-text">
+    <div class="pwa-title">Install BOQ Estimator</div>
+    <div class="pwa-sub">Works offline · Add to home screen</div>
+  </div>
+  <button class="pwa-install" onclick="installApp()">Install</button>
+  <button class="pwa-close" onclick="dismissInstall()" title="Dismiss">×</button>
+</div>
+
+</body>
+</html>
