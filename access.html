@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BOQ Quick Estimator — Get Access</title>
+<script>
+(function(){
+  var RM={'SA':'SAR','AE':'AED','GB':'GBP','US':'USD','DE':'EUR','FR':'EUR','IT':'EUR','ES':'EUR','NL':'EUR','BE':'EUR','IN':'INR','AU':'AUD','KW':'KWD','QA':'QAR','BH':'BHD','OM':'OMR'};
+  var SYM={'SAR':'SAR ','AED':'AED ','GBP':'£','USD':'$','EUR':'€','INR':'₹','AUD':'A$','KWD':'KD ','QAR':'QR ','BHD':'BD ','OMR':'OMR '};
+  var MON={'SAR':'55','AED':'55','GBP':'12','USD':'15','EUR':'13','INR':'1,190','AUD':'23','KWD':'5','QAR':'55','BHD':'6','OMR':'6'};
+  var ANN={'SAR':'480','AED':'480','GBP':'99','USD':'129','EUR':'115','INR':'9,990','AUD':'199','KWD':'42','QAR':'480','BHD':'49','OMR':'49'};
+  var TZ={'Riyadh':'SA','Saudi':'SA','Dubai':'AE','Abu_Dhabi':'AE','London':'GB','New_York':'US','Chicago':'US','Los_Angeles':'US','Berlin':'DE','Paris':'FR','Kolkata':'IN','Mumbai':'IN','Sydney':'AU','Kuwait':'KW','Qatar':'QA','Bahrain':'BH','Muscat':'OM'};
+  function detect(){try{var tz=Intl.DateTimeFormat().resolvedOptions().timeZone||'';for(var k in TZ){if(tz.indexOf(k)>-1)return TZ[k];}}catch(e){}return 'SA';}
+  var cc=detect();var cur=RM[cc]||'SAR';var sym=SYM[cur]||cur+' ';
+  window.AC_CUR=cur;window.AC_SYM=sym;
+  window.AC_MON=sym+(MON[cur]||'55');
+  window.AC_ANN=sym+(ANN[cur]||'480');
+  document.documentElement.lang='en';document.documentElement.dir='ltr';
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600&family=DM+Mono:wght@300;400;500&family=Playfair+Display:ital,wght@0,600;1,400;1,600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a09;--s1:#111110;--s2:#181816;--s3:#212120;--s4:#2a2a28;
+  --gold:#c8a84b;--gold2:#e8c96a;--gold-dim:rgba(200,168,75,.1);--gold-border:rgba(200,168,75,.22);
+  --text:#e8e6de;--muted:#6a6860;--muted2:#9a9890;--muted3:#b8b6ae;
+  --green:#4a9b6a;--red:#c8504a;--blue:#4a7eb5;
+  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);
+  --head:'Playfair Display',serif;--body:'Sora',sans-serif;--mono:'DM Mono',monospace;
+  --radius:12px;--radius-sm:7px;
+}
+html{min-height:100%;background:var(--bg)}
+body{min-height:100vh;color:var(--text);font-family:var(--body);font-size:13px;overflow-x:hidden;
+  display:grid;grid-template-columns:1fr 1fr;
+}
+
+/* ── LEFT PANEL — brand / social proof ─────────────────────────────── */
+.left-panel{background:var(--s1);border-right:1px solid var(--border);padding:48px 40px;display:flex;flex-direction:column;justify-content:space-between;min-height:100vh;position:relative;overflow:hidden}
+.left-panel::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 30% 40%,rgba(200,168,75,.06) 0%,transparent 70%);pointer-events:none}
+.lp-logo{display:flex;flex-direction:column;gap:4px;margin-bottom:48px}
+.lp-logo-name{font-family:var(--head);font-size:26px;font-style:italic;color:var(--gold);letter-spacing:-.3px}
+.lp-logo-tag{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:3px;text-transform:uppercase}
+.lp-hero-title{font-family:var(--head);font-size:clamp(28px,3vw,40px);font-style:italic;color:var(--text);line-height:1.15;letter-spacing:-.5px;margin-bottom:16px}
+.lp-hero-title em{color:var(--gold)}
+.lp-hero-sub{font-size:13px;color:var(--muted2);line-height:1.8;max-width:380px;margin-bottom:36px}
+.lp-features{display:flex;flex-direction:column;gap:12px;margin-bottom:40px}
+.lp-feat{display:flex;align-items:flex-start;gap:12px}
+.lp-feat-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;background:var(--gold-dim);border:1px solid var(--gold-border)}
+.lp-feat-text{font-size:12px;color:var(--muted2);line-height:1.5;padding-top:7px}
+.lp-feat-text strong{color:var(--muted3);font-weight:500}
+.lp-proof{display:flex;gap:24px;flex-wrap:wrap;border-top:1px solid var(--border);padding-top:24px}
+.lp-proof-item .pn{font-family:var(--mono);font-size:20px;font-weight:500;color:var(--gold);line-height:1}
+.lp-proof-item .pl{font-size:10px;color:var(--muted);margin-top:3px;line-height:1.4}
+.lp-bottom{display:flex;align-items:center;gap:10px;margin-top:24px}
+.lp-company-tag{font-size:11px;color:var(--muted);line-height:1.5}
+.lp-company-tag strong{color:var(--muted2);display:block}
+.trust-dots{display:flex;gap:5px}
+.td{width:6px;height:6px;border-radius:50%}
+
+/* ── RIGHT PANEL — form ─────────────────────────────────────────────── */
+.right-panel{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 32px;min-height:100vh;background:var(--bg)}
+.form-card{width:100%;max-width:420px}
+
+/* Step indicator */
+.steps-row{display:flex;align-items:center;gap:0;margin-bottom:32px}
+.step-dot{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1}
+.step-dot-circle{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;font-weight:500;transition:.3s}
+.step-dot-circle.done{background:var(--green);color:#fff}
+.step-dot-circle.active{background:var(--gold);color:#0a0a09}
+.step-dot-circle.todo{background:var(--s3);color:var(--muted);border:1px solid var(--border2)}
+.step-dot-label{font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;white-space:nowrap}
+.step-line{flex:1;height:1px;background:var(--border2);margin-bottom:16px;transition:.3s}
+.step-line.done{background:var(--green)}
+
+/* View system */
+.view{display:none}.view.on{display:block}
+
+/* Form headings */
+.form-eyebrow{font-family:var(--mono);font-size:9px;color:var(--gold);letter-spacing:2.5px;text-transform:uppercase;margin-bottom:8px}
+.form-title{font-family:var(--head);font-size:26px;font-style:italic;color:var(--text);line-height:1.2;margin-bottom:6px}
+.form-title em{color:var(--gold)}
+.form-sub{font-size:12px;color:var(--muted2);line-height:1.7;margin-bottom:24px}
+
+/* Fields */
+.field-group{margin-bottom:14px}
+.field-label{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;display:block;margin-bottom:5px}
+.field-input,.field-select{width:100%;background:var(--s2);border:1px solid var(--border2);color:var(--text);font-family:var(--body);font-size:12px;padding:11px 14px;border-radius:var(--radius-sm);transition:.2s;outline:none}
+.field-input:focus,.field-select:focus{border-color:var(--gold);background:var(--s3)}
+.field-input.err{border-color:var(--red)}
+.field-row-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.err-msg{font-size:10px;color:var(--red);margin-top:8px;display:none;padding:8px 12px;background:rgba(200,80,74,.07);border-radius:5px;border:1px solid rgba(200,80,74,.2)}
+.err-msg.show{display:block}
+
+/* Plan cards */
+.plan-toggle{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.plan-card{background:var(--s2);border:1.5px solid var(--border2);border-radius:var(--radius);padding:16px 14px;cursor:pointer;transition:.2s;user-select:none;position:relative}
+.plan-card:hover{border-color:rgba(200,168,75,.3);background:var(--s3)}
+.plan-card.sel{border-color:var(--gold);background:var(--gold-dim)}
+.plan-card.sel::after{content:'✓';position:absolute;top:10px;right:12px;font-size:11px;color:var(--gold);font-weight:700}
+.plan-type{font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px}
+.plan-price{font-family:var(--mono);font-size:22px;font-weight:500;color:var(--gold);line-height:1;margin-bottom:2px}
+.plan-price-note{font-size:10px;color:var(--muted);margin-bottom:6px}
+.plan-desc{font-size:10px;color:var(--muted2);line-height:1.5}
+.save-chip{display:inline-block;background:rgba(74,155,106,.1);border:1px solid rgba(74,155,106,.25);color:var(--green);font-family:var(--mono);font-size:8px;padding:1px 7px;border-radius:8px;letter-spacing:.5px;margin-top:4px}
+.free-plan-row{background:var(--s2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+.free-plan-info .fp-label{font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px}
+.free-plan-info .fp-name{font-size:12px;font-weight:500;color:var(--text)}
+.free-plan-info .fp-desc{font-size:10px;color:var(--muted2);margin-top:1px}
+.free-tick{width:20px;height:20px;border-radius:50%;background:rgba(74,155,106,.1);border:1px solid rgba(74,155,106,.25);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--green)}
+
+/* Billing toggle inside plan */
+.billing-sub{background:var(--s3);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:14px}
+.billing-sub-label{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
+.billing-opts{display:flex;gap:6px}
+.bill-btn{flex:1;padding:8px;background:transparent;border:1px solid var(--border2);border-radius:6px;cursor:pointer;text-align:center;transition:.15s;user-select:none}
+.bill-btn.sel{border-color:var(--gold);background:var(--gold-dim)}
+.bill-btn-label{font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px}
+.bill-btn-price{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--gold)}
+.bill-btn-period{font-size:9px;color:var(--muted);margin-top:1px}
+
+/* Buttons */
+.btn-primary{width:100%;padding:13px;background:var(--gold);color:#0a0a09;font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;border-radius:var(--radius-sm);cursor:pointer;border:none;transition:.15s;margin-bottom:10px}
+.btn-primary:hover{background:var(--gold2)}
+.btn-outline{width:100%;padding:11px;background:transparent;border:1px solid var(--border2);color:var(--muted2);font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:1px;text-transform:uppercase;border-radius:var(--radius-sm);cursor:pointer;transition:.15s;margin-bottom:8px}
+.btn-outline:hover{border-color:var(--gold-border);color:var(--muted3)}
+.btn-green{width:100%;padding:13px;background:rgba(74,155,106,.1);border:1px solid rgba(74,155,106,.25);color:var(--green);font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;border-radius:var(--radius-sm);cursor:pointer;transition:.15s;margin-bottom:10px}
+.btn-green:hover{background:rgba(74,155,106,.2)}
+.btn-wa{width:100%;padding:13px;background:#25D366;color:#fff;font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;border-radius:var(--radius-sm);cursor:pointer;border:none;transition:.15s;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none}
+.btn-wa:hover{background:#1ebe5a}
+.btn-ghost{width:100%;padding:8px;background:transparent;border:none;color:var(--muted);font-family:var(--mono);font-size:10px;letter-spacing:1px;cursor:pointer;transition:.15s}
+.btn-ghost:hover{color:var(--muted2)}
+.divider{display:flex;align-items:center;gap:10px;margin:12px 0;font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border2)}
+
+/* Code input */
+.code-input{width:100%;background:var(--s2);border:1.5px solid var(--border2);color:var(--gold);font-family:var(--mono);font-size:22px;padding:14px;border-radius:var(--radius-sm);transition:.2s;text-align:center;letter-spacing:5px;outline:none;margin-bottom:10px}
+.code-input:focus{border-color:var(--gold);background:var(--s3)}
+.code-input::placeholder{letter-spacing:1px;font-size:13px;color:var(--muted)}
+
+/* Order summary box */
+.order-summary{background:var(--gold-dim);border:1px solid var(--gold-border);border-radius:var(--radius);padding:16px;margin-bottom:20px}
+.os-label{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px}
+.os-plan{font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px}
+.os-price{font-family:var(--mono);font-size:28px;font-weight:500;color:var(--gold);line-height:1;margin-bottom:2px}
+.os-period{font-size:10px;color:var(--muted)}
+
+/* Feature checklist in buy view */
+.feat-list{margin-bottom:18px}
+.feat-item{display:flex;align-items:flex-start;gap:9px;padding:6px 0;border-bottom:1px solid rgba(42,42,40,.5);font-size:11px;color:var(--muted2);line-height:1.5}
+.feat-item:last-child{border:none}
+.feat-check{color:var(--green);font-size:10px;flex-shrink:0;margin-top:2px;font-weight:700}
+.steps-how{margin-bottom:16px}
+.how-step{display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-bottom:1px solid rgba(42,42,40,.4);font-size:11px;color:var(--muted2);line-height:1.5}
+.how-step:last-child{border:none}
+.how-num{min-width:20px;height:20px;border-radius:50%;background:var(--gold-dim);border:1px solid var(--gold-border);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:9px;color:var(--gold);flex-shrink:0;margin-top:1px}
+
+/* Alerts */
+.alert{padding:10px 13px;border-radius:var(--radius-sm);margin-bottom:12px;font-size:11px;line-height:1.5;display:none}
+.alert.show{display:block}
+.alert-err{background:rgba(200,80,74,.08);border:1px solid rgba(200,80,74,.2);color:#e07070}
+.alert-ok{background:rgba(74,155,106,.08);border:1px solid rgba(74,155,106,.25);color:#72be92}
+
+/* Success */
+.success-wrap{text-align:center;padding:12px 0}
+.success-icon{font-size:52px;display:block;margin-bottom:16px}
+.app-link-card{display:flex;align-items:center;gap:12px;background:var(--s2);border:1px solid var(--gold-border);border-radius:var(--radius);padding:14px 16px;text-decoration:none;margin-bottom:10px;transition:.2s}
+.app-link-card:hover{border-color:var(--gold);background:var(--s3);transform:translateX(3px)}
+.alc-icon{font-size:20px;flex-shrink:0}
+.alc-name{font-size:13px;font-weight:500;color:var(--text)}
+.alc-sub{font-size:10px;color:var(--muted);margin-top:1px}
+.alc-arrow{margin-left:auto;color:var(--gold);font-size:16px}
+
+/* Footer note */
+.form-foot{font-size:10px;color:var(--muted);text-align:center;margin-top:16px;line-height:1.7}
+.form-foot a{color:var(--muted2);text-decoration:none;transition:.15s}
+.form-foot a:hover{color:var(--gold)}
+
+/* Mobile */
+@media(max-width:820px){
+  body{grid-template-columns:1fr}
+  .left-panel{display:none}
+  .right-panel{padding:32px 20px;justify-content:flex-start;padding-top:40px}
+  .form-card{max-width:100%}
+}
+@media(max-width:440px){
+  .right-panel{padding:24px 16px}
+  .plan-toggle{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- LEFT PANEL -->
+<div class="left-panel">
+  <div>
+    <div class="lp-logo">
+      <div class="lp-logo-name">BOQ Quick Estimator</div>
+      <div class="lp-logo-tag">Professional Construction Estimating</div>
+    </div>
+    <div class="lp-hero-title">The fastest way to produce<br>accurate <em>construction estimates.</em></div>
+    <div class="lp-hero-sub">BOQ quantities + full cost plans in minutes. Trusted by QS professionals, engineers and contractors across Saudi Arabia, UAE and beyond.</div>
+    <div class="lp-features">
+      <div class="lp-feat">
+        <div class="lp-feat-icon">⬡</div>
+        <div class="lp-feat-text"><strong>BOQ Estimator</strong> — Concrete, rebar, blockwork, tiling, plaster, paint + MEP systems per room</div>
+      </div>
+      <div class="lp-feat">
+        <div class="lp-feat-icon">⊟</div>
+        <div class="lp-feat-text"><strong>Cost Estimator</strong> — Material, labour & indirect costs by trade with contingency and VAT</div>
+      </div>
+      <div class="lp-feat">
+        <div class="lp-feat-icon">🌍</div>
+        <div class="lp-feat-text"><strong>8 building codes</strong> — SBC 304, IBC/ACI, EC2, IS 456, AS 3600 and more. All factors auto-calibrate.</div>
+      </div>
+      <div class="lp-feat">
+        <div class="lp-feat-icon">📐</div>
+        <div class="lp-feat-text"><strong>6 project types</strong> — Residential, commercial, mixed-use, industrial, hospitality, healthcare</div>
+      </div>
+    </div>
+  </div>
+  <div>
+    <div class="lp-proof">
+      <div class="lp-proof-item"><div class="pn">8</div><div class="pl">Building<br>codes</div></div>
+      <div class="lp-proof-item"><div class="pn">6</div><div class="pl">Project<br>types</div></div>
+      <div class="lp-proof-item"><div class="pn">4</div><div class="pl">MEP<br>systems</div></div>
+      <div class="lp-proof-item"><div class="pn">2</div><div class="pl">Estimating<br>apps</div></div>
+    </div>
+    <div class="lp-bottom" style="margin-top:20px">
+      <div class="trust-dots">
+        <div class="td" style="background:var(--gold)"></div>
+        <div class="td" style="background:rgba(200,168,75,.5)"></div>
+        <div class="td" style="background:rgba(200,168,75,.25)"></div>
+      </div>
+      <div class="lp-company-tag">
+        <strong>Al Qaswaa Al Sharqia Trading EST</strong>
+        EPC Contractor · Eastern Province, Saudi Arabia
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RIGHT PANEL -->
+<div class="right-panel">
+  <div class="form-card">
+
+    <!-- Step indicator -->
+    <div class="steps-row" id="steps-row">
+      <div class="step-dot">
+        <div class="step-dot-circle active" id="sd1">1</div>
+        <div class="step-dot-label">Details</div>
+      </div>
+      <div class="step-line" id="sl1"></div>
+      <div class="step-dot">
+        <div class="step-dot-circle todo" id="sd2">2</div>
+        <div class="step-dot-label">Plan</div>
+      </div>
+      <div class="step-line" id="sl2"></div>
+      <div class="step-dot">
+        <div class="step-dot-circle todo" id="sd3">3</div>
+        <div class="step-dot-label">Access</div>
+      </div>
+    </div>
+
+    <!-- ── VIEW 1: Details ──────────────────────────────────────────── -->
+    <div class="view on" id="v-details">
+      <div class="form-eyebrow">Step 1 of 3</div>
+      <div class="form-title">Create your<br><em>free account</em></div>
+      <div class="form-sub">Takes 30 seconds. No credit card required.</div>
+
+      <div class="field-row-2">
+        <div class="field-group">
+          <label class="field-label">Full name *</label>
+          <input class="field-input" id="f-name" type="text" placeholder="Mohammed Al-Rashid" autocomplete="name">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Role *</label>
+          <select class="field-select" id="f-role">
+            <option value="">— Select —</option>
+            <option>Quantity Surveyor (QS)</option>
+            <option>Civil / Structural Engineer</option>
+            <option>Architect</option>
+            <option>Contractor / Builder</option>
+            <option>Project Manager</option>
+            <option>Property Developer</option>
+            <option>Consultant</option>
+            <option>Student</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Email address *</label>
+        <input class="field-input" id="f-email" type="email" placeholder="you@company.com" autocomplete="email">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Phone / WhatsApp *</label>
+        <input class="field-input" id="f-phone" type="tel" placeholder="+966 5X XXX XXXX" autocomplete="tel">
+      </div>
+
+      <div class="err-msg" id="err-details">Please fill in all fields with a valid email.</div>
+      <button class="btn-primary" onclick="step1Next()">Continue →</button>
+      <div class="form-foot">
+        Already have an access code?
+        <a href="#" onclick="showView('v-code');setStepState(3)">Enter code here</a>
+      </div>
+    </div>
+
+    <!-- ── VIEW 2: Plan ─────────────────────────────────────────────── -->
+    <div class="view" id="v-plan">
+      <div class="form-eyebrow">Step 2 of 3</div>
+      <div class="form-title">Choose your<br><em>plan</em></div>
+      <div class="form-sub">Start free with 10 projects, or unlock everything with Pro.</div>
+
+      <!-- Free plan row -->
+      <div class="free-plan-row" id="fp-row" onclick="selMainPlan('free')" style="cursor:pointer;border:1.5px solid var(--border);transition:.2s">
+        <div class="free-plan-info">
+          <div class="fp-label">Free plan</div>
+          <div class="fp-name">Try before you buy</div>
+          <div class="fp-desc">10 projects · Both apps · All 8 codes</div>
+        </div>
+        <div class="free-tick" id="free-tick" style="display:none">✓</div>
+        <div style="font-family:var(--mono);font-size:18px;font-weight:500;color:var(--muted2)">SAR 0</div>
+      </div>
+
+      <!-- Pro plan -->
+      <div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">Pro plan</div>
+      <div class="billing-sub">
+        <div class="billing-sub-label">Select billing period</div>
+        <div class="billing-opts">
+          <div class="bill-btn" id="bb-monthly" onclick="selBilling('monthly')">
+            <div class="bill-btn-label">Monthly</div>
+            <div class="bill-btn-price" id="bb-mon-price">SAR 55</div>
+            <div class="bill-btn-period">per month</div>
+          </div>
+          <div class="bill-btn sel" id="bb-annual" onclick="selBilling('annual')">
+            <div class="bill-btn-label">Annual <span class="save-chip">Save 27%</span></div>
+            <div class="bill-btn-price" id="bb-ann-price">SAR 480</div>
+            <div class="bill-btn-period">per year</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="err-msg" id="err-plan"></div>
+      <button class="btn-primary" id="plan-cta" onclick="step2Next()">Continue →</button>
+      <button class="btn-ghost" onclick="showView('v-details');setStepState(1)">← Back</button>
+    </div>
+
+    <!-- ── VIEW 3a: Free confirmation ──────────────────────────────── -->
+    <div class="view" id="v-free-confirm">
+      <div class="form-eyebrow">Step 3 of 3</div>
+      <div class="form-title">You're all set,<br><em>welcome aboard!</em></div>
+      <div class="form-sub">Your free account is ready. 10 projects included — upgrade to Pro anytime.</div>
+      <div style="background:rgba(74,155,106,.07);border:1px solid rgba(74,155,106,.2);border-radius:var(--radius);padding:14px 16px;margin-bottom:20px">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--green);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px">Free plan activated</div>
+        <div style="font-size:12px;color:var(--muted2);line-height:1.7">
+          ✓ &nbsp;BOQ Estimator — unlimited rooms<br>
+          ✓ &nbsp;Cost Estimator — full trade breakdown<br>
+          ✓ &nbsp;All 8 building codes + 6 project types<br>
+          ✓ &nbsp;Save up to 10 projects locally
+        </div>
+      </div>
+      <button class="btn-primary" onclick="grantFreeAccess()">Open BOQ Estimator →</button>
+      <a class="btn-outline" style="display:block;text-align:center;text-decoration:none;padding:11px;font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--muted2);cursor:pointer;transition:.15s;margin-bottom:8px" href="cost-estimator.html">Open Cost Estimator →</a>
+      <button class="btn-ghost" onclick="showView('v-plan');setStepState(2)">← Change plan</button>
+    </div>
+
+    <!-- ── VIEW 3b: Pro order ───────────────────────────────────────── -->
+    <div class="view" id="v-pro-order">
+      <div class="form-eyebrow">Step 3 of 3</div>
+      <div class="form-title">Order <em>Pro</em> access</div>
+
+      <div class="order-summary">
+        <div class="os-label">Your order</div>
+        <div class="os-plan" id="os-plan-label">Annual plan</div>
+        <div class="os-price" id="os-price">SAR 480</div>
+        <div class="os-period" id="os-period">per year · Save 27%</div>
+      </div>
+
+      <div class="feat-list">
+        <div class="feat-item"><span class="feat-check">✓</span>BOQ Estimator + Cost Estimator</div>
+        <div class="feat-item"><span class="feat-check">✓</span>Unlimited projects & saves</div>
+        <div class="feat-item"><span class="feat-check">✓</span>All 8 codes · 6 project types · Full MEP scope</div>
+        <div class="feat-item"><span class="feat-check">✓</span>PDF export — professional reports</div>
+        <div class="feat-item"><span class="feat-check">✓</span>All future updates included</div>
+      </div>
+
+      <div class="steps-how">
+        <div class="how-step"><div class="how-num">1</div>Click WhatsApp button below</div>
+        <div class="how-step"><div class="how-num">2</div>Pay via STC Pay or bank transfer (IBAN)</div>
+        <div class="how-step"><div class="how-num">3</div>Send payment screenshot on WhatsApp</div>
+        <div class="how-step"><div class="how-num">4</div>Receive your access code within 1 hour</div>
+      </div>
+
+      <a class="btn-wa" id="wa-order-btn" href="#" target="_blank">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Order on WhatsApp — Imran Khoje
+      </a>
+      <div class="divider">already have a code</div>
+      <button class="btn-outline" onclick="showView('v-code');setStepState(3)">Enter access code →</button>
+      <button class="btn-ghost" onclick="showView('v-plan');setStepState(2)">← Change plan</button>
+      <div class="form-foot">STC Pay or IBAN · Code within 1 hour · +966 51 175 9092</div>
+    </div>
+
+    <!-- ── VIEW: Code entry ─────────────────────────────────────────── -->
+    <div class="view" id="v-code">
+      <div class="form-eyebrow">Access code</div>
+      <div class="form-title">Enter your<br><em>code</em></div>
+      <div class="form-sub">Enter the access code you received after payment to unlock Pro.</div>
+      <div class="alert alert-err" id="code-err"></div>
+      <div class="alert alert-ok" id="code-ok">Code verified! Opening the app...</div>
+      <input class="code-input" id="code-inp" placeholder="BOQ-XXXXXX" maxlength="12"
+        oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9\-]/g,'')"
+        onkeydown="if(event.key==='Enter')verifyCode()">
+      <button class="btn-primary" onclick="verifyCode()">Unlock access →</button>
+      <div class="divider">no code yet</div>
+      <button class="btn-outline" onclick="showView('v-plan');setStepState(2)">Order Pro on WhatsApp →</button>
+      <button class="btn-ghost" onclick="showView('v-details');setStepState(1)">← Back to start</button>
+    </div>
+
+    <!-- ── VIEW: Success ────────────────────────────────────────────── -->
+    <div class="view" id="v-success">
+      <div class="success-wrap">
+        <span class="success-icon">✅</span>
+        <div class="form-eyebrow" style="text-align:center;margin-bottom:6px">Pro access activated</div>
+        <div class="form-title" style="text-align:center;margin-bottom:6px">Welcome to<br><em>BOQ Quick Estimator</em></div>
+        <div class="form-sub" style="text-align:center;margin-bottom:24px">Your code is verified. Open either app below.</div>
+        <a class="app-link-card" href="boq-estimator.html">
+          <span class="alc-icon">⬡</span>
+          <div><div class="alc-name">BOQ Estimator</div><div class="alc-sub">Quantities, MEP scope, project BOQ</div></div>
+          <span class="alc-arrow">→</span>
+        </a>
+        <a class="app-link-card" href="cost-estimator.html">
+          <span class="alc-icon">⊟</span>
+          <div><div class="alc-name">Cost Estimator</div><div class="alc-sub">Material, labour & indirect costs</div></div>
+          <span class="alc-arrow">→</span>
+        </a>
+        <div style="font-size:10px;color:var(--muted);text-align:center;margin-top:16px;line-height:1.8;padding:10px 12px;background:var(--s1);border-radius:8px;border:1px solid var(--border)">
+          💡 Add to home screen for quick access<br>
+          <span style="color:var(--muted2)">iPhone: Share ⬆ → Add to Home Screen</span><br>
+          <span style="color:var(--muted2)">Android: Menu ⋮ → Add to Home Screen</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-foot" style="margin-top:20px">
+      <a href="https://wa.me/966511759092" target="_blank">WhatsApp Support</a> ·
+      <a href="index.html">Home</a> ·
+      <a href="privacy.html">Privacy</a>
+    </div>
+
+  </div>
+</div>
+
+<script>
+var CODES_KEY = 'boq_valid_codes';
+var LEAD_KEY  = 'sc_leads';
+var selectedBilling = 'annual';
+var selectedMainPlan = 'pro';
+var lead = {};
+
+// ── STEP INDICATORS ────────────────────────────────────────────────
+function setStepState(active) {
+  [1,2,3].forEach(function(i) {
+    var dot = document.getElementById('sd'+i);
+    if (!dot) return;
+    dot.className = 'step-dot-circle ' + (i < active ? 'done' : i === active ? 'active' : 'todo');
+    dot.textContent = i < active ? '✓' : i;
+  });
+  [1,2].forEach(function(i) {
+    var line = document.getElementById('sl'+i);
+    if (line) line.className = 'step-line ' + (i < active ? 'done' : '');
+  });
+}
+
+// ── VIEWS ──────────────────────────────────────────────────────────
+function showView(id) {
+  document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('on'); });
+  var el = document.getElementById(id);
+  if (el) el.classList.add('on');
+  window.scrollTo(0, 0);
+}
+
+// ── STEP 1: Details ────────────────────────────────────────────────
+function step1Next() {
+  var name  = document.getElementById('f-name').value.trim();
+  var role  = document.getElementById('f-role').value;
+  var email = document.getElementById('f-email').value.trim();
+  var phone = document.getElementById('f-phone').value.trim();
+  var err   = document.getElementById('err-details');
+  var emailOk = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
+
+  ['f-name','f-email','f-phone','f-role'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    var ok = id==='f-name' ? name.length>1
+           : id==='f-email' ? emailOk
+           : id==='f-phone' ? phone.length>6
+           : !!role;
+    el.classList.toggle('err', !ok);
+  });
+
+  if (!name || !emailOk || phone.length<7 || !role) {
+    err.classList.add('show');
+    return;
+  }
+  err.classList.remove('show');
+
+  lead = { name:name, email:email, phone:phone, purpose:role, ts:new Date().toISOString() };
+  saveLead(lead);
+
+  setStepState(2);
+  initPlanView();
+  showView('v-plan');
+}
+
+// ── STEP 2: Plan ───────────────────────────────────────────────────
+function selMainPlan(p) {
+  selectedMainPlan = p;
+  var fpRow = document.getElementById('fp-row');
+  var tick  = document.getElementById('free-tick');
+  if (fpRow) fpRow.style.borderColor = p==='free' ? 'var(--gold)' : 'var(--border)';
+  if (tick)  tick.style.display = p==='free' ? 'flex' : 'none';
+  document.getElementById('plan-cta').textContent = p==='free'
+    ? 'Continue with free plan →'
+    : (selectedBilling==='annual' ? 'Order Pro — Annual →' : 'Order Pro — Monthly →');
+}
+
+function selBilling(b) {
+  selectedBilling = b;
+  selectedMainPlan = 'pro';
+  selMainPlan('pro');
+  document.getElementById('bb-monthly').classList.toggle('sel', b==='monthly');
+  document.getElementById('bb-annual').classList.toggle('sel', b==='annual');
+  updatePlanCTA();
+}
+
+function updatePlanCTA() {
+  document.getElementById('plan-cta').textContent =
+    selectedMainPlan==='free' ? 'Continue with free plan →'
+    : selectedBilling==='annual' ? 'Order Pro — Annual →'
+    : 'Order Pro — Monthly →';
+}
+
+function initPlanView() {
+  var mon = window.AC_MON || 'SAR 55';
+  var ann = window.AC_ANN || 'SAR 480';
+  var mEl = document.getElementById('bb-mon-price');
+  var aEl = document.getElementById('bb-ann-price');
+  if (mEl) mEl.textContent = mon;
+  if (aEl) aEl.textContent = ann;
+  selBilling('annual');
+}
+
+function step2Next() {
+  setStepState(3);
+  if (selectedMainPlan === 'free') {
+    showView('v-free-confirm');
+  } else {
+    buildOrderSummary();
+    buildWALink();
+    showView('v-pro-order');
+  }
+}
+
+// ── STEP 3a: Free ──────────────────────────────────────────────────
+function grantFreeAccess() {
+  sessionStorage.setItem('sc_access', 'free');
+  sessionStorage.setItem('sc_lead', JSON.stringify(lead));
+  window.location.href = 'boq-estimator.html';
+}
+
+// ── STEP 3b: Pro order ─────────────────────────────────────────────
+function buildOrderSummary() {
+  var mon = window.AC_MON || 'SAR 55';
+  var ann = window.AC_ANN || 'SAR 480';
+  var isAnn = selectedBilling === 'annual';
+  var price  = isAnn ? ann : mon;
+  var period = isAnn ? 'per year · Save 27%' : 'per month · cancel anytime';
+  var label  = isAnn ? 'Annual plan' : 'Monthly plan';
+  document.getElementById('os-plan-label').textContent = label;
+  document.getElementById('os-price').textContent = price;
+  document.getElementById('os-period').textContent = period;
+}
+
+function buildWALink() {
+  var mon = window.AC_MON || 'SAR 55';
+  var ann = window.AC_ANN || 'SAR 480';
+  var isAnn = selectedBilling === 'annual';
+  var price = isAnn ? ann : mon;
+  var planLabel = isAnn ? 'Annual Plan (' + ann + '/year)' : 'Monthly Plan (' + mon + '/month)';
+  var msg = 'Hello Imran Khoje!\n\n'
+    + 'I would like to purchase BOQ Quick Estimator Pro — ' + planLabel + '.\n\n'
+    + 'My details:\n'
+    + '\u2022 Name: ' + (lead.name || '\u2014') + '\n'
+    + '\u2022 Email: ' + (lead.email || '\u2014') + '\n'
+    + '\u2022 Phone: ' + (lead.phone || '\u2014') + '\n'
+    + '\u2022 Role: ' + (lead.purpose || '\u2014') + '\n\n'
+    + 'Please send me payment details (STC Pay / IBAN) to complete the order.\n\nThank you!';
+  document.getElementById('wa-order-btn').href =
+    'https://wa.me/966511759092?text=' + encodeURIComponent(msg);
+}
+
+// ── CODE ENTRY ──────────────────────────────────────────────────────
+function verifyCode() {
+  var raw = document.getElementById('code-inp').value.trim().toUpperCase();
+  var errEl = document.getElementById('code-err');
+  var okEl  = document.getElementById('code-ok');
+  errEl.classList.remove('show'); okEl.classList.remove('show');
+
+  if (!raw || raw.length < 6) {
+    errEl.textContent = 'Please enter your full access code.';
+    errEl.classList.add('show');
+    return;
+  }
+  var codes = [];
+  try { codes = JSON.parse(localStorage.getItem(CODES_KEY) || '[]'); } catch(e) {}
+  var match = null;
+  for (var i = 0; i < codes.length; i++) {
+    if (codes[i].code === raw && codes[i].active) { match = codes[i]; break; }
+  }
+  if (!match) {
+    errEl.textContent = 'Invalid or expired code. Contact support on WhatsApp: +966 51 175 9092';
+    errEl.classList.add('show');
+    return;
+  }
+  match.uses = (match.uses || 0) + 1;
+  match.lastUsed = new Date().toISOString();
+  try { localStorage.setItem(CODES_KEY, JSON.stringify(codes)); } catch(e) {}
+  try { sessionStorage.setItem('boq_access', 'ok_' + raw); } catch(e) {}
+  okEl.classList.add('show');
+  setTimeout(function(){ showView('v-success'); }, 700);
+}
+
+// ── SAVE LEAD ──────────────────────────────────────────────────────
+function saveLead(l) {
+  var list = [];
+  try { list = JSON.parse(localStorage.getItem(LEAD_KEY) || '[]'); } catch(e) {}
+  list = list.filter(function(x){ return x.email !== l.email; });
+  list.unshift(l);
+  try { localStorage.setItem(LEAD_KEY, JSON.stringify(list.slice(0, 200))); } catch(e) {}
+}
+
+// ── INIT ──────────────────────────────────────────────────────────
+(function(){
+  initPlanView();
+
+  // Auto-verify from URL ?code=XXX
+  var params = new URLSearchParams(window.location.search);
+  var urlCode = params.get('code');
+  if (urlCode) {
+    document.getElementById('code-inp').value = urlCode.toUpperCase();
+    showView('v-code');
+    setStepState(3);
+    setTimeout(verifyCode, 400);
+    return;
+  }
+
+  // If session already has access, redirect
+  var sess = sessionStorage.getItem('sc_access') || sessionStorage.getItem('boq_access') || '';
+  if (sess && sess.length > 2) {
+    var redirect = params.get('redirect') || 'boq-estimator.html';
+    window.location.href = redirect;
+  }
+})();
+</script>
+</body>
+</html>

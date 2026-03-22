@@ -1,0 +1,89 @@
+{
+  "name": "BOQ Quick Estimator",
+  "short_name": "BOQ Estimator",
+  "description": "Professional construction estimating tool. BOQ quantities and cost plans for residential, commercial and industrial projects. Supports SBC 304, ACI 318, EC2, IS 456 and 5 more building codes. Includes electrical, plumbing, HVAC and fire safety systems.",
+  "start_url": "/boq-estimator/index.html",
+  "scope": "/boq-estimator/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0a0a09",
+  "theme_color": "#c8a84b",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["productivity", "business", "utilities"],
+  "icons": [
+    {
+      "src": "icons/icon-72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "BOQ Estimator",
+      "short_name": "BOQ",
+      "description": "Open BOQ quantity calculator",
+      "url": "/boq-estimator/boq-estimator.html",
+      "icons": [{ "src": "icons/icon-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Cost Estimator",
+      "short_name": "Cost",
+      "description": "Open construction cost estimator",
+      "url": "/boq-estimator/cost-estimator.html",
+      "icons": [{ "src": "icons/icon-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Access / Get Pro",
+      "short_name": "Access",
+      "description": "Manage access or upgrade to Pro",
+      "url": "/boq-estimator/access.html",
+      "icons": [{ "src": "icons/icon-96.png", "sizes": "96x96" }]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}

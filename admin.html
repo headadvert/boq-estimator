@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BOQ Quick Estimator — Admin Panel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500&family=DM+Mono:wght@300;400;500&family=Playfair+Display:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a09;--s1:#111110;--s2:#181816;--s3:#212120;--s4:#2a2a28;
+  --gold:#c8a84b;--gold2:#e8c96a;--gold-dim:rgba(200,168,75,.1);--gold-border:rgba(200,168,75,.2);
+  --text:#e8e6de;--muted:#6a6860;--muted2:#9a9890;--muted3:#b8b6ae;
+  --green:#4a9b6a;--red:#c8504a;--blue:#4a7eb5;
+  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);
+  --head:'Playfair Display',serif;--body:'Sora',sans-serif;--mono:'DM Mono',monospace;
+  --radius:10px;--radius-sm:6px;
+}
+html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--body);font-size:13px;overflow-x:hidden}
+/* Login */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.login-card{background:var(--s1);border:1px solid var(--border2);border-radius:14px;padding:32px 28px;width:100%;max-width:360px;text-align:center}
+.login-logo{font-family:var(--head);font-size:24px;font-style:italic;color:var(--gold);margin-bottom:4px}
+.login-sub{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:24px}
+.login-title{font-size:14px;font-weight:500;color:var(--text);margin-bottom:16px}
+.login-inp{width:100%;background:var(--s2);border:1px solid var(--border2);color:var(--text);font-family:var(--mono);font-size:14px;padding:12px;border-radius:var(--radius-sm);text-align:center;letter-spacing:2px;margin-bottom:10px;transition:.15s}
+.login-inp:focus{outline:none;border-color:var(--gold)}
+.login-btn{width:100%;padding:12px;background:var(--gold);color:#0a0a09;font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;border-radius:var(--radius-sm);cursor:pointer;border:none;transition:.15s}
+.login-btn:hover{background:var(--gold2)}
+.login-err{font-size:11px;color:var(--red);margin-top:8px;display:none}
+/* Admin layout */
+.admin-wrap{display:none;min-height:100vh;flex-direction:column}
+.admin-topbar{background:var(--s1);border-bottom:1px solid var(--border);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.admin-logo{font-family:var(--head);font-size:18px;font-style:italic;color:var(--gold)}
+.admin-logo small{font-family:var(--mono);font-size:9px;color:var(--muted);font-style:normal;letter-spacing:2px;text-transform:uppercase;margin-left:6px}
+.admin-nav{display:flex;gap:4px}
+.anav{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;padding:6px 12px;border-radius:4px;cursor:pointer;transition:.15s;background:none;border:none}
+.anav:hover{color:var(--text);background:var(--s2)}
+.anav.on{color:var(--gold);background:var(--gold-dim)}
+.logout-btn{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1px;padding:6px 12px;border-radius:4px;cursor:pointer;background:none;border:1px solid var(--border);transition:.15s}
+.logout-btn:hover{color:var(--red);border-color:rgba(200,80,74,.3)}
+.admin-main{flex:1;padding:28px 24px;max-width:960px;width:100%;margin:0 auto}
+/* Panels */
+.apanel{display:none}.apanel.on{display:block}
+/* Stats row */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px}
+.stat-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--radius);padding:16px;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--gold);opacity:.4}
+.stat-label{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+.stat-value{font-family:var(--mono);font-size:24px;font-weight:500;color:var(--gold);line-height:1}
+.stat-sub{font-size:10px;color:var(--muted);margin-top:4px}
+/* Section */
+.section-hd{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.section-hd h3{font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:500;white-space:nowrap}
+.section-hd::after{content:'';flex:1;height:1px;background:var(--border)}
+/* Generate code */
+.gen-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.field-wrap{display:flex;flex-direction:column;gap:4px}
+.field-label{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase}
+.field-input,.field-select{background:var(--s2);border:1px solid var(--border);color:var(--text);font-family:var(--body);font-size:12px;padding:9px 12px;border-radius:var(--radius-sm);transition:.15s;width:100%}
+.field-input:focus,.field-select:focus{outline:none;border-color:var(--gold)}
+.btn{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:1px;text-transform:uppercase;padding:10px 20px;border-radius:var(--radius-sm);cursor:pointer;transition:.15s;border:1px solid transparent;white-space:nowrap}
+.btn-primary{background:var(--gold);color:#0a0a09;border-color:var(--gold)}.btn-primary:hover{background:var(--gold2)}
+.btn-outline{background:transparent;border-color:var(--border2);color:var(--muted2)}.btn-outline:hover{border-color:var(--gold);color:var(--gold)}
+.btn-danger{background:transparent;border-color:rgba(200,80,74,.3);color:var(--red)}.btn-danger:hover{background:rgba(200,80,74,.08)}
+.btn-sm{padding:6px 14px;font-size:9px}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap}
+/* Generated code display */
+.code-result{background:var(--s1);border:1px solid var(--gold-border);border-radius:var(--radius);padding:18px;margin-top:14px;display:none}
+.code-result.show{display:block}
+.code-display{font-family:var(--mono);font-size:28px;font-weight:500;color:var(--gold);letter-spacing:3px;text-align:center;margin:10px 0;cursor:pointer;padding:14px;background:var(--s2);border-radius:var(--radius-sm);border:1px solid var(--gold-border);transition:.15s}
+.code-display:hover{background:var(--gold-dim)}
+.code-display-label{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;text-align:center;margin-bottom:4px}
+.wa-msg-box{background:var(--s2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;font-size:11px;color:var(--muted2);line-height:1.7;margin-top:12px;white-space:pre-wrap;font-family:var(--body)}
+.copy-hint{font-size:10px;color:var(--muted);text-align:center;margin-top:6px}
+/* Codes table */
+.codes-table{width:100%;border-collapse:collapse}
+.codes-table th{font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;padding:8px 12px;border-bottom:1px solid var(--border);text-align:left;background:rgba(0,0,0,.15)}
+.codes-table td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:12px;vertical-align:middle}
+.codes-table tr:last-child td{border-bottom:none}
+.codes-table tr:hover td{background:rgba(200,168,75,.02)}
+.code-val{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--gold);letter-spacing:1.5px}
+.status-badge{font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:8px;letter-spacing:.5px}
+.sb-active{background:rgba(74,155,106,.1);border:1px solid rgba(74,155,106,.25);color:var(--green)}
+.sb-inactive{background:rgba(200,80,74,.08);border:1px solid rgba(200,80,74,.2);color:var(--red)}
+.plan-badge{font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:8px;letter-spacing:.5px;background:var(--gold-dim);border:1px solid var(--gold-border);color:var(--gold)}
+/* Leads table */
+.leads-table{width:100%;border-collapse:collapse}
+.leads-table th{font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;padding:8px 12px;border-bottom:1px solid var(--border);text-align:left;background:rgba(0,0,0,.15)}
+.leads-table td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:12px;vertical-align:middle;color:var(--muted2)}
+.leads-table tr:last-child td{border-bottom:none}
+.leads-table tr:hover td{background:rgba(200,168,75,.02)}
+.empty-state{text-align:center;padding:40px 20px;color:var(--muted);border:1px dashed var(--border2);border-radius:var(--radius)}
+.empty-icon{font-size:24px;margin-bottom:8px}
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--s2);border:1px solid var(--gold-border);color:var(--gold);font-family:var(--mono);font-size:10px;letter-spacing:1px;padding:9px 20px;border-radius:20px;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+@media(max-width:768px){.stats-row{grid-template-columns:1fr 1fr}.gen-grid{grid-template-columns:1fr}.admin-main{padding:18px 14px}}
+@media(max-width:480px){.stats-row{grid-template-columns:1fr 1fr}.anav span{display:none}}
+</style>
+</head>
+<body>
+<div id="toast"></div>
+
+<!-- LOGIN -->
+<div class="login-wrap" id="login-wrap">
+  <div class="login-card">
+    <div class="login-logo">BOQ Quick Estimator</div>
+    <div class="login-sub">Admin Panel</div>
+    <div class="login-title">Enter admin password</div>
+    <input class="login-inp" type="password" id="pw-inp" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">Sign in →</button>
+    <div class="login-err" id="login-err">Incorrect password.</div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div class="admin-wrap" id="admin-wrap">
+  <div class="admin-topbar">
+    <div class="admin-logo">BOQ Quick Estimator <small>Admin</small></div>
+    <div class="admin-nav">
+      <button class="anav on" id="anav-overview" onclick="showAdminPanel('overview')">Overview</button>
+      <button class="anav" id="anav-generate" onclick="showAdminPanel('generate')">Generate</button>
+      <button class="anav" id="anav-codes" onclick="showAdminPanel('codes')">Codes</button>
+      <button class="anav" id="anav-leads" onclick="showAdminPanel('leads')">Leads</button>
+    </div>
+    <button class="logout-btn" onclick="doLogout()">Sign out</button>
+  </div>
+
+  <div class="admin-main">
+
+    <!-- OVERVIEW -->
+    <div class="apanel on" id="apanel-overview">
+      <div class="stats-row" id="stats-row"></div>
+      <div class="section-hd"><h3>Recent codes</h3></div>
+      <div id="overview-codes-list"></div>
+      <div class="section-hd" style="margin-top:20px"><h3>Recent leads</h3></div>
+      <div id="overview-leads-list"></div>
+    </div>
+
+    <!-- GENERATE -->
+    <div class="apanel" id="apanel-generate">
+      <div class="section-hd"><h3>Generate new access code</h3></div>
+      <div class="gen-grid">
+        <div class="field-wrap">
+          <label class="field-label">Customer name</label>
+          <input class="field-input" id="gen-name" placeholder="e.g. Mohammed Al-Rashid">
+        </div>
+        <div class="field-wrap">
+          <label class="field-label">Customer WhatsApp</label>
+          <input class="field-input" id="gen-phone" placeholder="e.g. +966 5X XXX XXXX">
+        </div>
+        <div class="field-wrap">
+          <label class="field-label">Plan</label>
+          <select class="field-select" id="gen-plan">
+            <option value="Monthly">Monthly Plan</option>
+            <option value="Annual" selected>Annual Plan</option>
+            <option value="Pro">Pro (Legacy)</option>
+          </select>
+        </div>
+        <div class="field-wrap">
+          <label class="field-label">Amount paid</label>
+          <input class="field-input" id="gen-amount" placeholder="e.g. SAR 480">
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="generateCode()">Generate code →</button>
+        <button class="btn btn-outline" onclick="clearGenForm()">Clear</button>
+      </div>
+
+      <div class="code-result" id="code-result">
+        <div class="code-display-label">Generated access code — click to copy</div>
+        <div class="code-display" id="code-display" onclick="copyCode()">BOQ-XXXXXX</div>
+        <div class="copy-hint" id="copy-hint">Click code to copy</div>
+        <div class="section-hd" style="margin-top:14px"><h3>WhatsApp message</h3></div>
+        <div class="wa-msg-box" id="wa-msg-box"></div>
+        <div class="btn-row" style="margin-top:10px">
+          <a class="btn btn-primary" id="wa-send-link" href="#" target="_blank">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            Send on WhatsApp
+          </a>
+          <button class="btn btn-outline" onclick="copyWAMsg()">Copy message</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CODES -->
+    <div class="apanel" id="apanel-codes">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+        <div class="section-hd" style="margin-bottom:0;flex:1"><h3>All access codes</h3></div>
+        <button class="btn btn-danger btn-sm" onclick="if(confirm('Delete ALL codes?'))clearAllCodes()">Clear all</button>
+      </div>
+      <div id="codes-table-wrap"></div>
+    </div>
+
+    <!-- LEADS -->
+    <div class="apanel" id="apanel-leads">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+        <div class="section-hd" style="margin-bottom:0;flex:1"><h3>Customer leads</h3></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-outline btn-sm" onclick="exportLeads()">Export CSV</button>
+          <button class="btn btn-danger btn-sm" onclick="if(confirm('Clear all leads?'))clearAllLeads()">Clear all</button>
+        </div>
+      </div>
+      <div id="leads-table-wrap"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+var ADMIN_PASSWORD = 'BOQ2026';
+var CODES_KEY = 'boq_valid_codes';
+var LEADS_KEY = 'sc_leads';
+
+function doLogin(){
+  var pw = document.getElementById('pw-inp').value;
+  if(pw === ADMIN_PASSWORD){
+    document.getElementById('login-wrap').style.display='none';
+    document.getElementById('admin-wrap').style.display='flex';
+    renderAll();
+  } else {
+    document.getElementById('login-err').style.display='block';
+    document.getElementById('pw-inp').value='';
+    document.getElementById('pw-inp').focus();
+  }
+}
+function doLogout(){document.getElementById('admin-wrap').style.display='none';document.getElementById('login-wrap').style.display='flex';document.getElementById('pw-inp').value='';}
+
+function showAdminPanel(id){
+  document.querySelectorAll('.apanel').forEach(function(p){p.classList.remove('on');});
+  document.getElementById('apanel-'+id).classList.add('on');
+  document.querySelectorAll('.anav').forEach(function(n){n.classList.remove('on');});
+  document.getElementById('anav-'+id).classList.add('on');
+  renderAll();
+}
+
+function getCodes(){var list=[];try{list=JSON.parse(localStorage.getItem(CODES_KEY)||'[]');}catch(e){}return list;}
+function saveCodes(c){try{localStorage.setItem(CODES_KEY,JSON.stringify(c));}catch(e){}}
+function getLeads(){var list=[];try{list=JSON.parse(localStorage.getItem(LEADS_KEY)||'[]');}catch(e){}return list;}
+
+function renderAll(){renderStats();renderOverview();renderCodesTable();renderLeadsTable();}
+
+function renderStats(){
+  var codes=getCodes();
+  var leads=getLeads();
+  var active=codes.filter(function(c){return c.active;}).length;
+  var used=codes.filter(function(c){return(c.uses||0)>0;}).length;
+  var el=document.getElementById('stats-row');
+  if(!el)return;
+  el.innerHTML=[
+    {l:'Total codes',v:codes.length,s:''},
+    {l:'Active codes',v:active,s:'ready to use'},
+    {l:'Codes used',v:used,s:'at least once'},
+    {l:'Leads captured',v:leads.length,s:'registered users'},
+  ].map(function(s){return '<div class="stat-card"><div class="stat-label">'+s.l+'</div><div class="stat-value">'+s.v+'</div><div class="stat-sub">'+s.s+'</div></div>';}).join('');
+}
+
+function renderOverview(){
+  var codes=getCodes().slice(0,5);
+  var leads=getLeads().slice(0,5);
+  var cEl=document.getElementById('overview-codes-list');
+  var lEl=document.getElementById('overview-leads-list');
+  if(!cEl||!lEl)return;
+  cEl.innerHTML=codes.length?codeRows(codes):'<div class="empty-state"><div class="empty-icon">○</div>No codes yet</div>';
+  lEl.innerHTML=leads.length?leadRows(leads):'<div class="empty-state"><div class="empty-icon">○</div>No leads yet</div>';
+}
+
+function codeRows(codes){
+  return '<div style="overflow-x:auto"><table class="codes-table"><thead><tr><th>Code</th><th>Customer</th><th>Plan</th><th>Uses</th><th>Created</th><th>Status</th><th>Actions</th></tr></thead><tbody>'
+    +codes.map(function(c){
+      return '<tr>'
+        +'<td><span class="code-val">'+c.code+'</span></td>'
+        +'<td><div style="font-size:12px;color:var(--text)">'+(c.name||'—')+'</div><div style="font-size:10px;color:var(--muted)">'+(c.phone||'')+'</div></td>'
+        +'<td><span class="plan-badge">'+(c.plan||'Pro')+'</span></td>'
+        +'<td style="font-family:var(--mono);font-size:12px;color:var(--muted2)">'+(c.uses||0)+'</td>'
+        +'<td style="font-size:11px;color:var(--muted)">'+(c.created||'—')+'</td>'
+        +'<td><span class="status-badge '+(c.active?'sb-active':'sb-inactive')+'">'+(c.active?'Active':'Revoked')+'</span></td>'
+        +'<td><div style="display:flex;gap:6px;flex-wrap:wrap">'
+          +'<button class="btn btn-sm btn-outline" onclick="copyVal(\''+c.code+'\')">Copy</button>'
+          +'<button class="btn btn-sm btn-outline" onclick="sendCodeWA(\''+c.code+'\',\''+encodeURIComponent(c.name||'')+'\',\''+encodeURIComponent(c.phone||'')+'\')">'
+            +'<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>'
+            +'WA</button>'
+          +(c.active?'<button class="btn btn-sm btn-danger" onclick="revokeCode(\''+c.code+'\')">Revoke</button>':'<button class="btn btn-sm btn-outline" onclick="reinstateCode(\''+c.code+'\')">Reinstate</button>')
+        +'</div></td>'
+      +'</tr>';
+    }).join('')+'</tbody></table></div>';
+}
+
+function leadRows(leads){
+  return '<div style="overflow-x:auto"><table class="leads-table"><thead><tr><th>Name</th><th>Email</th><th>Phone / WhatsApp</th><th>Role</th><th>Registered</th></tr></thead><tbody>'
+    +leads.map(function(l){
+      return '<tr>'
+        +'<td style="color:var(--text);font-weight:500">'+(l.name||'—')+'</td>'
+        +'<td><a href="mailto:'+encodeURIComponent(l.email||'')+'" style="color:var(--blue);font-size:11px">'+(l.email||'—')+'</a></td>'
+        +'<td><a href="https://wa.me/'+((l.phone||'').replace(/[^0-9]/g,''))+'" target="_blank" style="color:var(--green);font-size:11px">'+(l.phone||'—')+'</a></td>'
+        +'<td>'+(l.purpose||'—')+'</td>'
+        +'<td style="font-size:10px;color:var(--muted)">'+(l.ts?new Date(l.ts).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):'—')+'</td>'
+      +'</tr>';
+    }).join('')+'</tbody></table></div>';
+}
+
+function renderCodesTable(){var el=document.getElementById('codes-table-wrap');if(!el)return;var codes=getCodes();el.innerHTML=codes.length?codeRows(codes):'<div class="empty-state"><div class="empty-icon">○</div>No codes generated yet</div>';}
+function renderLeadsTable(){var el=document.getElementById('leads-table-wrap');if(!el)return;var leads=getLeads();el.innerHTML=leads.length?leadRows(leads):'<div class="empty-state"><div class="empty-icon">○</div>No leads yet — they appear here when users register in the app</div>';}
+
+function generateCode(){
+  var name=document.getElementById('gen-name').value.trim()||'Customer';
+  var phone=document.getElementById('gen-phone').value.trim();
+  var plan=document.getElementById('gen-plan').value;
+  var amount=document.getElementById('gen-amount').value.trim();
+  var chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  var suffix='';for(var i=0;i<6;i++)suffix+=chars[Math.floor(Math.random()*chars.length)];
+  var code='BOQ-'+suffix;
+  var now=new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+  var entry={code:code,name:name,phone:phone,plan:plan,amount:amount,active:true,uses:0,created:now};
+  var codes=getCodes();codes.unshift(entry);saveCodes(codes);
+  // Display
+  document.getElementById('code-display').textContent=code;
+  document.getElementById('code-result').classList.add('show');
+  // Build WA message
+  var baseUrl='https://headadvert.github.io/boq-estimator/access.html?code='+code;
+  var msg='Hello '+name+'! 👋\n\n'
+    +'Thank you for your payment of '+(amount||'—')+'.\n\n'
+    +'Your BOQ Quick Estimator *Pro access code* is ready:\n\n'
+    +'🔑 *'+code+'*\n\n'
+    +'To activate, click this link:\n'
+    +baseUrl+'\n\n'
+    +'Or go to:\n'
+    +'https://headadvert.github.io/boq-estimator/access.html\n'
+    +'and enter the code above.\n\n'
+    +'This gives you access to:\n'
+    +'✅ BOQ Estimator (unlimited projects)\n'
+    +'✅ Cost Estimator\n'
+    +'✅ All 8 building codes\n'
+    +'✅ PDF export\n\n'
+    +'Need help? Reply to this message anytime.\n\n'
+    +'— Imran Khoje, BOQ Quick Estimator';
+  document.getElementById('wa-msg-box').textContent=msg;
+  var waPhone=phone.replace(/[^0-9]/g,'');
+  if(!waPhone.startsWith('966')&&!waPhone.startsWith('1'))waPhone=waPhone.startsWith('0')?'966'+waPhone.slice(1):'966'+waPhone;
+  document.getElementById('wa-send-link').href='https://wa.me/'+waPhone+'?text='+encodeURIComponent(msg);
+  renderAll();showToast('Code generated: '+code);
+}
+
+function copyCode(){copyVal(document.getElementById('code-display').textContent);document.getElementById('copy-hint').textContent='Copied! ✓';}
+function copyWAMsg(){copyVal(document.getElementById('wa-msg-box').textContent);showToast('WhatsApp message copied');}
+function copyVal(v){navigator.clipboard.writeText(v).then(function(){showToast('Copied: '+v);}).catch(function(){});}
+function sendCodeWA(code,name,phone){
+  var n=decodeURIComponent(name);var p=decodeURIComponent(phone);
+  var baseUrl='https://headadvert.github.io/boq-estimator/access.html?code='+code;
+  var msg='Hello '+n+'!\n\nYour BOQ Quick Estimator access code:\n\n🔑 *'+code+'*\n\n'+baseUrl+'\n\n— Imran Khoje';
+  var wp=p.replace(/[^0-9]/g,'');
+  if(wp&&!wp.startsWith('966'))wp='966'+wp;
+  window.open('https://wa.me/'+(wp||'966511759092')+'?text='+encodeURIComponent(msg),'_blank');
+}
+function revokeCode(code){var codes=getCodes();codes.forEach(function(c){if(c.code===code)c.active=false;});saveCodes(codes);renderAll();showToast('Code revoked: '+code);}
+function reinstateCode(code){var codes=getCodes();codes.forEach(function(c){if(c.code===code)c.active=true;});saveCodes(codes);renderAll();showToast('Code reinstated: '+code);}
+function clearAllCodes(){saveCodes([]);renderAll();showToast('All codes cleared');}
+function clearAllLeads(){try{localStorage.removeItem(LEADS_KEY);}catch(e){}renderAll();showToast('All leads cleared');}
+function clearGenForm(){['gen-name','gen-phone','gen-amount'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});document.getElementById('code-result').classList.remove('show');}
+function exportLeads(){
+  var leads=getLeads();if(!leads.length){showToast('No leads to export');return;}
+  var csv='Name,Email,Phone,Role,Date\n'+leads.map(function(l){return[l.name,l.email,l.phone,l.purpose,l.ts?new Date(l.ts).toLocaleDateString('en-GB'):''].map(function(v){return'"'+(v||'').replace(/"/g,'""')+'"';}).join(',');}).join('\n');
+  var blob=new Blob([csv],{type:'text/csv'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');a.href=url;a.download='boq-leads-'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+  URL.revokeObjectURL(url);showToast('CSV exported');
+}
+function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.style.opacity='1';clearTimeout(t._to);t._to=setTimeout(function(){t.style.opacity='0';},2400);}
+document.addEventListener('keydown',function(e){if(e.key==='Enter'&&document.getElementById('pw-inp')===document.activeElement)doLogin();});
+</script>
+</body>
+</html>

@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SiteCalc Pro — Costing — Professional Construction Costing</title>
+<script>
+(function(){
+  var RM={'SA':'SAR','AE':'AED','GB':'GBP','US':'USD','DE':'EUR','FR':'EUR','IT':'EUR','ES':'EUR','NL':'EUR','BE':'EUR','IN':'INR','AU':'AUD'};
+  var SYM={'SAR':'SAR ','AED':'AED ','GBP':'£','USD':'$','EUR':'€','INR':'₹','AUD':'A$'};
+  var PRICE={'SAR':'71','AED':'72','GBP':'15','USD':'19','EUR':'18','INR':'1,590','AUD':'29'};
+  var TZ={'Riyadh':'SA','Saudi':'SA','Dubai':'AE','Abu_Dhabi':'AE','London':'GB','New_York':'US','Berlin':'DE','Paris':'FR','Kolkata':'IN','Sydney':'AU'};
+  function detect(){try{var tz=Intl.DateTimeFormat().resolvedOptions().timeZone||'';for(var k in TZ){if(tz.indexOf(k)>-1)return TZ[k];}}catch(e){}return 'SA';}
+  var cc=detect();var cur=RM[cc]||'SAR';var sym=SYM[cur]||cur+' ';
+  window.COST_REGION=cc;window.COST_CURRENCY=cur;window.COST_SYMBOL=sym;window.COST_PRICE=PRICE[cur]||'71';
+  window.COST_PRO_DISPLAY=sym+(PRICE[cur]||'71');
+  document.documentElement.lang='en';document.documentElement.dir='ltr';
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600&family=DM+Mono:wght@300;400;500&family=Playfair+Display:ital,wght@0,600;1,400;1,600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a09;--s1:#111110;--s2:#181816;--s3:#212120;--s4:#2a2a28;
+  --gold:#c8a84b;--gold2:#e8c96a;--gold-dim:rgba(200,168,75,.12);--gold-border:rgba(200,168,75,.2);
+  --text:#e8e6de;--muted:#6a6860;--muted2:#9a9890;--muted3:#b8b6ae;
+  --green:#4a9b6a;--red:#c8504a;--blue:#4a7eb5;--purple:#8b6bbd;--orange:#c87840;
+  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.14);
+  --head:'Playfair Display',serif;--body:'Sora',sans-serif;--mono:'DM Mono',monospace;
+  --radius:10px;--radius-sm:6px;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--body);font-size:13px;line-height:1.6;overflow-x:hidden}
+.topbar{position:fixed;top:0;left:0;right:0;height:56px;background:rgba(10,10,9,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);z-index:300;display:flex;align-items:center;justify-content:space-between;padding:0 20px}
+.topbar-logo{font-family:var(--head);font-size:20px;font-style:italic;color:var(--gold);display:flex;align-items:center;gap:10px}
+.topbar-logo span{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;font-style:normal}
+.topbar-nav{display:flex;gap:4px}
+.tnav{background:none;border:none;font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;padding:6px 12px;border-radius:4px;cursor:pointer;transition:.15s}
+.tnav:hover{color:var(--text);background:var(--s2)}
+.tnav.on{color:var(--gold);background:var(--gold-dim)}
+.burger{display:none;background:none;border:none;color:var(--muted2);font-size:20px;cursor:pointer;padding:6px}
+
+.shell{display:flex;padding-top:56px;min-height:100vh}
+.sidebar{width:240px;flex-shrink:0;background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:56px;bottom:0;left:0;overflow-y:auto;transition:transform .25s ease;z-index:200}
+.main{flex:1;margin-left:240px;min-height:calc(100vh - 56px);display:flex;flex-direction:column}
+.panel{display:none;flex:1;padding:28px 32px 60px;max-width:960px}
+.panel.on{display:block}
+
+.sidebar-top{padding:20px 16px 12px}
+.ptype-badge-sb{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:9px;color:var(--gold);background:var(--gold-dim);border:1px solid var(--gold-border);padding:3px 9px;border-radius:20px;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
+.proj-name-sb{font-family:var(--head);font-size:14px;font-style:italic;color:var(--text);margin-bottom:3px}
+.proj-code-sb{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1px}
+
+.nav-section{padding:6px 0}
+.nav-label{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;padding:5px 16px 3px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 16px;cursor:pointer;color:var(--muted2);transition:.15s;font-size:12px;position:relative;user-select:none}
+.nav-item:hover{background:var(--s2);color:var(--text)}
+.nav-item.on{background:var(--gold-dim);color:var(--gold);font-weight:500}
+.nav-item.on::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--gold);border-radius:0 2px 2px 0}
+.nav-item .ni-icon{font-size:14px;width:18px;text-align:center;flex-shrink:0}
+.nav-divider{height:1px;background:var(--border);margin:5px 16px}
+.cfg-section{padding:12px 16px;border-top:1px solid var(--border);margin-top:auto}
+.cfg-row{margin-bottom:10px}
+.cfg-label{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;display:block;margin-bottom:4px}
+.cfg-select{width:100%;background:var(--s2);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:11px;padding:7px 10px;border-radius:var(--radius-sm);cursor:pointer;appearance:none;transition:.15s}
+.cfg-select:focus{outline:none;border-color:var(--gold)}
+
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:190}
+.overlay.open{display:block}
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--s2);border:1px solid var(--gold-border);color:var(--gold);font-family:var(--mono);font-size:10px;letter-spacing:1px;padding:9px 20px;border-radius:20px;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+
+/* Form */
+.page-hd{margin-bottom:26px}
+.page-hd h1{font-family:var(--head);font-size:28px;font-weight:600;font-style:italic;color:var(--text);line-height:1.15;letter-spacing:-.3px;margin-bottom:6px}
+.page-hd h1 em{color:var(--gold)}
+.page-hd p{font-size:12px;color:var(--muted2);line-height:1.7;max-width:560px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
+.form-grid.three{grid-template-columns:1fr 1fr 1fr}
+.form-full{grid-column:1/-1}
+.field-wrap{display:flex;flex-direction:column;gap:4px}
+.field-label{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase}
+.field-input,.field-select,.field-textarea{background:var(--s2);border:1px solid var(--border);color:var(--text);font-family:var(--body);font-size:12px;padding:9px 12px;border-radius:var(--radius-sm);transition:.15s;width:100%}
+.field-input:focus,.field-select:focus,.field-textarea:focus{outline:none;border-color:var(--gold);background:var(--s3)}
+.field-textarea{resize:vertical;min-height:72px}
+.field-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px}
+
+.section-hd{display:flex;align-items:center;gap:12px;margin-bottom:14px;margin-top:24px}
+.section-hd h3{font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:500;white-space:nowrap}
+.section-hd::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* Project type */
+.ptype-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px}
+.ptype-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--radius);padding:14px 12px;cursor:pointer;transition:.2s;text-align:center;user-select:none;position:relative}
+.ptype-card:hover{border-color:var(--border2);background:var(--s2)}
+.ptype-card.sel{border-color:var(--gold);background:var(--gold-dim)}
+.ptype-card.sel::after{content:'✓';position:absolute;top:7px;right:9px;font-size:10px;color:var(--gold)}
+.ptype-icon{font-size:20px;margin-bottom:6px}
+.ptype-name{font-size:11px;font-weight:500;color:var(--text);margin-bottom:2px}
+.ptype-sub{font-size:9px;color:var(--muted)}
+
+/* Codes */
+.codes-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px}
+.cc{background:var(--s1);border:1px solid var(--border);border-radius:var(--radius);padding:12px 8px;text-align:center;cursor:pointer;transition:.2s;user-select:none;position:relative;display:flex;flex-direction:column;align-items:center}
+.cc:hover{border-color:var(--border2);background:var(--s2)}
+.cc.active{border-color:var(--gold);background:var(--gold-dim)}
+.cc.active::after{content:'✓';position:absolute;top:5px;right:7px;font-size:9px;color:var(--gold)}
+.cc-flag{font-size:22px;margin-bottom:5px;line-height:1}
+.cc-name{font-size:10px;font-weight:500;color:var(--muted3);letter-spacing:.2px}
+.cc-country{font-size:9px;color:var(--muted);margin-top:2px}
+
+/* CAD upload */
+.method-tabs{display:flex;gap:1px;background:var(--border);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:18px;width:fit-content}
+.method-tab{padding:9px 18px;font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:.15s;color:var(--muted2);background:var(--s1);border:none}
+.method-tab.on{background:var(--gold);color:#0a0a09}
+.cad-zone{border:1.5px dashed var(--border2);border-radius:var(--radius);padding:28px 20px;text-align:center;margin-bottom:16px;cursor:pointer;position:relative;transition:.2s}
+.cad-zone:hover,.cad-zone.over{border-color:var(--gold);background:var(--gold-dim)}
+.cad-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.cad-result-box{background:var(--s1);border:1px solid var(--gold-border);border-radius:var(--radius);padding:14px;margin-bottom:14px;display:none}
+.cad-result-box.show{display:block}
+
+/* Cost items table */
+.trade-section{margin-bottom:12px;background:var(--s1);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.trade-hd{display:flex;align-items:center;justify-content:space-between;padding:11px 18px;background:var(--s2);border-bottom:1px solid var(--border)}
+.trade-hd-left{display:flex;align-items:center;gap:8px}
+.trade-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.trade-hd-name{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:1px;text-transform:uppercase}
+.trade-hd-total{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--gold)}
+.cost-table{width:100%;border-collapse:collapse}
+.cost-table th{font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;padding:8px 16px;border-bottom:1px solid var(--border);text-align:left;background:rgba(0,0,0,.12)}
+.cost-table th:last-child,.cost-table th:nth-child(2),.cost-table th:nth-child(3),.cost-table th:nth-child(4){text-align:right}
+.cost-table td{padding:10px 16px;border-bottom:1px solid rgba(42,42,40,.5);font-size:12px;vertical-align:middle}
+.cost-table tr:last-child td{border-bottom:none}
+.cost-table tr:hover td{background:rgba(200,168,75,.02)}
+.td-desc{color:var(--muted2)}
+.td-qty{font-family:var(--mono);font-size:12px;color:var(--text);text-align:right}
+.td-unit{font-family:var(--mono);font-size:10px;color:var(--muted);text-align:center}
+.td-rate{text-align:right}
+.td-rate input{background:var(--s2);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:11px;padding:5px 8px;border-radius:3px;width:100px;text-align:right}
+.td-rate input:focus{outline:none;border-color:var(--gold)}
+.td-total{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--gold);text-align:right}
+.td-subtotals{display:flex;flex-direction:column;gap:2px;text-align:right}
+.td-mat{font-family:var(--mono);font-size:10px;color:var(--muted2)}
+.td-lab{font-family:var(--mono);font-size:10px;color:var(--blue)}
+.td-ind{font-family:var(--mono);font-size:10px;color:var(--purple)}
+
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+.stat-box{background:var(--s1);border:1px solid var(--border);border-radius:var(--radius);padding:16px;position:relative;overflow:hidden}
+.stat-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--gold);opacity:.35}
+.stat-l{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
+.stat-v{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--gold);line-height:1}
+.stat-u{font-size:10px;color:var(--muted);margin-top:4px}
+
+/* Breakdown */
+.grand-total{background:var(--s1);border:1px solid rgba(200,168,75,.25);border-radius:var(--radius);padding:18px 22px;margin-bottom:16px}
+.gt-section-hd{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px}
+.gt-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:12px}
+.gt-row:last-child{border:none}
+.gt-row span:first-child{color:var(--muted2)}
+.gt-row span:last-child{font-family:var(--mono);font-size:13px;color:var(--text)}
+.gt-grand-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0 0;margin-top:6px;border-top:1px solid rgba(200,168,75,.3);font-size:13px}
+.gt-grand-row span:first-child{color:var(--text);font-weight:500;text-transform:uppercase;letter-spacing:.5px;font-family:var(--mono);font-size:11px}
+.gt-grand-val{font-family:var(--mono);font-size:24px;font-weight:700;color:var(--gold)}
+
+/* Cost breakdown by type */
+.breakdown-tabs{display:flex;gap:1px;background:var(--border);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:14px;width:fit-content}
+.btab{padding:7px 14px;font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:.15s;color:var(--muted2);background:var(--s1);border:none}
+.btab.on{background:var(--s3);color:var(--text)}
+.breakdown-pane{display:none}.breakdown-pane.on{display:block}
+.bd-row{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;background:var(--s1);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:6px}
+.bd-name{font-size:12px;color:var(--text);display:flex;align-items:center;gap:8px}
+.bd-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.bd-amount{font-family:var(--mono);font-size:13px;font-weight:600}
+.bd-pct{font-family:var(--mono);font-size:10px;color:var(--muted);margin-left:8px}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:1px;text-transform:uppercase;padding:10px 20px;border-radius:var(--radius-sm);cursor:pointer;transition:.15s;border:1px solid transparent;white-space:nowrap}
+.btn-primary{background:var(--gold);color:#0a0a09;border-color:var(--gold)}
+.btn-primary:hover{background:var(--gold2)}
+.btn-outline{background:transparent;border-color:var(--border2);color:var(--muted2)}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold)}
+.btn-ghost{background:transparent;border-color:transparent;color:var(--muted2)}
+.btn-ghost:hover{color:var(--text)}
+.btn-import{background:rgba(74,126,181,.1);border:1px solid rgba(74,126,181,.3);color:var(--blue)}
+.btn-import:hover{background:rgba(74,126,181,.18)}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}
+.btn-row.right{justify-content:flex-end}
+
+/* Results header */
+.res-header{background:var(--s1);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;margin-bottom:16px}
+.res-header-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px}
+.res-title{font-family:var(--head);font-size:22px;font-style:italic;color:var(--text)}
+.res-badge{font-family:var(--mono);font-size:9px;color:var(--gold);background:var(--gold-dim);border:1px solid var(--gold-border);padding:3px 10px;border-radius:3px;letter-spacing:1px}
+.proj-meta-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;border-top:1px solid var(--border);padding-top:12px;margin-top:12px}
+.pm-lbl{font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:2px}
+.pm-val{font-size:12px;color:var(--muted3)}
+
+/* Company footer */
+.co-footer{margin-top:22px;background:var(--s1);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.co-footer-left{}
+.co-name{font-family:var(--head);font-size:14px;font-style:italic;color:var(--text);margin-bottom:2px}
+.co-tag{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px}
+.co-contact{font-size:11px;color:var(--muted2)}
+.co-cta-box{background:var(--gold-dim);border:1px solid var(--gold-border);border-radius:var(--radius-sm);padding:12px 14px;text-align:right}
+.co-cta-title{font-size:12px;font-weight:500;color:var(--text);margin-bottom:2px}
+.co-cta-sub{font-size:10px;color:var(--muted2);line-height:1.5}
+.co-cta-link{font-family:var(--mono);font-size:9px;color:var(--gold);text-decoration:none;display:block;margin-top:4px;letter-spacing:.5px}
+
+.disclaimer{font-size:10px;color:var(--muted);line-height:1.7;margin-top:14px;padding:12px 16px;background:var(--s1);border-radius:var(--radius-sm);border:1px solid var(--border)}
+
+/* Saved */
+.proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.pc{background:var(--s1);border:1px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;transition:.15s}
+.pc:hover{border-color:var(--border2);background:var(--s2)}
+.pc-name{font-family:var(--head);font-size:14px;font-style:italic;color:var(--text);margin-bottom:5px}
+.pc-meta{font-size:11px;color:var(--muted);line-height:1.7;margin-bottom:10px}
+.pc-foot{display:flex;align-items:center;justify-content:space-between}
+.pc-badge{font-family:var(--mono);font-size:9px;color:var(--muted);background:var(--s3);padding:2px 8px;border-radius:3px}
+.pc-del{font-size:10px;color:var(--muted);cursor:pointer;transition:.15s}
+.pc-del:hover{color:var(--red)}
+
+@media print{
+  #print-company-profile{display:block!important}
+  #print-company-profile > div{page-break-before:always}
+}
+@media print{
+  .topbar,.sidebar,.btn-row,.method-tabs{display:none!important}
+  .main{margin-left:0!important}
+  .panel{padding:0!important;max-width:none!important}
+  body{background:#fff!important;color:#111!important;font-family:Arial,sans-serif!important}
+  .gt-grand-val,.stat-v,.trade-hd-total{color:#7a5c10!important}
+  .co-footer{border:1pt solid #c8a84b!important;background:#fffdf5!important}
+}
+@media(max-width:900px){.stats-grid{grid-template-columns:1fr 1fr}.proj-meta-grid{grid-template-columns:1fr 1fr}.codes-grid{grid-template-columns:repeat(4,1fr)}.ptype-grid{grid-template-columns:1fr 1fr 1fr}}
+@media(max-width:768px){.burger{display:flex}.sidebar{transform:translateX(-100%);top:56px}.sidebar.open{transform:translateX(0)}.main{margin-left:0}.panel{padding:18px 14px 40px}.codes-grid{grid-template-columns:repeat(2,1fr)}.ptype-grid{grid-template-columns:1fr 1fr}.stats-grid{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr}.proj-meta-grid{grid-template-columns:1fr 1fr}.page-hd h1{font-size:22px}}
+@media(max-width:420px){.panel{padding:14px 10px 28px}.ptype-grid{grid-template-columns:1fr 1fr}.stats-grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div id="toast"></div>
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<header class="topbar">
+  <div class="topbar-logo">SiteCalc <span>Pro · Cost</span></div>
+  <div class="topbar-nav">
+    <button class="tnav" onclick="window.location.href='boq-estimator.html'">BOQ App</button>
+    <button class="tnav" onclick="window.location.href='index.html'">Home</button>
+  </div>
+  <button class="burger" onclick="toggleSidebar()">☰</button>
+</header>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-top">
+    <div class="ptype-badge-sb" id="sb-ptype">⬡ No project</div>
+    <div class="proj-name-sb" id="sb-pname">Untitled estimate</div>
+    <div class="proj-code-sb" id="sb-pcode">No code selected</div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Workflow</div>
+    <div class="nav-item on" id="ni-project" onclick="showPanel('project')"><span class="ni-icon">◈</span> Project setup</div>
+    <div class="nav-item" id="ni-quantities" onclick="showPanel('quantities')"><span class="ni-icon">⬡</span> Quantities & rates</div>
+    <div class="nav-item" id="ni-results" onclick="showPanel('results')"><span class="ni-icon">≡</span> Cost report</div>
+    <div class="nav-divider"></div>
+    <div class="nav-label">Projects</div>
+    <div class="nav-item" id="ni-saved" onclick="showPanel('saved')"><span class="ni-icon">○</span> Saved estimates</div>
+  </div>
+  <div class="cfg-section">
+    <div class="cfg-row">
+      <span class="cfg-label">Currency</span>
+      <select id="currency" class="cfg-select" onchange="refreshRates()">
+        <option value="KSA">SAR — Saudi Riyal</option>
+        <option value="UAE">AED — UAE Dirham</option>
+        <option value="UK">GBP — British Pound</option>
+        <option value="US">USD — US Dollar</option>
+        <option value="EU">EUR — Euro</option>
+        <option value="IN">INR — Indian Rupee</option>
+        <option value="AU">AUD — Australian Dollar</option>
+        <option value="INTL">USD — International</option>
+      </select>
+    </div>
+    <div class="cfg-row">
+      <span class="cfg-label">Contingency</span>
+      <select id="contingency" class="cfg-select">
+        <option value="5">5% — Low risk</option>
+        <option value="10" selected>10% — Standard</option>
+        <option value="15">15% — Medium risk</option>
+        <option value="20">20% — High risk</option>
+        <option value="25">25% — Complex</option>
+      </select>
+    </div>
+    <div class="cfg-row">
+      <span class="cfg-label">VAT / Tax</span>
+      <select id="vat" class="cfg-select">
+        <option value="0">0% — Exempt</option>
+        <option value="5">5% — KSA / UAE</option>
+        <option value="15" selected>15% — KSA Standard</option>
+        <option value="20">20% — UK / EU</option>
+        <option value="18">18% — India</option>
+        <option value="10">10% — Australia</option>
+      </select>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+
+<!-- ─── PROJECT SETUP ─────────────────────────────────────────────────────── -->
+<section class="panel on" id="panel-project">
+  <div class="page-hd">
+    <h1>Project <em>setup</em></h1>
+    <p>Define project type, building code and entry method before entering quantities.</p>
+  </div>
+
+  <div class="section-hd" style="margin-top:0"><h3>Project type</h3></div>
+  <div class="ptype-grid" id="ptype-grid-cost">
+    <div class="ptype-card sel" data-type="Residential" onclick="selPtype(this,'Residential')"><div class="ptype-icon">🏠</div><div class="ptype-name">Residential</div><div class="ptype-sub">Villas, apartments</div></div>
+    <div class="ptype-card" data-type="Commercial" onclick="selPtype(this,'Commercial')"><div class="ptype-icon">🏢</div><div class="ptype-name">Commercial</div><div class="ptype-sub">Offices, retail</div></div>
+    <div class="ptype-card" data-type="Mixed-use" onclick="selPtype(this,'Mixed-use')"><div class="ptype-icon">🏙️</div><div class="ptype-name">Mixed-use</div><div class="ptype-sub">Combined use</div></div>
+    <div class="ptype-card" data-type="Industrial" onclick="selPtype(this,'Industrial')"><div class="ptype-icon">🏭</div><div class="ptype-name">Industrial</div><div class="ptype-sub">Warehouses</div></div>
+    <div class="ptype-card" data-type="Hospitality" onclick="selPtype(this,'Hospitality')"><div class="ptype-icon">🏨</div><div class="ptype-name">Hospitality</div><div class="ptype-sub">Hotels, resorts</div></div>
+    <div class="ptype-card" data-type="Healthcare" onclick="selPtype(this,'Healthcare')"><div class="ptype-icon">🏥</div><div class="ptype-name">Healthcare</div><div class="ptype-sub">Clinics, hospitals</div></div>
+  </div>
+
+  <div class="section-hd"><h3>Building code</h3></div>
+  <div class="codes-grid" id="cost-codes-grid"></div>
+
+  <div class="section-hd"><h3>Entry method</h3></div>
+  <div class="method-tabs">
+    <button class="method-tab on" id="ctab-manual" onclick="setCostMethod('manual')">✏ Manual / BOQ import</button>
+    <button class="method-tab" id="ctab-cad" onclick="setCostMethod('cad')">📐 CAD-assisted</button>
+  </div>
+  <div id="cost-cad-section" style="display:none">
+    <div class="cad-zone" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="event.preventDefault();this.classList.remove('over');handleCostCad(event.dataTransfer.files[0])">
+      <input type="file" accept=".dwg,.dxf,.pdf,.png,.jpg" onchange="handleCostCad(this.files[0])">
+      <div style="font-size:28px;color:var(--muted);margin-bottom:8px">📐</div>
+      <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px">Upload DWG / CAD / PDF drawing</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:10px">File registered — enter areas below to generate cost estimate</div>
+      <span style="font-family:var(--mono);font-size:9px;background:var(--s3);border:1px solid var(--border);color:var(--muted);padding:3px 9px;border-radius:10px;letter-spacing:1px">CAD-ASSISTED ENTRY</span>
+    </div>
+    <div class="cad-result-box" id="cost-cad-result">
+      <div style="background:var(--s2);border:1px solid var(--gold-border);border-radius:var(--radius-sm);padding:10px 12px;font-size:11px;color:var(--muted2);line-height:1.7;margin-bottom:10px">
+        <strong style="color:var(--gold);display:block;margin-bottom:3px">⚠ CAD-assisted entry</strong>
+        File registered: <strong id="cost-cad-fname" style="color:var(--text)">drawing.dwg</strong>. Enter your gross floor area below to auto-populate quantities, then adjust individual items as needed.
+      </div>
+      <div class="field-row">
+        <div class="field-wrap"><label class="field-label">Gross floor area (m²)</label><input class="field-input" id="cad-gfa" type="number" min="1" placeholder="e.g. 450" oninput="autoFillFromGFA(this.value)"></div>
+        <div class="field-wrap"><label class="field-label">No. of floors</label><input class="field-input" id="cad-floors" type="number" min="1" value="1" placeholder="1"></div>
+        <div class="field-wrap"><label class="field-label">No. of units (if applicable)</label><input class="field-input" id="cad-units-no" type="number" min="1" value="1" placeholder="1"></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="autoFillFromGFA(document.getElementById('cad-gfa').value);showPanel('quantities')">Auto-fill quantities →</button>
+        <button class="btn btn-outline" onclick="clearCostCad()">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-hd"><h3>Project information</h3></div>
+  <div class="form-grid">
+    <div class="field-wrap"><label class="field-label">Estimate name *</label><input class="field-input" id="cpname" type="text" placeholder="e.g. Al Noor Villa — Cost Plan"></div>
+    <div class="field-wrap"><label class="field-label">Client name</label><input class="field-input" id="cpclient" type="text" placeholder="e.g. Mr. Abdullah Al-Rashid"></div>
+    <div class="field-wrap"><label class="field-label">Project location</label><input class="field-input" id="cploc" type="text" placeholder="e.g. Al Khobar, Eastern Province"></div>
+    <div class="field-wrap"><label class="field-label">Reference number</label><input class="field-input" id="cpref" type="text" placeholder="e.g. CE-2026-001"></div>
+    <div class="field-wrap"><label class="field-label">Prepared by</label><input class="field-input" id="cpqs" type="text" placeholder="e.g. Eng. Mohammed Hassan"></div>
+    <div class="field-wrap"><label class="field-label">Gross floor area (m²)</label><input class="field-input" id="cpgfa" type="number" placeholder="e.g. 450" oninput="updateSbMeta()"></div>
+    <div class="field-wrap form-full"><label class="field-label">Scope notes</label><textarea class="field-textarea" id="cpnotes" placeholder="e.g. Includes all structural, architectural, MEP and civil works. Excludes FF&E and landscaping."></textarea></div>
+  </div>
+  <div class="btn-row right">
+    <button class="btn btn-import" onclick="importFromBOQ()">⬇ Import from BOQ App</button>
+    <button class="btn btn-primary" onclick="showPanel('quantities')">Continue to quantities →</button>
+  </div>
+</section>
+
+<!-- ─── QUANTITIES ─────────────────────────────────────────────────────────── -->
+<section class="panel" id="panel-quantities">
+  <div class="page-hd">
+    <h1>Quantities <em>&amp; rates</em></h1>
+    <p>Enter quantities from your BOQ or drawing. Rates are pre-filled by region and project type — adjust to match your supplier quotes.</p>
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap">
+    <button class="btn btn-import" onclick="importFromBOQ()">⬇ Import from BOQ App</button>
+    <button class="btn btn-primary" onclick="generateEstimate()">Generate cost report →</button>
+    <button class="btn btn-ghost" onclick="showPanel('project')">← Back</button>
+  </div>
+  <div id="qty-trades-container"></div>
+  <div class="btn-row right">
+    <button class="btn btn-ghost" onclick="showPanel('project')">← Back</button>
+    <button class="btn btn-primary" onclick="generateEstimate()">Generate cost report →</button>
+  </div>
+</section>
+
+<!-- ─── RESULTS ────────────────────────────────────────────────────────────── -->
+<section class="panel" id="panel-results">
+  <div id="results-out">
+    <div style="text-align:center;padding:60px 20px;color:var(--muted)">
+      <div style="font-size:32px;margin-bottom:10px">≡</div>
+      <div>Enter quantities and generate report to see your cost estimate</div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── SAVED ──────────────────────────────────────────────────────────────── -->
+<section class="panel" id="panel-saved">
+  <div class="page-hd">
+    <h1>Saved <em>estimates</em></h1>
+    <p>All estimates stored locally on your device.</p>
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:18px">
+    <button class="btn btn-primary" onclick="newEstimate()">＋ New estimate</button>
+  </div>
+  <div id="saved-count" style="font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:14px"></div>
+  <div id="saved-list"></div>
+</section>
+
+</main>
+<script>
+// ── REGIONS with full material / labour / indirect cost breakdown ─────────
+const REGIONS = {
+  KSA:{name:'Saudi Arabia — SBC 304',code:'SBC 304',currency:'SAR',sym:'SAR ',
+    // Material rate (SAR/unit), Labour rate (SAR/unit), Indirect %
+    rates:{
+      conc_slab:    {mat:280,lab:120,ind:0.15,unit:'m³'},
+      conc_col:     {mat:300,lab:150,ind:0.15,unit:'m³'},
+      rebar_slab:   {mat:3.2, lab:1.4,ind:0.10,unit:'kg'},
+      rebar_beam:   {mat:3.2, lab:1.6,ind:0.10,unit:'kg'},
+      blocks_200:   {mat:4.5, lab:3.2,ind:0.12,unit:'no.'},
+      mortar:       {mat:18,  lab:0,  ind:0.10,unit:'bag'},
+      excavation:   {mat:0,   lab:35, ind:0.20,unit:'m³'},
+      backfill:     {mat:12,  lab:22, ind:0.18,unit:'m³'},
+      floor_tile:   {mat:75,  lab:45, ind:0.12,unit:'m²'},
+      wall_tile:    {mat:80,  lab:50, ind:0.12,unit:'m²'},
+      tile_adhesive:{mat:22,  lab:0,  ind:0.08,unit:'bag'},
+      tile_grout:   {mat:18,  lab:0,  ind:0.08,unit:'bag'},
+      plaster:      {mat:25,  lab:15, ind:0.10,unit:'bag'},
+      primer:       {mat:12,  lab:8,  ind:0.08,unit:'litre'},
+      paint_emulsion:{mat:18, lab:10, ind:0.08,unit:'litre'},
+      waterproofing:{mat:95,  lab:35, ind:0.12,unit:'m²'},
+      insulation:   {mat:85,  lab:25, ind:0.10,unit:'m²'},
+      door_std:     {mat:850, lab:250,ind:0.10,unit:'no.'},
+      window_alum:  {mat:1200,lab:350,ind:0.10,unit:'no.'},
+      ceiling_gypsum:{mat:55, lab:40, ind:0.12,unit:'m²'},
+      // MEP
+      electrical:   {mat:120,lab:100,ind:0.20,unit:'m²'},
+      plumbing:     {mat:140,lab:115,ind:0.18,unit:'m²'},
+      hvac:         {mat:200,lab:130,ind:0.20,unit:'m²'},
+      fire_safety:  {mat:45, lab:30, ind:0.18,unit:'m²'},
+      // Indirect & site
+      site_prep:    {mat:0,   lab:0,  ind:1.0, unit:'lump'},
+      temp_services:{mat:0,   lab:0,  ind:1.0, unit:'lump'},
+      scaffolding:  {mat:12,  lab:8,  ind:0.15,unit:'m²'},
+      waste_disposal:{mat:0,  lab:0,  ind:1.0, unit:'lump'},
+      security:     {mat:0,   lab:0,  ind:1.0, unit:'lump'},
+    }
+  },
+  UAE:{name:'UAE — IBC/ACI',code:'IBC/ACI',currency:'AED',sym:'AED ',
+    rates:{conc_slab:{mat:320,lab:140,ind:0.15,unit:'m³'},conc_col:{mat:340,lab:170,ind:0.15,unit:'m³'},rebar_slab:{mat:3.6,lab:1.6,ind:0.10,unit:'kg'},rebar_beam:{mat:3.6,lab:1.8,ind:0.10,unit:'kg'},blocks_200:{mat:5.2,lab:3.8,ind:0.12,unit:'no.'},mortar:{mat:22,lab:0,ind:0.10,unit:'bag'},excavation:{mat:0,lab:42,ind:0.20,unit:'m³'},backfill:{mat:14,lab:26,ind:0.18,unit:'m³'},floor_tile:{mat:85,lab:55,ind:0.12,unit:'m²'},wall_tile:{mat:90,lab:60,ind:0.12,unit:'m²'},tile_adhesive:{mat:26,lab:0,ind:0.08,unit:'bag'},tile_grout:{mat:22,lab:0,ind:0.08,unit:'bag'},plaster:{mat:28,lab:18,ind:0.10,unit:'bag'},primer:{mat:14,lab:9,ind:0.08,unit:'litre'},paint_emulsion:{mat:22,lab:12,ind:0.08,unit:'litre'},waterproofing:{mat:110,lab:40,ind:0.12,unit:'m²'},insulation:{mat:95,lab:28,ind:0.10,unit:'m²'},door_std:{mat:950,lab:280,ind:0.10,unit:'no.'},window_alum:{mat:1400,lab:400,ind:0.10,unit:'no.'},ceiling_gypsum:{mat:65,lab:45,ind:0.12,unit:'m²'},electrical:{mat:140,lab:120,ind:0.20,unit:'m²'},plumbing:{mat:165,lab:130,ind:0.18,unit:'m²'},hvac:{mat:240,lab:150,ind:0.20,unit:'m²'},fire_safety:{mat:52,lab:35,ind:0.18,unit:'m²'},site_prep:{mat:0,lab:0,ind:1.0,unit:'lump'},temp_services:{mat:0,lab:0,ind:1.0,unit:'lump'},scaffolding:{mat:14,lab:10,ind:0.15,unit:'m²'},waste_disposal:{mat:0,lab:0,ind:1.0,unit:'lump'},security:{mat:0,lab:0,ind:1.0,unit:'lump'}}
+  },
+  UK:{name:'UK — EC2/BS8110',code:'EC2/BS',currency:'GBP',sym:'£',
+    rates:{conc_slab:{mat:115,lab:65,ind:0.18,unit:'m³'},conc_col:{mat:125,lab:80,ind:0.18,unit:'m³'},rebar_slab:{mat:1.2,lab:0.7,ind:0.12,unit:'kg'},rebar_beam:{mat:1.2,lab:0.8,ind:0.12,unit:'kg'},blocks_200:{mat:2.2,lab:2.8,ind:0.14,unit:'no.'},mortar:{mat:9,lab:0,ind:0.10,unit:'bag'},excavation:{mat:0,lab:18,ind:0.22,unit:'m³'},backfill:{mat:6,lab:12,ind:0.20,unit:'m³'},floor_tile:{mat:35,lab:28,ind:0.14,unit:'m²'},wall_tile:{mat:38,lab:32,ind:0.14,unit:'m²'},tile_adhesive:{mat:10,lab:0,ind:0.08,unit:'bag'},tile_grout:{mat:8,lab:0,ind:0.08,unit:'bag'},plaster:{mat:10,lab:12,ind:0.12,unit:'bag'},primer:{mat:5,lab:4,ind:0.08,unit:'litre'},paint_emulsion:{mat:7,lab:5,ind:0.08,unit:'litre'},waterproofing:{mat:42,lab:20,ind:0.14,unit:'m²'},insulation:{mat:38,lab:15,ind:0.12,unit:'m²'},door_std:{mat:380,lab:150,ind:0.10,unit:'no.'},window_alum:{mat:550,lab:180,ind:0.10,unit:'no.'},ceiling_gypsum:{mat:28,lab:22,ind:0.14,unit:'m²'},electrical:{mat:65,lab:55,ind:0.22,unit:'m²'},plumbing:{mat:75,lab:60,ind:0.20,unit:'m²'},hvac:{mat:95,lab:65,ind:0.22,unit:'m²'},fire_safety:{mat:22,lab:18,ind:0.20,unit:'m²'},site_prep:{mat:0,lab:0,ind:1.0,unit:'lump'},temp_services:{mat:0,lab:0,ind:1.0,unit:'lump'},scaffolding:{mat:5,lab:4,ind:0.15,unit:'m²'},waste_disposal:{mat:0,lab:0,ind:1.0,unit:'lump'},security:{mat:0,lab:0,ind:1.0,unit:'lump'}}
+  },
+  US:{name:'United States — ACI 318',code:'ACI 318',currency:'USD',sym:'$',
+    rates:{conc_slab:{mat:145,lab:85,ind:0.18,unit:'m³'},conc_col:{mat:160,lab:100,ind:0.18,unit:'m³'},rebar_slab:{mat:1.5,lab:0.9,ind:0.12,unit:'kg'},rebar_beam:{mat:1.5,lab:1.0,ind:0.12,unit:'kg'},blocks_200:{mat:2.8,lab:3.5,ind:0.14,unit:'no.'},mortar:{mat:11,lab:0,ind:0.10,unit:'bag'},excavation:{mat:0,lab:22,ind:0.22,unit:'m³'},backfill:{mat:8,lab:15,ind:0.20,unit:'m³'},floor_tile:{mat:45,lab:35,ind:0.14,unit:'m²'},wall_tile:{mat:48,lab:38,ind:0.14,unit:'m²'},tile_adhesive:{mat:12,lab:0,ind:0.08,unit:'bag'},tile_grout:{mat:10,lab:0,ind:0.08,unit:'bag'},plaster:{mat:13,lab:14,ind:0.12,unit:'bag'},primer:{mat:6,lab:4.5,ind:0.08,unit:'litre'},paint_emulsion:{mat:9,lab:6,ind:0.08,unit:'litre'},waterproofing:{mat:52,lab:25,ind:0.14,unit:'m²'},insulation:{mat:48,lab:18,ind:0.12,unit:'m²'},door_std:{mat:450,lab:180,ind:0.10,unit:'no.'},window_alum:{mat:650,lab:200,ind:0.10,unit:'no.'},ceiling_gypsum:{mat:32,lab:26,ind:0.14,unit:'m²'},electrical:{mat:80,lab:70,ind:0.22,unit:'m²'},plumbing:{mat:90,lab:75,ind:0.20,unit:'m²'},hvac:{mat:115,lab:80,ind:0.22,unit:'m²'},fire_safety:{mat:28,lab:22,ind:0.20,unit:'m²'},site_prep:{mat:0,lab:0,ind:1.0,unit:'lump'},temp_services:{mat:0,lab:0,ind:1.0,unit:'lump'},scaffolding:{mat:7,lab:5,ind:0.15,unit:'m²'},waste_disposal:{mat:0,lab:0,ind:1.0,unit:'lump'},security:{mat:0,lab:0,ind:1.0,unit:'lump'}}
+  },
+  EU:{name:'Europe — Eurocode 2',code:'EC2',currency:'EUR',sym:'€',
+    rates:{conc_slab:{mat:110,lab:60,ind:0.18,unit:'m³'},conc_col:{mat:120,lab:75,ind:0.18,unit:'m³'},rebar_slab:{mat:1.1,lab:0.6,ind:0.12,unit:'kg'},rebar_beam:{mat:1.1,lab:0.7,ind:0.12,unit:'kg'},blocks_200:{mat:2.0,lab:2.5,ind:0.14,unit:'no.'},mortar:{mat:8,lab:0,ind:0.10,unit:'bag'},excavation:{mat:0,lab:16,ind:0.22,unit:'m³'},backfill:{mat:5,lab:11,ind:0.20,unit:'m³'},floor_tile:{mat:32,lab:25,ind:0.14,unit:'m²'},wall_tile:{mat:35,lab:28,ind:0.14,unit:'m²'},tile_adhesive:{mat:9,lab:0,ind:0.08,unit:'bag'},tile_grout:{mat:7,lab:0,ind:0.08,unit:'bag'},plaster:{mat:9,lab:11,ind:0.12,unit:'bag'},primer:{mat:5,lab:4,ind:0.08,unit:'litre'},paint_emulsion:{mat:7,lab:5,ind:0.08,unit:'litre'},waterproofing:{mat:40,lab:18,ind:0.14,unit:'m²'},insulation:{mat:35,lab:14,ind:0.12,unit:'m²'},door_std:{mat:360,lab:140,ind:0.10,unit:'no.'},window_alum:{mat:520,lab:160,ind:0.10,unit:'no.'},ceiling_gypsum:{mat:26,lab:20,ind:0.14,unit:'m²'},electrical:{mat:60,lab:52,ind:0.22,unit:'m²'},plumbing:{mat:70,lab:58,ind:0.20,unit:'m²'},hvac:{mat:88,lab:60,ind:0.22,unit:'m²'},fire_safety:{mat:20,lab:16,ind:0.20,unit:'m²'},site_prep:{mat:0,lab:0,ind:1.0,unit:'lump'},temp_services:{mat:0,lab:0,ind:1.0,unit:'lump'},scaffolding:{mat:5,lab:4,ind:0.15,unit:'m²'},waste_disposal:{mat:0,lab:0,ind:1.0,unit:'lump'},security:{mat:0,lab:0,ind:1.0,unit:'lump'}}
+  },
+  IN:{name:'India — IS 456',code:'IS 456',currency:'INR',sym:'₹',
+    rates:{conc_slab:{mat:5200,lab:2200,ind:0.18,unit:'m³'},conc_col:{mat:5600,lab:2800,ind:0.18,unit:'m³'},rebar_slab:{mat:58,lab:22,ind:0.12,unit:'kg'},rebar_beam:{mat:58,lab:25,ind:0.12,unit:'kg'},blocks_200:{mat:38,lab:42,ind:0.14,unit:'no.'},mortar:{mat:280,lab:0,ind:0.10,unit:'bag'},excavation:{mat:0,lab:380,ind:0.22,unit:'m³'},backfill:{mat:150,lab:220,ind:0.20,unit:'m³'},floor_tile:{mat:780,lab:480,ind:0.14,unit:'m²'},wall_tile:{mat:820,lab:520,ind:0.14,unit:'m²'},tile_adhesive:{mat:220,lab:0,ind:0.08,unit:'bag'},tile_grout:{mat:180,lab:0,ind:0.08,unit:'bag'},plaster:{mat:240,lab:280,ind:0.12,unit:'bag'},primer:{mat:120,lab:80,ind:0.08,unit:'litre'},paint_emulsion:{mat:180,lab:110,ind:0.08,unit:'litre'},waterproofing:{mat:950,lab:450,ind:0.14,unit:'m²'},insulation:{mat:820,lab:320,ind:0.12,unit:'m²'},door_std:{mat:8500,lab:2800,ind:0.10,unit:'no.'},window_alum:{mat:11000,lab:3500,ind:0.10,unit:'no.'},ceiling_gypsum:{mat:550,lab:420,ind:0.14,unit:'m²'},electrical:{mat:1200,lab:980,ind:0.22,unit:'m²'},plumbing:{mat:1400,lab:1100,ind:0.20,unit:'m²'},hvac:{mat:1800,lab:1200,ind:0.22,unit:'m²'},fire_safety:{mat:420,lab:340,ind:0.20,unit:'m²'},site_prep:{mat:0,lab:0,ind:1.0,unit:'lump'},temp_services:{mat:0,lab:0,ind:1.0,unit:'lump'},scaffolding:{mat:120,lab:90,ind:0.15,unit:'m²'},waste_disposal:{mat:0,lab:0,ind:1.0,unit:'lump'},security:{mat:0,lab:0,ind:1.0,unit:'lump'}}
+  },
+  AU:{name:'Australia — AS 3600',code:'AS 3600',currency:'AUD',sym:'A$',
+    rates:{conc_slab:{mat:175,lab:95,ind:0.18,unit:'m³'},conc_col:{mat:190,lab:110,ind:0.18,unit:'m³'},rebar_slab:{mat:1.8,lab:1.0,ind:0.12,unit:'kg'},rebar_beam:{mat:1.8,lab:1.1,ind:0.12,unit:'kg'},blocks_200:{mat:3.2,lab:4.0,ind:0.14,unit:'no.'},mortar:{mat:13,lab:0,ind:0.10,unit:'bag'},excavation:{mat:0,lab:28,ind:0.22,unit:'m³'},backfill:{mat:9,lab:18,ind:0.20,unit:'m³'},floor_tile:{mat:52,lab:42,ind:0.14,unit:'m²'},wall_tile:{mat:55,lab:45,ind:0.14,unit:'m²'},tile_adhesive:{mat:14,lab:0,ind:0.08,unit:'bag'},tile_grout:{mat:11,lab:0,ind:0.08,unit:'bag'},plaster:{mat:15,lab:16,ind:0.12,unit:'bag'},primer:{mat:7,lab:5,ind:0.08,unit:'litre'},paint_emulsion:{mat:10,lab:7,ind:0.08,unit:'litre'},waterproofing:{mat:62,lab:28,ind:0.14,unit:'m²'},insulation:{mat:55,lab:20,ind:0.12,unit:'m²'},door_std:{mat:520,lab:200,ind:0.10,unit:'no.'},window_alum:{mat:750,lab:230,ind:0.10,unit:'no.'},ceiling_gypsum:{mat:38,lab:30,ind:0.14,unit:'m²'},electrical:{mat:95,lab:80,ind:0.22,unit:'m²'},plumbing:{mat:108,lab:88,ind:0.20,unit:'m²'},hvac:{mat:135,lab:92,ind:0.22,unit:'m²'},fire_safety:{mat:32,lab:26,ind:0.20,unit:'m²'},site_prep:{mat:0,lab:0,ind:1.0,unit:'lump'},temp_services:{mat:0,lab:0,ind:1.0,unit:'lump'},scaffolding:{mat:8,lab:6,ind:0.15,unit:'m²'},waste_disposal:{mat:0,lab:0,ind:1.0,unit:'lump'},security:{mat:0,lab:0,ind:1.0,unit:'lump'}}
+  },
+  INTL:{name:'International / Generic',code:'Generic',currency:'USD',sym:'$',
+    rates:{conc_slab:{mat:145,lab:85,ind:0.18,unit:'m³'},conc_col:{mat:160,lab:100,ind:0.18,unit:'m³'},rebar_slab:{mat:1.5,lab:0.9,ind:0.12,unit:'kg'},rebar_beam:{mat:1.5,lab:1.0,ind:0.12,unit:'kg'},blocks_200:{mat:2.8,lab:3.5,ind:0.14,unit:'no.'},mortar:{mat:11,lab:0,ind:0.10,unit:'bag'},excavation:{mat:0,lab:22,ind:0.22,unit:'m³'},backfill:{mat:8,lab:15,ind:0.20,unit:'m³'},floor_tile:{mat:45,lab:35,ind:0.14,unit:'m²'},wall_tile:{mat:48,lab:38,ind:0.14,unit:'m²'},tile_adhesive:{mat:12,lab:0,ind:0.08,unit:'bag'},tile_grout:{mat:10,lab:0,ind:0.08,unit:'bag'},plaster:{mat:13,lab:14,ind:0.12,unit:'bag'},primer:{mat:6,lab:4.5,ind:0.08,unit:'litre'},paint_emulsion:{mat:9,lab:6,ind:0.08,unit:'litre'},waterproofing:{mat:52,lab:25,ind:0.14,unit:'m²'},insulation:{mat:48,lab:18,ind:0.12,unit:'m²'},door_std:{mat:450,lab:180,ind:0.10,unit:'no.'},window_alum:{mat:650,lab:200,ind:0.10,unit:'no.'},ceiling_gypsum:{mat:32,lab:26,ind:0.14,unit:'m²'},electrical:{mat:80,lab:70,ind:0.22,unit:'m²'},plumbing:{mat:90,lab:75,ind:0.20,unit:'m²'},hvac:{mat:115,lab:80,ind:0.22,unit:'m²'},fire_safety:{mat:28,lab:22,ind:0.20,unit:'m²'},site_prep:{mat:0,lab:0,ind:1.0,unit:'lump'},temp_services:{mat:0,lab:0,ind:1.0,unit:'lump'},scaffolding:{mat:7,lab:5,ind:0.15,unit:'m²'},waste_disposal:{mat:0,lab:0,ind:1.0,unit:'lump'},security:{mat:0,lab:0,ind:1.0,unit:'lump'}}
+  },
+};
+
+// ── TRADE STRUCTURE ───────────────────────────────────────────────────────
+const TRADES = [
+  {id:'concrete',name:'Concrete & reinforcement',color:'#5b94d4',items:[
+    {id:'conc_slab', desc:'Concrete slab — supply, pour & finish',unit:'m³'},
+    {id:'conc_col',  desc:'Concrete columns & beams — supply & pour',unit:'m³'},
+    {id:'rebar_slab',desc:'Rebar — slabs (incl. laps & waste)',unit:'kg'},
+    {id:'rebar_beam',desc:'Rebar — columns & beams (incl. laps)',unit:'kg'},
+  ]},
+  {id:'groundworks',name:'Groundworks & site',color:'#9b7d4a',items:[
+    {id:'excavation',  desc:'Excavation — bulk & strip (incl. disposal)',unit:'m³'},
+    {id:'backfill',    desc:'Backfill & compaction',unit:'m³'},
+    {id:'site_prep',   desc:'Site preparation, levelling & clearing',unit:'lump'},
+    {id:'temp_services',desc:'Temporary services, hoarding & access',unit:'lump'},
+    {id:'scaffolding', desc:'Scaffolding — erect, maintain, dismantle',unit:'m²'},
+    {id:'waste_disposal',desc:'Waste management & disposal',unit:'lump'},
+    {id:'security',    desc:'Site security & safety provisions',unit:'lump'},
+  ]},
+  {id:'masonry',name:'Masonry & blockwork',color:'#c8a84b',items:[
+    {id:'blocks_200',desc:'Hollow blocks 200mm — supply & lay',unit:'no.'},
+    {id:'mortar',    desc:'Mortar — supply & apply (1:6 mix)',unit:'bag'},
+  ]},
+  {id:'finishes',name:'Tiling & finishes',color:'#5aad7e',items:[
+    {id:'floor_tile',    desc:'Floor tiles — supply & fix',unit:'m²'},
+    {id:'wall_tile',     desc:'Wall tiles — supply & fix',unit:'m²'},
+    {id:'tile_adhesive', desc:'Tile adhesive — supply & apply',unit:'bag'},
+    {id:'tile_grout',    desc:'Tile grout — supply & apply',unit:'bag'},
+    {id:'waterproofing', desc:'Waterproof membrane / DPC',unit:'m²'},
+    {id:'insulation',    desc:'Thermal / acoustic insulation',unit:'m²'},
+  ]},
+  {id:'plasterwork',name:'Plastering & painting',color:'#b87bd4',items:[
+    {id:'plaster',        desc:'Wall plaster — 10mm coat',unit:'bag'},
+    {id:'primer',         desc:'Primer — 1 coat',unit:'litre'},
+    {id:'paint_emulsion', desc:'Emulsion paint — 2 coats',unit:'litre'},
+  ]},
+  {id:'joinery',name:'Doors, windows & ceilings',color:'#e08060',items:[
+    {id:'door_std',       desc:'Doors — supply & install (standard)',unit:'no.'},
+    {id:'window_alum',    desc:'Windows aluminium — supply & install',unit:'no.'},
+    {id:'ceiling_gypsum', desc:'Gypsum board ceiling — supply & fix',unit:'m²'},
+  ]},
+  {id:'mep_elec',name:'Electrical installation',color:'#60a0c8',items:[
+    {id:'electrical',desc:'Electrical — wiring, DBs, sockets, lighting, ELV',unit:'m²'},
+  ]},
+  {id:'mep_plumb',name:'Plumbing & drainage',color:'#4a9b6a',items:[
+    {id:'plumbing',desc:'Plumbing — supply pipes, drainage, sanitary, hot/cold water',unit:'m²'},
+  ]},
+  {id:'mep_hvac',name:'HVAC & air conditioning',color:'#4a7eb5',items:[
+    {id:'hvac',desc:'HVAC — split/central, ductwork, controls, BMS',unit:'m²'},
+  ]},
+  {id:'mep_fire',name:'Fire & safety systems',color:'#c87840',items:[
+    {id:'fire_safety',desc:'Fire — sprinklers, detectors, alarms, hose reels, signage',unit:'m²'},
+  ]},
+];
+
+// Indirect cost lump-sum percentages by project type
+const INDIRECT_PCT = {
+  Residential:0.08, Commercial:0.12, 'Mixed-use':0.10, Industrial:0.09, Hospitality:0.14, Healthcare:0.16
+};
+
+const PTYPE_ICONS={Residential:'🏠',Commercial:'🏢','Mixed-use':'🏙️',Industrial:'🏭',Hospitality:'🏨',Healthcare:'🏥'};
+const CODES_LIST=[['🇸🇦','SBC 304','Saudi Arabia','KSA','SA'],['🇦🇪','IBC/ACI','UAE','UAE','AE'],['🇬🇧','EC2/BS 8110','United Kingdom','UK','GB'],['🇺🇸','ACI 318-19','United States','US','US'],['🇪🇺','Eurocode 2','Europe','EU','EU'],['🇮🇳','IS 456:2000','India','IN','IN'],['🇦🇺','AS 3600-2018','Australia','AU','AU'],['🌐','Generic','International','INTL','—']];
+
+// ── STATE ─────────────────────────────────────────────────────────────────
+let selectedCode='KSA', selectedPtype='Residential', costMethod='manual';
+let quantities={};   // {itemId: qty}
+let customRates={};  // {itemId: total_rate_override}
+
+function getReg(){return REGIONS[selectedCode]||REGIONS.KSA;}
+function fmt(n){var r=getReg();return r.sym+Math.round(n).toLocaleString();}
+function getCont(){return parseFloat(document.getElementById('contingency').value)/100;}
+function getVAT(){return parseFloat(document.getElementById('vat').value)/100;}
+
+// ── NAVIGATION ────────────────────────────────────────────────────────────
+function showPanel(id){
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('on');});
+  var el=document.getElementById('panel-'+id);
+  if(el)el.classList.add('on');
+  document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('on');});
+  var ni=document.getElementById('ni-'+id);
+  if(ni)ni.classList.add('on');
+  if(id==='quantities')renderQuantitiesTable();
+  if(id==='saved')renderSaved();
+  closeSidebar();
+  window.scrollTo(0,0);
+}
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('open');}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('open');}
+function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.style.opacity='1';clearTimeout(t._to);t._to=setTimeout(function(){t.style.opacity='0';},2400);}
+
+// ── PROJECT TYPE ──────────────────────────────────────────────────────────
+function selPtype(el,type){
+  document.querySelectorAll('.ptype-card').forEach(function(c){c.classList.remove('sel');});
+  el.classList.add('sel');
+  selectedPtype=type;
+  updateSbMeta();
+}
+
+// ── BUILDING CODE ─────────────────────────────────────────────────────────
+function buildCodesGrid(id){
+  var g=document.getElementById(id);if(!g)return;
+  g.innerHTML='';
+  CODES_LIST.forEach(function(c){
+    var d=document.createElement('div');
+    d.className='cc'+(c[3]===selectedCode?' active':'');
+    d.innerHTML='<div class="cc-flag">'+c[0]+'</div><div class="cc-name">'+c[1]+'</div><div class="cc-country">'+c[2]+'</div>'
+      +'<div style="font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:1px;margin-top:2px;background:var(--s3);padding:1px 6px;border-radius:3px;display:inline-block">'+(c[4]||'—')+'</div>';
+    d.onclick=function(){selectCode(c[3]);};
+    g.appendChild(d);
+  });
+}
+function selectCode(k){
+  selectedCode=k;
+  document.querySelectorAll('.cc').forEach(function(el){el.classList.remove('active');});
+  document.querySelectorAll('.cc').forEach(function(el){
+    var c=CODES_LIST.find(function(x){return x[3]===k;});
+    if(c&&el.querySelector('.cc-name')&&el.querySelector('.cc-name').textContent===c[1])el.classList.add('active');
+  });
+  // simpler: rebuild grids
+  buildCodesGrid('cost-codes-grid');
+  refreshRates();
+  updateSbMeta();
+  showToast('Building code: '+REGIONS[k].name);
+}
+
+function refreshRates(){
+  // Rebuild quantities table with new rates
+  if(document.getElementById('panel-quantities').classList.contains('on')){
+    renderQuantitiesTable();
+  }
+}
+
+// ── SIDEBAR META ──────────────────────────────────────────────────────────
+function updateSbMeta(){
+  var pname=document.getElementById('cpname').value||'Untitled estimate';
+  document.getElementById('sb-pname').textContent=pname;
+  document.getElementById('sb-ptype').textContent=(PTYPE_ICONS[selectedPtype]||'⬡')+' '+selectedPtype;
+  document.getElementById('sb-pcode').textContent=REGIONS[selectedCode].code;
+}
+
+// ── ENTRY METHOD ──────────────────────────────────────────────────────────
+function setCostMethod(m){
+  costMethod=m;
+  document.getElementById('ctab-manual').classList.toggle('on',m==='manual');
+  document.getElementById('ctab-cad').classList.toggle('on',m==='cad');
+  document.getElementById('cost-cad-section').style.display=m==='cad'?'block':'none';
+}
+function handleCostCad(f){
+  if(!f)return;
+  document.getElementById('cost-cad-fname').textContent=f.name;
+  document.getElementById('cost-cad-result').classList.add('show');
+  var pn=document.getElementById('cpname');
+  if(!pn.value)pn.value=f.name.replace(/\.[^.]+$/,'').replace(/[-_]/g,' ');
+  showToast('File registered — enter GFA to auto-fill');
+}
+function clearCostCad(){document.getElementById('cost-cad-result').classList.remove('show');}
+
+// ── QUANTITIES TABLE ──────────────────────────────────────────────────────
+function renderQuantitiesTable(){
+  var reg=getReg();
+  var container=document.getElementById('qty-trades-container');
+  container.innerHTML=TRADES.map(function(trade){
+    var rows=trade.items.map(function(item){
+      var r=reg.rates[item.id]||{mat:0,lab:0,ind:0.10};
+      var totalRate=customRates[item.id]!==undefined?customRates[item.id]:(r.mat+r.lab);
+      var qty=quantities[item.id]||0;
+      var total=qty*totalRate;
+      var matAmt=qty*r.mat;
+      var labAmt=qty*r.lab;
+      var indAmt=(matAmt+labAmt)*r.ind;
+      return '<tr>'
+        +'<td class="td-desc">'+item.desc+'</td>'
+        +'<td class="td-qty"><input type="number" min="0" step="0.1" value="'+(qty||'')+'" placeholder="0" style="width:80px;background:var(--s2);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:11px;padding:5px 7px;border-radius:3px;text-align:right" onchange="setQty(\''+item.id+'\',+this.value);updateTradeTotal()"></td>'
+        +'<td class="td-unit" style="text-align:center;font-family:var(--mono);font-size:9px;color:var(--muted)">'+r.unit+'</td>'
+        +'<td class="td-rate" style="text-align:right">'
+          +'<input type="number" min="0" step="0.01" value="'+totalRate.toFixed(2)+'" style="width:90px;background:var(--s2);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:11px;padding:5px 7px;border-radius:3px;text-align:right" onchange="setRate(\''+item.id+'\',+this.value)">'
+        +'</td>'
+        +'<td style="text-align:right">'
+          +'<div class="td-subtotals">'
+            +(qty>0?'<span class="td-mat">Mat: '+fmt(matAmt)+'</span><span class="td-lab">Lab: '+fmt(labAmt)+'</span><span class="td-ind">Ind: '+fmt(indAmt)+'</span>':'<span style="color:var(--muted);font-size:11px">—</span>')
+          +'</div>'
+        +'</td>'
+        +'<td class="td-total">'+(qty>0?fmt(total):'—')+'</td>'
+      +'</tr>';
+    }).join('');
+    return '<div class="trade-section">'
+      +'<div class="trade-hd"><div class="trade-hd-left"><div class="trade-dot" style="background:'+trade.color+'"></div><div class="trade-hd-name" style="color:'+trade.color+'">'+trade.name+'</div></div>'
+      +'<div class="trade-hd-total" id="tt-'+trade.id+'">—</div></div>'
+      +'<table class="cost-table"><thead><tr>'
+      +'<th>Description</th><th style="text-align:right">Qty</th><th style="text-align:center">Unit</th>'
+      +'<th style="text-align:right">Rate ('+reg.sym.trim()+')</th>'
+      +'<th style="text-align:right">Mat / Lab / Indirect</th>'
+      +'<th style="text-align:right">Total</th>'
+      +'</tr></thead><tbody>'+rows+'</tbody></table>'
+    +'</div>';
+  }).join('');
+  updateTradeTotal();
+}
+
+function setQty(id,v){quantities[id]=v;}
+function setRate(id,v){customRates[id]=v;}
+
+function updateTradeTotal(){
+  var reg=getReg();
+  TRADES.forEach(function(trade){
+    var total=trade.items.reduce(function(sum,item){
+      var r=reg.rates[item.id]||{mat:0,lab:0};
+      var rate=customRates[item.id]!==undefined?customRates[item.id]:(r.mat+r.lab);
+      return sum+(quantities[item.id]||0)*rate;
+    },0);
+    var el=document.getElementById('tt-'+trade.id);
+    if(el)el.textContent=total>0?fmt(total):'—';
+  });
+}
+
+// ── AUTO-FILL FROM GFA ───────────────────────────────────────────────────
+function autoFillFromGFA(gfa){
+  gfa=parseFloat(gfa)||0;
+  if(!gfa)return;
+  var reg=getReg();
+  // Apply code-based factors to GFA
+  var slabFactor=0.20; // m³ concrete per m² slab
+  var rebarFactor=80;  // kg rebar per m³ concrete
+  quantities.conc_slab=+(gfa*slabFactor*1.05).toFixed(1);
+  quantities.conc_col=+(gfa*0.04).toFixed(1);
+  quantities.rebar_slab=Math.round(gfa*slabFactor*rebarFactor*1.05*1.08);
+  quantities.rebar_beam=Math.round(gfa*0.04*160);
+  quantities.blocks_200=Math.round(gfa*1.5*12*1.05);
+  quantities.mortar=+(quantities.blocks_200/25).toFixed(0);
+  quantities.excavation=+(gfa*1.5*0.8).toFixed(0);
+  quantities.backfill=+(gfa*0.4).toFixed(0);
+  quantities.floor_tile=+(gfa*1.12).toFixed(0);
+  quantities.wall_tile=+(gfa*0.8*1.10).toFixed(0);
+  quantities.tile_adhesive=Math.ceil((quantities.floor_tile+quantities.wall_tile)/4);
+  quantities.tile_grout=Math.ceil((quantities.floor_tile+quantities.wall_tile)/6);
+  quantities.plaster=Math.ceil(gfa*0.8/1.5);
+  quantities.primer=+(gfa*0.8*0.12).toFixed(0);
+  quantities.paint_emulsion=+(gfa*0.8/8*2).toFixed(0);
+  quantities.waterproofing=+(gfa*0.25).toFixed(0);
+  quantities.insulation=+(gfa*0.3).toFixed(0);
+  quantities.ceiling_gypsum=+(gfa*0.7).toFixed(0);
+  quantities.electrical=+(gfa).toFixed(0);
+  quantities.plumbing=+(gfa).toFixed(0);
+  quantities.hvac=+(gfa).toFixed(0);
+  quantities.fire_safety=+(gfa).toFixed(0);
+  quantities.scaffolding=+(gfa*1.2).toFixed(0);
+  // Lump sums — set to 1 to trigger costing
+  quantities.site_prep=1; quantities.temp_services=1; quantities.waste_disposal=1; quantities.security=1;
+  renderQuantitiesTable();
+  showToast('Quantities auto-filled from GFA: '+gfa+' m²');
+}
+
+// ── IMPORT FROM BOQ ───────────────────────────────────────────────────────
+function importFromBOQ(){
+  var stored=null;
+  try{stored=JSON.parse(localStorage.getItem('boq_v3')||'[]');}catch(e){}
+  if(!stored||!stored.length){showToast('No saved BOQ projects found — save a project in BOQ Estimator first');return;}
+  var p=stored[0]; // Use most recent
+  if(!p.rooms||!p.rooms.length){showToast('Most recent BOQ project has no rooms');return;}
+  // Calculate quantities from rooms
+  var tF=0,tW=0,tC=0,tR=0,tB=0,tT=0,tP=0,tElec=0,tPlumb=0,tHvac=0,tFire=0;
+  p.rooms.forEach(function(r){
+    var L=+r.L,W=+r.W,H=+r.H;
+    var fl=L*W,gw=2*(L+W)*H,op=(r.doors||0)*2+(r.windows||0)*1.5,wl=Math.max(0,gw-op);
+    var cv=fl*0.20;
+    tF+=fl;tW+=wl;tC+=cv*1.05;tR+=cv*80*1.05*1.08;tB+=wl*12*1.05;tT+=fl*1.12;tP+=wl/8*2;
+    if(r.scope){if(r.scope.elec)tElec+=fl;if(r.scope.plumb)tPlumb+=fl;if(r.scope.hvac)tHvac+=fl;if(r.scope.fire)tFire+=fl;}
+  });
+  quantities.conc_slab=+tC.toFixed(1);quantities.rebar_slab=Math.round(tR);
+  quantities.blocks_200=Math.round(tB);quantities.mortar=+(tB/25).toFixed(0);
+  quantities.floor_tile=+tT.toFixed(0);quantities.wall_tile=+(tW*1.10).toFixed(0);
+  quantities.tile_adhesive=Math.ceil((+tT.toFixed(0)++(tW*1.10).toFixed(0))/4);
+  quantities.tile_grout=Math.ceil((+tT.toFixed(0)++(tW*1.10).toFixed(0))/6);
+  quantities.plaster=Math.ceil(tW/1.5);quantities.primer=+(tW*0.12).toFixed(0);
+  quantities.paint_emulsion=+(tP).toFixed(0);
+  if(tElec>0)quantities.electrical=+tElec.toFixed(0);
+  if(tPlumb>0)quantities.plumbing=+tPlumb.toFixed(0);
+  if(tHvac>0)quantities.hvac=+tHvac.toFixed(0);
+  if(tFire>0)quantities.fire_safety=+tFire.toFixed(0);
+  quantities.site_prep=1;quantities.temp_services=1;quantities.waste_disposal=1;quantities.security=1;
+  // Copy project info
+  if(p.name)document.getElementById('cpname').value=p.name+' — Cost Plan';
+  if(p.client)document.getElementById('cpclient').value=p.client;
+  if(p.location)document.getElementById('cploc').value=p.location;
+  if(p.qs)document.getElementById('cpqs').value=p.qs;
+  if(p.code)selectCode(p.code);
+  renderQuantitiesTable();
+  showPanel('quantities');
+  showToast('Imported from BOQ: '+p.name+' ('+p.rooms.length+' rooms)');
+}
+
+// ── GENERATE ESTIMATE ─────────────────────────────────────────────────────
+function generateEstimate(){
+  var reg=getReg();
+  var pname=document.getElementById('cpname').value||'Untitled Estimate';
+  var pclient=document.getElementById('cpclient').value||'—';
+  var ploc=document.getElementById('cploc').value||'—';
+  var pqs=document.getElementById('cpqs').value||'—';
+  var pref=document.getElementById('cpref').value||'—';
+  var pnotes=document.getElementById('cpnotes').value;
+  var gfa=parseFloat(document.getElementById('cpgfa').value)||0;
+  var cont=getCont(), vat=getVAT();
+  var now=new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+
+  var grandSubtotal=0, grandMat=0, grandLab=0, grandInd=0;
+  var tradeSections='', tradeRows=[];
+
+  TRADES.forEach(function(trade){
+    var tradeMat=0,tradeLab=0,tradeInd=0,tradeTotal=0;
+    var hasQty=false;
+    var costRows=trade.items.map(function(item){
+      var r=reg.rates[item.id]||{mat:0,lab:0,ind:0.10};
+      var rate=customRates[item.id]!==undefined?customRates[item.id]:(r.mat+r.lab);
+      var qty=quantities[item.id]||0;
+      if(qty<=0)return '';
+      hasQty=true;
+      var matAmt=qty*r.mat;
+      var labAmt=qty*r.lab;
+      var indAmt=(matAmt+labAmt)*r.ind;
+      var totalAmt=qty*rate;
+      tradeMat+=matAmt;tradeLab+=labAmt;tradeInd+=indAmt;tradeTotal+=totalAmt;
+      grandSubtotal+=totalAmt;grandMat+=matAmt;grandLab+=labAmt;grandInd+=indAmt;
+      return '<tr>'
+        +'<td class="td-desc">'+item.desc+'</td>'
+        +'<td class="td-qty">'+qty.toLocaleString()+'</td>'
+        +'<td class="td-unit" style="text-align:center;font-family:var(--mono);font-size:9px;color:var(--muted)">'+r.unit+'</td>'
+        +'<td style="text-align:right;font-family:var(--mono);font-size:11px;color:var(--muted2)">'+reg.sym+rate.toFixed(2)+'</td>'
+        +'<td style="text-align:right;font-family:var(--mono);font-size:10px"><span style="color:var(--muted2)">'+fmt(matAmt)+'</span></td>'
+        +'<td style="text-align:right;font-family:var(--mono);font-size:10px"><span style="color:var(--blue)">'+fmt(labAmt)+'</span></td>'
+        +'<td style="text-align:right;font-family:var(--mono);font-size:10px"><span style="color:var(--purple)">'+fmt(indAmt)+'</span></td>'
+        +'<td class="td-total">'+fmt(totalAmt)+'</td>'
+      +'</tr>';
+    }).filter(Boolean).join('');
+    if(!hasQty)return;
+    tradeSections+='<div class="trade-section">'
+      +'<div class="trade-hd"><div class="trade-hd-left"><div class="trade-dot" style="background:'+trade.color+'"></div><div class="trade-hd-name" style="color:'+trade.color+'">'+trade.name+'</div></div><div class="trade-hd-total">'+fmt(tradeTotal)+'</div></div>'
+      +'<table class="cost-table"><thead><tr>'
+      +'<th>Description</th><th style="text-align:right">Qty</th><th style="text-align:center">Unit</th>'
+      +'<th style="text-align:right">Rate</th>'
+      +'<th style="text-align:right;color:var(--muted2)">Material</th>'
+      +'<th style="text-align:right;color:var(--blue)">Labour</th>'
+      +'<th style="text-align:right;color:var(--purple)">Indirect</th>'
+      +'<th style="text-align:right">Total</th>'
+      +'</tr></thead><tbody>'+costRows+'</tbody></table>'
+    +'</div>';
+    tradeRows.push({name:trade.name,color:trade.color,total:tradeTotal,mat:tradeMat,lab:tradeLab,ind:tradeInd});
+  });
+
+  if(!tradeRows.length){showToast('No quantities entered — please add quantities first');return;}
+
+  var contAmt=grandSubtotal*cont;
+  var subtotalPlusCont=grandSubtotal+contAmt;
+  var vatAmt=subtotalPlusCont*vat;
+  var grandTotal=subtotalPlusCont+vatAmt;
+
+  // Company footer
+  var footer='<div class="co-footer">'
+    +'<div class="co-footer-left"><div class="co-name">Al Qaswaa Al Sharqia Trading EST</div>'
+    +'<div class="co-tag">EPC Contractor · Eastern Province, Saudi Arabia</div>'
+    +'<div class="co-contact">+966 51 175 9092 · info@qaswasharqia.com</div></div>'
+    +'<div class="co-cta-box"><div class="co-cta-title">Ready to build your project?</div>'
+    +'<div class="co-cta-sub">Full EPC delivery across Saudi Arabia.<br>Proven experience · Competitive pricing.</div>'
+    +'<a href="https://qaswa-sharqia.netlify.app" target="_blank" class="co-cta-link">qaswa-sharqia.netlify.app →</a></div>'
+  +'</div>';
+
+  document.getElementById('results-out').innerHTML =
+    // Header
+    '<div class="res-header">'
+      +'<div class="res-header-top"><div class="res-title">'+pname+'</div><span class="res-badge">'+reg.code+' · '+selectedPtype+'</span></div>'
+      +'<div class="proj-meta-grid">'
+        +'<div><span class="pm-lbl">Client</span><span class="pm-val">'+pclient+'</span></div>'
+        +'<div><span class="pm-lbl">Location</span><span class="pm-val">'+ploc+'</span></div>'
+        +'<div><span class="pm-lbl">Reference</span><span class="pm-val">'+pref+'</span></div>'
+        +'<div><span class="pm-lbl">Prepared by</span><span class="pm-val">'+pqs+'</span></div>'
+        +'<div><span class="pm-lbl">Date</span><span class="pm-val">'+now+'</span></div>'
+        +'<div><span class="pm-lbl">Currency</span><span class="pm-val">'+reg.currency+'</span></div>'
+        +(gfa>0?'<div><span class="pm-lbl">GFA</span><span class="pm-val">'+gfa.toLocaleString()+' m²</span></div>':'')
+        +(gfa>0?'<div><span class="pm-lbl">Rate per m²</span><span class="pm-val">'+fmt(grandTotal/gfa)+'/m²</span></div>':'')
+      +'</div>'
+    +'</div>'
+    // Stats
+    +'<div class="stats-grid">'
+      +'<div class="stat-box"><div class="stat-l">Construction cost</div><div class="stat-v">'+fmt(grandSubtotal)+'</div><div class="stat-u">before contingency</div></div>'
+      +'<div class="stat-box"><div class="stat-l">With contingency</div><div class="stat-v">'+fmt(subtotalPlusCont)+'</div><div class="stat-u">incl. '+Math.round(cont*100)+'%</div></div>'
+      +'<div class="stat-box"><div class="stat-l">Grand total</div><div class="stat-v">'+fmt(grandTotal)+'</div><div class="stat-u">incl. VAT/tax</div></div>'
+    +'</div>'
+    // Cost breakdown by type
+    +'<div class="grand-total">'
+      +'<div class="gt-section-hd">Cost breakdown by element</div>'
+      +tradeRows.map(function(t){return '<div class="gt-row"><span style="display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:50%;background:'+t.color+';display:inline-block"></span>'+t.name+'</span><span>'+fmt(t.total)+'</span></div>';}).join('')
+      +'<div class="gt-row"><span>Construction subtotal</span><span>'+fmt(grandSubtotal)+'</span></div>'
+      +'<div class="gt-row"><span style="color:var(--muted2)">— Material costs</span><span style="color:var(--muted2)">'+fmt(grandMat)+'</span></div>'
+      +'<div class="gt-row"><span style="color:var(--blue)">— Labour costs</span><span style="color:var(--blue)">'+fmt(grandLab)+'</span></div>'
+      +'<div class="gt-row"><span style="color:var(--purple)">— Indirect costs (site, tools, temp works)</span><span style="color:var(--purple)">'+fmt(grandInd)+'</span></div>'
+      +'<div class="gt-row"><span>Contingency ('+Math.round(cont*100)+'%)</span><span>'+fmt(contAmt)+'</span></div>'
+      +(vat>0?'<div class="gt-row"><span>VAT / Tax ('+Math.round(vat*100)+'%)</span><span>'+fmt(vatAmt)+'</span></div>':'')
+      +'<div class="gt-grand-row"><span>Grand Total</span><span class="gt-grand-val">'+fmt(grandTotal)+'</span></div>'
+    +'</div>'
+    // Trade sections
+    +tradeSections
+    // Buttons
+    +'<div class="btn-row"><button class="btn btn-outline" onclick="saveEstimate()">💾 Save estimate</button><button class="btn btn-primary" onclick="printEst()">📄 Export PDF</button><button class="btn btn-ghost" onclick="showPanel(\'quantities\')">← Edit quantities</button></div>'
+    +(pnotes?'<div class="disclaimer"><strong style="color:var(--muted2);font-family:var(--mono);font-size:9px;letter-spacing:1px">Scope notes </strong>'+pnotes+'</div>':'')
+    +'<div class="disclaimer">All costs are preliminary estimates based on regional average rates. Final costs must be confirmed by competitive tender. '+reg.name+' · Generated '+now+'.</div>'
+    +footer;
+
+  showPanel('results');
+}
+
+// ── SAVE / LOAD ───────────────────────────────────────────────────────────
+function saveEstimate(){
+  var key='cost_v3',list=[];try{list=JSON.parse(localStorage.getItem(key)||'[]');}catch(e){}
+  var est={
+    id:'e'+Date.now(),
+    name:document.getElementById('cpname').value||'Untitled',
+    client:document.getElementById('cpclient').value,
+    location:document.getElementById('cploc').value,
+    ptype:selectedPtype,code:selectedCode,
+    quantities:JSON.parse(JSON.stringify(quantities)),
+    customRates:JSON.parse(JSON.stringify(customRates)),
+    saved:new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})
+  };
+  list.unshift(est);
+  try{localStorage.setItem(key,JSON.stringify(list.slice(0,10)));}catch(e){}
+  renderSaved();showToast('Estimate saved: '+est.name);
+}
+
+function loadEstimate(id){
+  var list=[];try{list=JSON.parse(localStorage.getItem('cost_v3')||'[]');}catch(e){}
+  var e=list.find(function(x){return x.id===id;});
+  if(!e)return;
+  document.getElementById('cpname').value=e.name||'';
+  document.getElementById('cpclient').value=e.client||'';
+  document.getElementById('cploc').value=e.location||'';
+  selectedPtype=e.ptype||'Residential';
+  selectedCode=e.code||'KSA';
+  quantities=e.quantities||{};
+  customRates=e.customRates||{};
+  buildCodesGrid('cost-codes-grid');
+  renderQuantitiesTable();
+  showPanel('quantities');
+}
+
+function deleteEstimate(id,ev){
+  ev.stopPropagation();
+  if(!confirm('Delete this estimate?'))return;
+  var list=[];try{list=JSON.parse(localStorage.getItem('cost_v3')||'[]');}catch(e){}
+  try{localStorage.setItem('cost_v3',JSON.stringify(list.filter(function(e){return e.id!==id;})));}catch(e){}
+  renderSaved();
+}
+
+function renderSaved(){
+  var list=[];try{list=JSON.parse(localStorage.getItem('cost_v3')||'[]');}catch(e){}
+  var el=document.getElementById('saved-list');
+  var cnt=document.getElementById('saved-count');
+  if(cnt)cnt.textContent=list.length+' estimate'+(list.length===1?'':'s')+' saved';
+  if(!list.length){el.innerHTML='<div style="text-align:center;padding:48px 20px;color:var(--muted);border:1px dashed var(--border2);border-radius:var(--radius)"><div style="font-size:24px;margin-bottom:8px">○</div><div>No saved estimates yet</div></div>';return;}
+  el.innerHTML='<div class="proj-grid">'+list.map(function(e){
+    return '<div class="pc" onclick="loadEstimate(\''+e.id+'\')">'
+      +'<div class="pc-name">'+e.name+'</div>'
+      +'<div class="pc-meta">'+(e.client?'Client: '+e.client+'<br>':'')+(PTYPE_ICONS[e.ptype]||'⬡')+' '+(e.ptype||'Residential')+' · '+(REGIONS[e.code]?REGIONS[e.code].code:e.code)+'</div>'
+      +'<div class="pc-foot"><span class="pc-badge">'+e.saved+'</span><span class="pc-del" onclick="deleteEstimate(\''+e.id+'\',event)">✕ Delete</span></div>'
+    +'</div>';
+  }).join('')+'</div>';
+}
+
+function newEstimate(){
+  ['cpname','cpclient','cploc','cpref','cpqs','cpnotes','cpgfa'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  quantities={};customRates={};selectedPtype='Residential';selectedCode='KSA';
+  buildCodesGrid('cost-codes-grid');updateSbMeta();showPanel('project');
+}
+
+function printEst(){showPanel('results');setTimeout(function(){window.print();},250);}
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+buildCodesGrid('cost-codes-grid');
+selectCode('KSA');
+
+// Set locale defaults
+(function(){
+  var cc=window.COST_REGION||'SA';
+  var map={'SA':'KSA','AE':'UAE','GB':'UK','US':'US','IN':'IN','AU':'AU'};
+  var code=map[cc]||'KSA';
+  selectedCode=code;
+  buildCodesGrid('cost-codes-grid');
+  selectCode(code);
+  // Set currency dropdown
+  var cmap={'SA':'KSA','AE':'UAE','GB':'UK','US':'US','DE':'EU','FR':'EU','IN':'IN','AU':'AU'};
+  var csel=document.getElementById('currency');
+  var cval=cmap[cc]||'KSA';
+  if(csel){for(var i=0;i<csel.options.length;i++){if(csel.options[i].value===cval){csel.selectedIndex=i;break;}}}
+})();
+
+document.getElementById('cpname').addEventListener('input',updateSbMeta);
+</script>
+<div id="print-company-profile" style="display:none">
+<div style="page-break-before:always;padding:32px 0;font-family:Arial,sans-serif">
+  <div style="border:2px solid #c8a84b;border-radius:8px;padding:28px 32px;max-width:700px;margin:0 auto">
+    <div style="display:flex;align-items:flex-start;gap:24px;margin-bottom:20px">
+      <div style="width:60px;height:60px;background:rgba(200,168,75,.15);border:1.5px solid #c8a84b;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#c8a84b;font-family:Georgia,serif;flex-shrink:0">QS</div>
+      <div><div style="font-size:20px;font-weight:700;color:#111;margin-bottom:2px;font-family:Georgia,serif">Al Qaswaa Al Sharqia Trading EST</div>
+      <div style="font-size:11px;color:#7a6010;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">مؤسسة القصواء الشرقية للتجارة</div>
+      <div style="font-size:12px;color:#444;font-weight:500">Full-Service EPC Contractor · Eastern Province, Saudi Arabia</div></div>
+    </div>
+    <div style="border-top:1px solid #e8d090;padding-top:16px;margin-bottom:16px">
+      <div style="font-size:13px;font-weight:700;color:#111;margin-bottom:8px">About Us</div>
+      <div style="font-size:12px;color:#444;line-height:1.8">Al Qaswaa Al Sharqia Trading EST is a licensed full-cycle EPC (Engineering, Procurement &amp; Construction) contractor headquartered in the Eastern Province of Saudi Arabia. We deliver turnkey construction projects across residential, commercial, industrial and hospitality sectors — from concept design through to final handover.<br><br>Our team has <strong>proven experience delivering projects within Royal Commission jurisdictions</strong> including Jubail Industrial City, meeting the stringent quality, safety and compliance standards required by Saudi Arabia's premier development authorities. We are fully registered and compliant with Saudi Contractors Authority (SCA) requirements.</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px">
+      <div style="background:#fffdf5;border:1px solid #e8d090;border-radius:5px;padding:10px;text-align:center"><div style="font-size:18px;font-weight:700;color:#c8a84b;font-family:monospace">EPC</div><div style="font-size:10px;color:#666;margin-top:2px">Full cycle delivery</div></div>
+      <div style="background:#fffdf5;border:1px solid #e8d090;border-radius:5px;padding:10px;text-align:center"><div style="font-size:18px;font-weight:700;color:#c8a84b;font-family:monospace">RC</div><div style="font-size:10px;color:#666;margin-top:2px">Royal Commission proven</div></div>
+      <div style="background:#fffdf5;border:1px solid #e8d090;border-radius:5px;padding:10px;text-align:center"><div style="font-size:18px;font-weight:700;color:#c8a84b;font-family:monospace">SCA</div><div style="font-size:10px;color:#666;margin-top:2px">Registered contractor</div></div>
+    </div>
+    <div style="border-top:1px solid #e8d090;padding-top:14px">
+      <div style="font-size:13px;font-weight:700;color:#111;margin-bottom:8px">Looking for a trusted EPC contractor for your next project?</div>
+      <div style="font-size:12px;color:#444;line-height:1.7;margin-bottom:12px">If this estimate has helped you scope your project, let us help you build it. We offer competitive proposals, transparent pricing and full accountability from groundbreaking to handover. Contact us today for a no-obligation discussion.</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div style="background:#c8a84b;border-radius:5px;padding:10px;text-align:center">
+          <div style="font-size:9px;color:rgba(0,0,0,.6);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px">WhatsApp / Call</div>
+          <div style="font-size:14px;font-weight:700;color:#0a0a09">+966 51 175 9092</div>
+          <div style="font-size:11px;color:rgba(0,0,0,.7)">Imran Khoje · imran@qaswasharqia.com</div>
+        </div>
+        <div style="border:1.5px solid #c8a84b;border-radius:5px;padding:10px;text-align:center">
+          <div style="font-size:9px;color:#7a6010;letter-spacing:1px;text-transform:uppercase;margin-bottom:2px">Email &amp; Web</div>
+          <div style="font-size:12px;font-weight:600;color:#111">info@qaswasharqia.com</div>
+          <div style="font-size:10px;color:#7a6010;margin-top:2px">qaswa-sharqia.netlify.app</div>
+          <div style="font-size:11px;color:#444;margin-top:2px">+966 57 352 4746</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+<script>
+/* ── LEAD GATE ─────────────────────────────────────────────────────────── */
+/* ── LEAD GATE — shared across BOQ & Cost Estimator ─────────────────────
+   Collects name, email, phone, purpose before granting free or pro access.
+   Free: 10 projects max. Pro: monthly or annual, WhatsApp order flow.
+   ──────────────────────────────────────────────────────────────────────── */
+
+// ── STYLES (injected once) ──────────────────────────────────────────────
+var LG_CSS = `
+<style id="lg-styles">
+.lg-overlay{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:9000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);padding:16px}
+.lg-modal{background:#111110;border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:36px 32px;max-width:460px;width:100%;position:relative;max-height:90vh;overflow-y:auto}
+.lg-close{position:absolute;top:14px;right:16px;background:none;border:none;color:#6a6860;font-size:20px;cursor:pointer;line-height:1;transition:.15s}
+.lg-close:hover{color:#e8e6de}
+.lg-logo{font-family:'Playfair Display',serif;font-size:13px;font-style:italic;color:#c8a84b;letter-spacing:.5px;margin-bottom:4px}
+.lg-eyebrow{font-family:'DM Mono',monospace;font-size:9px;color:#6a6860;letter-spacing:2px;text-transform:uppercase;margin-bottom:18px}
+.lg-title{font-family:'Playfair Display',serif;font-size:24px;color:#e8e6de;margin-bottom:6px;line-height:1.2}
+.lg-title em{color:#c8a84b;font-style:italic}
+.lg-sub{font-size:12px;color:#9a9890;line-height:1.7;margin-bottom:22px}
+.lg-field{margin-bottom:12px}
+.lg-label{font-family:'DM Mono',monospace;font-size:9px;color:#6a6860;letter-spacing:1.5px;text-transform:uppercase;display:block;margin-bottom:4px}
+.lg-input,.lg-select{width:100%;background:#181816;border:1px solid rgba(255,255,255,.09);color:#e8e6de;font-family:'Sora',sans-serif;font-size:12px;padding:10px 13px;border-radius:7px;transition:.15s;outline:none}
+.lg-input:focus,.lg-select:focus{border-color:#c8a84b;background:#212120}
+.lg-input.err,.lg-select.err{border-color:#c8504a}
+.lg-err-msg{font-size:10px;color:#c8504a;margin-top:3px;display:none}
+.lg-err-msg.show{display:block}
+.lg-divider{display:flex;align-items:center;gap:12px;margin:16px 0;color:#6a6860;font-size:11px}
+.lg-divider::before,.lg-divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.07)}
+.lg-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;font-family:'DM Mono',monospace;font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;padding:12px;border-radius:7px;cursor:pointer;transition:.15s;border:1px solid transparent;text-decoration:none;margin-bottom:9px}
+.lg-btn-primary{background:#c8a84b;color:#0a0a09;border-color:#c8a84b}
+.lg-btn-primary:hover{background:#e8c96a}
+.lg-btn-outline{background:transparent;border-color:rgba(255,255,255,.14);color:#9a9890}
+.lg-btn-outline:hover{border-color:#c8a84b;color:#c8a84b}
+.lg-plans{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.lg-plan{background:#181816;border:1px solid rgba(255,255,255,.09);border-radius:10px;padding:16px;cursor:pointer;transition:.2s;user-select:none;position:relative}
+.lg-plan:hover{border-color:rgba(255,255,255,.18)}
+.lg-plan.sel{border-color:#c8a84b;background:rgba(200,168,75,.1)}
+.lg-plan.sel::after{content:'✓';position:absolute;top:8px;right:10px;font-size:11px;color:#c8a84b;font-weight:700}
+.lg-plan-label{font-family:'DM Mono',monospace;font-size:9px;color:#6a6860;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px}
+.lg-plan-price{font-family:'DM Mono',monospace;font-size:22px;font-weight:500;color:#c8a84b;line-height:1;margin-bottom:2px}
+.lg-plan-period{font-size:10px;color:#6a6860;margin-bottom:8px}
+.lg-plan-note{font-size:10px;color:#9a9890;line-height:1.5}
+.lg-savings{background:rgba(74,155,106,.1);border:1px solid rgba(74,155,106,.25);border-radius:5px;padding:4px 10px;font-family:'DM Mono',monospace;font-size:9px;color:#4a9b6a;letter-spacing:.5px;display:inline-block;margin-top:5px}
+.lg-note{font-size:10px;color:#6a6860;text-align:center;line-height:1.6;margin-top:10px}
+.lg-step{display:none}.lg-step.on{display:block}
+.lg-progress{display:flex;gap:6px;margin-bottom:22px}
+.lg-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.12);transition:.3s}
+.lg-dot.done{background:#c8a84b}
+.lg-dot.active{background:#c8a84b;box-shadow:0 0 8px rgba(200,168,75,.4)}
+</style>
+`;
+
+// ── COMPANY INFO ────────────────────────────────────────────────────────
+var LG_COMPANY = {
+  name: 'SiteCalc Pro',
+  contact_name: 'Imran Khoje',
+  email: 'info@qaswasharqia.com',
+  phone: '+966511759092',
+  phone2: '+966573524746',
+  wa: '966511759092',
+  website: 'https://qaswa-sharqia.netlify.app',
+};
+
+// ── PRICING (region-aware) ──────────────────────────────────────────────
+var LG_PRICES = {
+  SAR: {monthly:'SAR 29', annual:'SAR 249', monthly_num:29, annual_num:249, monthly_save:'', annual_save:'Save 30%', sym:'SAR '},
+  AED: {monthly:'AED 29', annual:'AED 249', monthly_num:29, annual_num:249, monthly_save:'', annual_save:'Save 30%', sym:'AED '},
+  GBP: {monthly:'£6',    annual:'£49',     monthly_num:6,  annual_num:49,  monthly_save:'', annual_save:'Save 32%', sym:'£'},
+  USD: {monthly:'$8',    annual:'$65',     monthly_num:8,  annual_num:65,  monthly_save:'', annual_save:'Save 32%', sym:'$'},
+  EUR: {monthly:'€7',    annual:'€59',     monthly_num:7,  annual_num:59,  monthly_save:'', annual_save:'Save 30%', sym:'€'},
+  INR: {monthly:'₹599',  annual:'₹4,999',  monthly_num:599,annual_num:4999,monthly_save:'', annual_save:'Save 30%', sym:'₹'},
+  AUD: {monthly:'A$12',  annual:'A$99',    monthly_num:12, annual_num:99,  monthly_save:'', annual_save:'Save 31%', sym:'A$'},
+};
+
+function lgGetPrices() {
+  return LG_PRICES[window.BOQ_CURRENCY||window.COST_CURRENCY||'SAR'] || LG_PRICES.SAR;
+}
+
+// ── STATE ───────────────────────────────────────────────────────────────
+var LG_STATE = {plan:'free', billing:'annual', step:1};
+var LG_LEAD = {};
+var LG_RESOLVE = null;
+
+// ── MAIN ENTRY POINT ────────────────────────────────────────────────────
+// Returns a promise that resolves to {plan:'free'|'monthly'|'annual', lead:{...}}
+// or rejects if user closes without completing
+function lgShow(mode) {
+  // mode: 'free' | 'pro' | 'any'
+  return new Promise(function(resolve, reject) {
+    LG_RESOLVE = resolve;
+    LG_STATE.plan = (mode === 'pro') ? 'monthly' : 'free';
+    LG_STATE.step = 1;
+    lgInject(mode);
+  });
+}
+
+function lgInject(mode) {
+  // Remove existing if any
+  var existing = document.getElementById('lg-container');
+  if (existing) existing.remove();
+
+  // Inject styles once
+  if (!document.getElementById('lg-styles')) {
+    document.head.insertAdjacentHTML('beforeend', LG_CSS);
+  }
+
+  var p = lgGetPrices();
+  var html = '<div class="lg-overlay" id="lg-container">'
+    + '<div class="lg-modal">'
+    + '<button class="lg-close" onclick="lgClose()">×</button>'
+    + '<div class="lg-logo">' + LG_COMPANY.name + '</div>'
+    + '<div class="lg-eyebrow">Professional Construction Estimating</div>'
+
+    // ── Step 1: Lead capture ──────────────────────────────────────────
+    + '<div class="lg-step on" id="lg-step-1">'
+    + '<div class="lg-progress"><div class="lg-dot active" id="lgd1"></div><div class="lg-dot" id="lgd2"></div><div class="lg-dot" id="lgd3"></div></div>'
+    + '<div class="lg-title">Get <em>instant access</em></div>'
+    + '<div class="lg-sub">Enter your details to start using SiteCalc Pro. No credit card required for the free plan.</div>'
+    + '<div class="lg-field"><label class="lg-label">Full name *</label><input class="lg-input" id="lg-name" placeholder="e.g. Mohammed Al-Rashid" autocomplete="name"></div>'
+    + '<div class="lg-field"><label class="lg-label">Email address *</label><input class="lg-input" id="lg-email" type="email" placeholder="e.g. mohammed@company.com" autocomplete="email"></div>'
+    + '<div class="lg-field"><label class="lg-label">Phone / WhatsApp *</label><input class="lg-input" id="lg-phone" type="tel" placeholder="e.g. +966 5X XXX XXXX" autocomplete="tel"></div>'
+    + '<div class="lg-field"><label class="lg-label">I am a *</label>'
+    + '<select class="lg-select" id="lg-purpose">'
+    + '<option value="">— Select your role —</option>'
+    + '<option>Quantity Surveyor (QS)</option>'
+    + '<option>Civil / Structural Engineer</option>'
+    + '<option>Architect</option>'
+    + '<option>Contractor / Builder</option>'
+    + '<option>Project Manager</option>'
+    + '<option>Property Developer</option>'
+    + '<option>Consultant</option>'
+    + '<option>Student</option>'
+    + '<option>Other</option>'
+    + '</select></div>'
+    + '<div class="lg-err-msg" id="lg-step1-err">Please fill in all required fields.</div>'
+    + '<button class="lg-btn lg-btn-primary" onclick="lgStep1Next()">Continue →</button>'
+    + '</div>'
+
+    // ── Step 2: Plan selection ────────────────────────────────────────
+    + '<div class="lg-step" id="lg-step-2">'
+    + '<div class="lg-progress"><div class="lg-dot done" id="lgd1b"></div><div class="lg-dot active" id="lgd2b"></div><div class="lg-dot" id="lgd3b"></div></div>'
+    + '<div class="lg-title">Choose your <em>plan</em></div>'
+    + '<div class="lg-sub">Start free with 10 projects, or unlock unlimited access with Pro.</div>'
+    + '<div class="lg-plans">'
+    + '<div class="lg-plan sel" id="lg-plan-free" onclick="lgSelectPlan(\'free\')">'
+    + '<div class="lg-plan-label">Free</div>'
+    + '<div class="lg-plan-price">0</div>'
+    + '<div class="lg-plan-period">forever</div>'
+    + '<div class="lg-plan-note">10 projects · All features · BOQ + Cost apps</div>'
+    + '</div>'
+    + '<div class="lg-plan" id="lg-plan-pro" onclick="lgSelectPlan(\'pro\')">'
+    + '<div class="lg-plan-label">Pro</div>'
+    + '<div class="lg-plan-price" id="lg-plan-pro-price">' + p.annual + '</div>'
+    + '<div class="lg-plan-period" id="lg-plan-pro-period">per year</div>'
+    + '<div class="lg-plan-note">Unlimited · PDF export · Priority support</div>'
+    + '</div>'
+    + '</div>'
+    + '<div id="lg-billing-toggle" style="display:none;margin-bottom:14px">'
+    + '<div style="font-family:\'DM Mono\',monospace;font-size:9px;color:#6a6860;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">Billing period</div>'
+    + '<div style="display:flex;gap:8px">'
+    + '<div class="lg-plan" style="padding:12px 16px" id="bt-monthly" onclick="lgSetBilling(\'monthly\')">'
+    + '<div class="lg-plan-label">Monthly</div><div class="lg-plan-price" style="font-size:16px">' + p.monthly + '</div><div class="lg-plan-period">/month</div>'
+    + '</div>'
+    + '<div class="lg-plan sel" style="padding:12px 16px" id="bt-annual" onclick="lgSetBilling(\'annual\')">'
+    + '<div class="lg-plan-label">Annual <span class="lg-savings">' + p.annual_save + '</span></div><div class="lg-plan-price" style="font-size:16px">' + p.annual + '</div><div class="lg-plan-period">/year</div>'
+    + '</div>'
+    + '</div></div>'
+    + '<button class="lg-btn lg-btn-primary" onclick="lgStep2Next()">Get access →</button>'
+    + '<button class="lg-btn lg-btn-outline" onclick="lgStep1Back()">← Back</button>'
+    + '</div>'
+
+    // ── Step 3: Confirmation ──────────────────────────────────────────
+    + '<div class="lg-step" id="lg-step-3">'
+    + '<div class="lg-progress"><div class="lg-dot done"></div><div class="lg-dot done"></div><div class="lg-dot active"></div></div>'
+    + '<div id="lg-step3-content"></div>'
+    + '</div>'
+
+    + '</div></div>';
+
+  document.body.insertAdjacentHTML('beforeend', html);
+  document.body.style.overflow = 'hidden';
+}
+
+function lgClose() {
+  var el = document.getElementById('lg-container');
+  if (el) el.remove();
+  document.body.style.overflow = '';
+}
+
+// ── STEP 1: Validate & advance ─────────────────────────────────────────
+function lgStep1Next() {
+  var name  = document.getElementById('lg-name').value.trim();
+  var email = document.getElementById('lg-email').value.trim();
+  var phone = document.getElementById('lg-phone').value.trim();
+  var purp  = document.getElementById('lg-purpose').value;
+  var err   = document.getElementById('lg-step1-err');
+
+  // Basic validation
+  var emailOk = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
+  var ok = name.length > 1 && emailOk && phone.length > 6 && purp;
+
+  [['lg-name', name.length > 1], ['lg-email', emailOk], ['lg-phone', phone.length > 6], ['lg-purpose', !!purp]].forEach(function(pair) {
+    var el = document.getElementById(pair[0]);
+    if (el) el.classList.toggle('err', !pair[1]);
+  });
+
+  if (!ok) { err.classList.add('show'); return; }
+  err.classList.remove('show');
+
+  LG_LEAD = { name: name, email: email, phone: phone, purpose: purp, ts: new Date().toISOString() };
+  lgSaveLead(LG_LEAD);
+
+  document.getElementById('lg-step-1').classList.remove('on');
+  document.getElementById('lg-step-2').classList.add('on');
+}
+
+function lgStep1Back() {
+  document.getElementById('lg-step-2').classList.remove('on');
+  document.getElementById('lg-step-1').classList.add('on');
+}
+
+// ── STEP 2: Plan & billing ─────────────────────────────────────────────
+function lgSelectPlan(plan) {
+  LG_STATE.plan = plan;
+  document.getElementById('lg-plan-free').classList.toggle('sel', plan === 'free');
+  document.getElementById('lg-plan-pro').classList.toggle('sel', plan === 'pro');
+  document.getElementById('lg-billing-toggle').style.display = plan === 'pro' ? 'block' : 'none';
+}
+
+function lgSetBilling(b) {
+  LG_STATE.billing = b;
+  document.getElementById('bt-monthly').classList.toggle('sel', b === 'monthly');
+  document.getElementById('bt-annual').classList.toggle('sel', b === 'annual');
+}
+
+function lgStep2Next() {
+  var plan = LG_STATE.plan;
+  document.getElementById('lg-step-2').classList.remove('on');
+  document.getElementById('lg-step-3').classList.add('on');
+
+  if (plan === 'free') {
+    lgShowFreeConfirm();
+  } else {
+    lgShowProConfirm();
+  }
+}
+
+// ── STEP 3a: FREE confirm ─────────────────────────────────────────────
+function lgShowFreeConfirm() {
+  document.getElementById('lg-step3-content').innerHTML =
+    '<div class="lg-title" style="margin-bottom:6px">You\'re in! <em>Free access</em></div>'
+    + '<div class="lg-sub">10 projects included. Upgrade to Pro anytime for unlimited access.</div>'
+    + '<div style="background:rgba(74,155,106,.08);border:1px solid rgba(74,155,106,.2);border-radius:8px;padding:14px;margin-bottom:18px;font-size:12px;color:#9a9890;line-height:1.7">'
+    + '<strong style="color:#4a9b6a;display:block;margin-bottom:5px">✓ Free plan activated</strong>'
+    + '10 projects · BOQ Estimator · Cost Estimator · All 8 building codes · All 6 project types</div>'
+    + '<button class="lg-btn lg-btn-primary" onclick="lgGrantFree()">Start using SiteCalc Pro →</button>';
+}
+
+function lgGrantFree() {
+  // Store access in sessionStorage
+  sessionStorage.setItem('sc_access', 'free');
+  sessionStorage.setItem('sc_lead', JSON.stringify(LG_LEAD));
+  lgClose();
+  if (LG_RESOLVE) LG_RESOLVE({ plan: 'free', lead: LG_LEAD });
+}
+
+// ── STEP 3b: PRO confirm + WhatsApp ──────────────────────────────────
+function lgShowProConfirm() {
+  var billing = LG_STATE.billing;
+  var p = lgGetPrices();
+  var priceDisplay = billing === 'monthly' ? p.monthly + '/month' : p.annual + '/year';
+  var saving = billing === 'annual' ? ' (' + p.annual_save + ')' : '';
+
+  // Build WhatsApp message
+  var msg = lgBuildWAMessage(billing, p);
+  var waUrl = 'https://wa.me/' + LG_COMPANY.wa + '?text=' + encodeURIComponent(msg);
+
+  document.getElementById('lg-step3-content').innerHTML =
+    '<div class="lg-title" style="margin-bottom:6px">Upgrade to <em>Pro</em></div>'
+    + '<div class="lg-sub">Complete your order via WhatsApp. Access code sent within 1 hour.</div>'
+    + '<div style="background:rgba(200,168,75,.08);border:1px solid rgba(200,168,75,.2);border-radius:8px;padding:16px;margin-bottom:18px">'
+    + '<div style="font-family:\'DM Mono\',monospace;font-size:9px;color:#6a6860;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">Your order summary</div>'
+    + '<div style="font-size:13px;color:#e8e6de;margin-bottom:4px">SiteCalc Pro — ' + (billing === 'annual' ? 'Annual plan' : 'Monthly plan') + '</div>'
+    + '<div style="font-family:\'DM Mono\',monospace;font-size:20px;font-weight:500;color:#c8a84b;margin-bottom:4px">' + priceDisplay + '</div>'
+    + '<div style="font-size:10px;color:#6a6860">' + (billing === 'annual' ? 'Billed once per year' + saving : 'Billed monthly, cancel anytime') + '</div>'
+    + '</div>'
+    + '<a class="lg-btn lg-btn-primary" href="' + waUrl + '" target="_blank" onclick="lgGrantProTemp()">Order on WhatsApp →</a>'
+    + '<button class="lg-btn lg-btn-outline" onclick="lgStep1Back();document.getElementById(\'lg-step-2\').classList.add(\'on\');document.getElementById(\'lg-step-3\').classList.remove(\'on\')">← Change plan</button>'
+    + '<div class="lg-note">Pay via STC Pay or bank transfer · Access code sent via WhatsApp within 1 hour<br>Contact: ' + LG_COMPANY.contact_name + ' · ' + LG_COMPANY.phone + '</div>';
+}
+
+function lgBuildWAMessage(billing, p) {
+  var priceLabel = billing === 'monthly' ? p.monthly + '/month' : p.annual + '/year';
+  return 'Hello ' + LG_COMPANY.contact_name + '!\n\n'
+    + 'I would like to purchase SiteCalc Pro — ' + (billing === 'annual' ? 'Annual Plan' : 'Monthly Plan') + ' (' + priceLabel + ').\n\n'
+    + 'My details:\n'
+    + '• Name: ' + (LG_LEAD.name || '—') + '\n'
+    + '• Email: ' + (LG_LEAD.email || '—') + '\n'
+    + '• Phone: ' + (LG_LEAD.phone || '—') + '\n'
+    + '• Role: ' + (LG_LEAD.purpose || '—') + '\n\n'
+    + 'Please confirm payment details so I can complete the order.\n\n'
+    + 'Thank you!';
+}
+
+function lgGrantProTemp() {
+  // Grant temporary session access while awaiting payment confirmation
+  sessionStorage.setItem('sc_access', 'pro_pending');
+  sessionStorage.setItem('sc_lead', JSON.stringify(LG_LEAD));
+  setTimeout(function() {
+    lgClose();
+    if (LG_RESOLVE) LG_RESOLVE({ plan: 'pro_pending', lead: LG_LEAD });
+  }, 600);
+}
+
+// ── SAVE LEAD ──────────────────────────────────────────────────────────
+function lgSaveLead(lead) {
+  var key = 'sc_leads';
+  var list = [];
+  try { list = JSON.parse(localStorage.getItem(key) || '[]'); } catch(e) {}
+  // Avoid duplicates by email
+  list = list.filter(function(l) { return l.email !== lead.email; });
+  list.unshift(lead);
+  try { localStorage.setItem(key, JSON.stringify(list.slice(0, 200))); } catch(e) {}
+}
+
+// ── CHECK EXISTING ACCESS ──────────────────────────────────────────────
+function lgCheckAccess() {
+  // Check session
+  var sess = sessionStorage.getItem('sc_access');
+  if (sess) return sess; // 'free', 'pro_pending', or legacy 'ok_BOQ...'
+  // Check legacy Pro code
+  var legacyAccess = sessionStorage.getItem('boq_access') || '';
+  if (legacyAccess.indexOf('ok_BOQ') === 0) return 'pro';
+  return null;
+}
+
+// ── GATE WRAPPER ──────────────────────────────────────────────────────
+// Call this on page load to gate access
+function lgGate(onGranted) {
+  var access = lgCheckAccess();
+  if (access) {
+    onGranted(access);
+    return;
+  }
+  // Show gate
+  lgShow('any').then(function(result) {
+    onGranted(result.plan);
+  }).catch(function() {
+    // closed without completing — show again if they try to use app
+  });
+}
+
+/* ── GATE INIT ────────────────────────────────────────────────────────── */
+window.addEventListener('load', function() {
+  lgGate(function(plan) {
+    // Update Pro tag in topbar
+    var freeTag = document.getElementById('free-tag');
+    var proTag  = document.getElementById('pro-tag');
+    if (plan === 'free' || plan === 'pro_pending') {
+      if (freeTag) freeTag.style.display = '';
+      if (proTag)  proTag.style.display = 'none';
+    }
+    if (plan === 'pro' || plan === 'pro_pending') {
+      if (freeTag) freeTag.style.display = 'none';
+      if (proTag)  proTag.style.display = '';
+    }
+  });
+});
+</script>
+</body>
+</html>
