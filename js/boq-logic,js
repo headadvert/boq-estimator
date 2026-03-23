@@ -1,0 +1,39 @@
+/**
+ * BOQ-LOGIC.js - Bill of Quantities Calculations
+ * Handles all BOQ calculations based on building codes
+ */
+
+const BOQ = {
+  // Building code factors
+  codes: {
+    sbc304: { name: 'SBC 304 (Saudi)', concreteRatio: 0.25, rebarRatio: 0.08, blockSpacing: 2.5 },
+    ibc_aci: { name: 'IBC / ACI 318', concreteRatio: 0.22, rebarRatio: 0.075, blockSpacing: 2.4 },
+    ec2: { name: 'Eurocode 2', concreteRatio: 0.24, rebarRatio: 0.085, blockSpacing: 2.6 },
+    is456: { name: 'IS 456', concreteRatio: 0.23, rebarRatio: 0.082, blockSpacing: 2.5 },
+    as3600: { name: 'AS 3600', concreteRatio: 0.21, rebarRatio: 0.078, blockSpacing: 2.3 },
+    generic: { name: 'Generic', concreteRatio: 0.23, rebarRatio: 0.08, blockSpacing: 2.5 }
+  },
+
+  // Calculate BOQ based on project parameters
+  calculateBOQ(projectData) {
+    const code = this.codes[projectData.code] || this.codes.generic;
+    const groundArea = projectData.groundArea;
+    const numFloors = projectData.numFloors;
+    const floorHeight = projectData.floorHeight || 3.5;
+
+    return {
+      concrete: (groundArea * code.concreteRatio * numFloors).toFixed(2),
+      rebar: ((groundArea * code.concreteRatio * numFloors) * code.rebarRatio).toFixed(2),
+      blockwork: (groundArea * code.blockSpacing * numFloors).toFixed(2),
+      tiles: (groundArea * 1.2 * numFloors).toFixed(2),
+      plaster: (groundArea * 4 * numFloors).toFixed(2),
+      paint: (groundArea * 2 * numFloors).toFixed(2),
+      mep: {
+        electrical: (groundArea * 0.15 * numFloors).toFixed(0),
+        plumbing: (groundArea * 0.12 * numFloors).toFixed(0),
+        hvac: (groundArea * 0.1 * numFloors).toFixed(0),
+        fireSafety: (groundArea * 0.05 * numFloors).toFixed(0)
+      }
+    };
+  }
+};
