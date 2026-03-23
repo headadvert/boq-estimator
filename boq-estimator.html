@@ -1,0 +1,1737 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SiteCalc Pro — BOQ — Professional Construction Calculator</title>
+<!-- Currency detection — always English LTR -->
+<script>
+(function(){
+  var RM={'SA':'SAR','AE':'AED','GB':'GBP','US':'USD','DE':'EUR','FR':'EUR','IT':'EUR','ES':'EUR','NL':'EUR','BE':'EUR','AT':'EUR','PT':'EUR','IN':'INR','AU':'AUD'};
+  var SYM={'SAR':'SAR ','AED':'AED ','GBP':'£','USD':'$','EUR':'€','INR':'₹','AUD':'A$'};
+  var PRICE={'SAR':'71','AED':'72','GBP':'15','USD':'19','EUR':'18','INR':'1,590','AUD':'29'};
+  var TZ={'Riyadh':'SA','Saudi':'SA','Dubai':'AE','Abu_Dhabi':'AE','London':'GB','New_York':'US','Berlin':'DE','Paris':'FR','Kolkata':'IN','Mumbai':'IN','Sydney':'AU'};
+  function detect(){try{var tz=Intl.DateTimeFormat().resolvedOptions().timeZone||'';for(var k in TZ){if(tz.indexOf(k)>-1)return TZ[k];}}catch(e){}return 'SA';}
+  var cc=detect();var cur=RM[cc]||'SAR';var sym=SYM[cur]||cur+' ';
+  window.BOQ_CURRENCY=cur;window.BOQ_SYMBOL=sym;window.BOQ_PRICE=PRICE[cur]||'71';
+  window.BOQ_PRO_DISPLAY=sym+(PRICE[cur]||'71');
+  document.documentElement.lang='en';document.documentElement.dir='ltr';
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a09;--s1:#111110;--s2:#181816;--s3:#212120;--s4:#2a2a28;
+  --gold:#c8a84b;--gold2:#e8c96a;--gold-dim:rgba(200,168,75,.12);--gold-border:rgba(200,168,75,.2);
+  --text:#e8e6de;--muted:#6a6860;--muted2:#9a9890;--muted3:#b8b6ae;
+  --green:#4a9b6a;--red:#c8504a;--blue:#4a7eb5;
+  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.14);
+  --head:'Inter',system-ui,sans-serif;--body:'Inter',system-ui,sans-serif;--mono:'DM Mono',monospace;
+  --radius:10px;--radius-sm:6px;--shadow:0 2px 12px rgba(0,0,0,.4);
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--body);font-size:13px;line-height:1.6;overflow-x:hidden}
+
+/* ── TOPBAR ── */
+.topbar{position:fixed;top:0;left:0;right:0;height:56px;background:rgba(10,10,9,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);z-index:300;display:flex;align-items:center;justify-content:space-between;padding:0 20px}
+.topbar-logo{font-family:var(--head);font-size:20px;font-style:italic;color:var(--gold);display:flex;align-items:center;gap:10px}
+.topbar-logo span{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;font-style:normal;margin-top:2px}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.topbar-tag{font-family:var(--mono);font-size:9px;color:var(--muted);background:var(--s2);border:1px solid var(--border);padding:3px 10px;border-radius:20px;letter-spacing:1px;text-transform:uppercase}
+.topbar-tag.pro{color:var(--gold);border-color:var(--gold-border);background:var(--gold-dim)}
+.burger{display:none;background:none;border:none;color:var(--muted2);font-size:20px;cursor:pointer;padding:6px;line-height:1}
+
+/* ── LAYOUT ── */
+.shell{display:flex;padding-top:56px;min-height:100vh}
+.sidebar{width:240px;flex-shrink:0;background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:56px;bottom:0;left:0;overflow-y:auto;transition:transform .25s ease;z-index:200}
+.main{flex:1;margin-left:240px;min-height:calc(100vh - 56px);display:flex;flex-direction:column}
+.panel{display:none;flex:1;padding:28px 32px 48px;max-width:900px}
+.panel.on{display:block}
+
+/* ── SIDEBAR ── */
+.sidebar-top{padding:20px 16px 12px}
+.project-type-badge{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;color:var(--gold);background:var(--gold-dim);border:1px solid var(--gold-border);padding:4px 10px;border-radius:20px;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px}
+.project-name-display{font-family:var(--head);font-size:15px;font-style:italic;color:var(--text);line-height:1.3;margin-bottom:4px}
+.project-code-display{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1px}
+.nav-section{padding:8px 0}
+.nav-label{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;padding:6px 16px 4px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 16px;cursor:pointer;color:var(--muted2);transition:.15s;border-radius:0;position:relative;user-select:none;font-size:12px;font-weight:400}
+.nav-item:hover{background:var(--s2);color:var(--text)}
+.nav-item.on{background:var(--gold-dim);color:var(--gold);font-weight:500}
+.nav-item.on::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--gold);border-radius:0 2px 2px 0}
+.nav-item .ni-icon{font-size:14px;width:18px;text-align:center;flex-shrink:0}
+.nav-item .ni-badge{margin-left:auto;font-family:var(--mono);font-size:9px;background:var(--s3);color:var(--muted);padding:1px 7px;border-radius:10px}
+.nav-item.on .ni-badge{background:rgba(200,168,75,.15);color:var(--gold)}
+.nav-divider{height:1px;background:var(--border);margin:6px 16px}
+
+/* Sidebar config */
+.cfg-section{padding:12px 16px;border-top:1px solid var(--border);margin-top:auto}
+.cfg-row{margin-bottom:10px}
+.cfg-label{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;display:block;margin-bottom:4px}
+.cfg-select{width:100%;background:var(--s2);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:11px;padding:7px 10px;border-radius:var(--radius-sm);cursor:pointer;appearance:none;transition:.15s}
+.cfg-select:focus{outline:none;border-color:var(--gold)}
+
+/* Usage meter */
+.usage-wrap{padding:12px 16px;border-top:1px solid var(--border)}
+.usage-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.usage-label{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase}
+.usage-pct{font-family:var(--mono);font-size:11px;color:var(--muted2);font-weight:500;transition:color .4s}
+.usage-track{height:3px;background:var(--s4);border-radius:2px;margin-bottom:6px}
+.usage-fill{height:100%;border-radius:2px;background:var(--gold);transition:width .6s ease}
+.usage-fill.warn{background:#c8803a}
+.usage-fill.high{background:#c8504a}
+.usage-msg{font-size:11px;color:var(--muted);line-height:1.5}
+.usage-msg a{color:rgba(200,168,75,.7);text-decoration:none;cursor:pointer;border-bottom:1px solid rgba(200,168,75,.2)}
+.pro-hint{margin:8px 0 0;background:var(--gold-dim);border:1px solid var(--gold-border);border-radius:var(--radius-sm);padding:10px;display:none}
+.pro-hint.show{display:block}
+.pro-hint-title{font-family:var(--mono);font-size:9px;font-weight:500;color:var(--gold);margin-bottom:3px;letter-spacing:.5px}
+.pro-hint-body{font-size:11px;color:var(--muted2);line-height:1.5}
+.pro-hint-link{display:block;margin-top:6px;font-size:10px;color:var(--gold);cursor:pointer;text-decoration:none}
+.pro-hint-link:hover{text-decoration:underline}
+
+/* ── PHASE INDICATOR ── */
+.phase-bar{display:flex;gap:0;margin-bottom:28px;background:var(--s1);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.phase-step{flex:1;padding:10px 12px;display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.5px;cursor:pointer;transition:.15s;position:relative;border-right:1px solid var(--border)}
+.phase-step:last-child{border-right:none}
+.phase-step:hover{background:var(--s2);color:var(--muted3)}
+.phase-step.active{background:var(--gold-dim);color:var(--gold)}
+.phase-step.done{color:var(--muted2)}
+.phase-step.done .ph-num{background:var(--green);color:#fff;border-color:var(--green)}
+.phase-step .ph-num{width:20px;height:20px;border-radius:50%;background:var(--s3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;transition:.15s;font-weight:500}
+.phase-step.active .ph-num{background:var(--gold);color:#0a0a09;border-color:var(--gold)}
+.ph-text{display:flex;flex-direction:column;gap:1px}
+.ph-name{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.5px}
+.ph-sub{font-size:9px;opacity:.7;display:none}
+
+/* ── PAGE HEADERS ── */
+.page-hd{margin-bottom:28px}
+.page-hd h1{font-family:var(--head);font-size:26px;font-weight:700;color:var(--text);line-height:1.15;letter-spacing:-.5px;margin-bottom:6px}
+.page-hd h1 em{color:var(--gold);font-style:italic}
+.page-hd p{font-size:12px;color:var(--muted2);line-height:1.7;max-width:540px}
+.page-hd-row{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap}
+
+/* ── PROJECT TYPE SELECTOR ── */
+.ptype-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+.ptype-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--radius);padding:16px 14px;cursor:pointer;transition:.2s;text-align:center;user-select:none;position:relative}
+.ptype-card:hover{border-color:var(--border2);background:var(--s2);transform:translateY(-1px)}
+.ptype-card.sel{border-color:var(--gold);background:var(--gold-dim)}
+.ptype-card.sel::after{content:'✓';position:absolute;top:8px;right:10px;font-size:11px;color:var(--gold);font-weight:700}
+.ptype-icon{font-size:24px;margin-bottom:8px;line-height:1}
+.ptype-name{font-size:12px;font-weight:500;color:var(--text);margin-bottom:3px}
+.ptype-sub{font-size:10px;color:var(--muted);line-height:1.4}
+
+/* ── CODES GRID ── */
+.codes-section-hd{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.codes-section-hd h3{font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:500}
+.codes-section-hd::after{content:'';flex:1;height:1px;background:var(--border)}
+.codes-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:24px}
+.cc{background:var(--s1);border:1px solid var(--border);border-radius:var(--radius);padding:14px 10px 12px;text-align:center;cursor:pointer;transition:.2s;user-select:none;position:relative;display:flex;flex-direction:column;align-items:center}
+.cc:hover{border-color:var(--border2);background:var(--s2);transform:translateY(-1px)}
+.cc.active{border-color:var(--gold);background:var(--gold-dim)}
+.cc.active::after{content:'✓';position:absolute;top:6px;right:8px;font-size:9px;color:var(--gold);font-weight:700}
+.cc-flag{font-size:26px;margin-bottom:7px;line-height:1}
+.cc-name{font-size:10px;font-weight:500;color:var(--muted3);letter-spacing:.3px;line-height:1.3;margin-bottom:2px}
+.cc-country{font-size:9px;color:var(--muted);letter-spacing:.2px}
+
+/* ── FORM FIELDS ── */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.form-grid.three{grid-template-columns:1fr 1fr 1fr}
+.form-full{grid-column:1/-1}
+.field-wrap{display:flex;flex-direction:column;gap:4px}
+.field-label{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase}
+.field-label span{color:var(--red)}
+.field-input,.field-select,.field-textarea{background:var(--s2);border:1px solid var(--border);color:var(--text);font-family:var(--body);font-size:12px;padding:9px 12px;border-radius:var(--radius-sm);transition:.15s;width:100%}
+.field-input:focus,.field-select:focus,.field-textarea:focus{outline:none;border-color:var(--gold);background:var(--s3)}
+.field-textarea{resize:vertical;min-height:72px;font-family:var(--body)}
+.field-hint{font-size:10px;color:var(--muted);margin-top:2px}
+
+/* ── CAD UPLOAD SECTION ── */
+.method-tabs{display:flex;gap:1px;background:var(--border);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:20px;width:fit-content}
+.method-tab{padding:9px 20px;font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:.15s;color:var(--muted2);background:var(--s1);border:none;white-space:nowrap}
+.method-tab.on{background:var(--gold);color:#0a0a09}
+.method-tab:hover:not(.on){background:var(--s2);color:var(--text)}
+.cad-upload-zone{border:1.5px dashed var(--border2);border-radius:var(--radius);padding:32px 24px;text-align:center;margin-bottom:20px;transition:.2s;cursor:pointer;position:relative}
+.cad-upload-zone:hover,.cad-upload-zone.drag-over{border-color:var(--gold);background:var(--gold-dim)}
+.cad-upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.cad-icon{font-size:32px;margin-bottom:10px;color:var(--muted)}
+.cad-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px}
+.cad-sub{font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.6}
+.cad-badge{font-family:var(--mono);font-size:9px;background:var(--s3);border:1px solid var(--border);color:var(--muted);padding:3px 9px;border-radius:10px;letter-spacing:1px}
+.cad-result{background:var(--s1);border:1px solid var(--gold-border);border-radius:var(--radius);padding:16px;margin-bottom:16px;display:none}
+.cad-result.show{display:block}
+.cad-result-hd{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.cad-result-icon{width:28px;height:28px;background:var(--gold-dim);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.cad-result-name{font-size:12px;font-weight:500;color:var(--text)}
+.cad-result-sub{font-size:10px;color:var(--muted)}
+
+/* ── ROOMS ── */
+.rooms-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.rooms-count{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:1px}
+.room-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px;overflow:hidden;transition:.15s}
+.room-card:hover{border-color:var(--border2)}
+.room-hd{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;user-select:none}
+.room-num{font-family:var(--mono);font-size:9px;color:var(--gold);letter-spacing:1.5px;background:var(--gold-dim);border:1px solid var(--gold-border);padding:2px 8px;border-radius:3px;flex-shrink:0}
+.room-title{font-size:13px;font-weight:500;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.room-badge{font-size:9px;color:var(--muted);background:var(--s3);padding:2px 8px;border-radius:3px;flex-shrink:0}
+.room-arrow{font-size:14px;color:var(--muted);transition:.2s;flex-shrink:0;margin-left:4px}
+.room-arrow.op{transform:rotate(45deg);color:var(--gold)}
+.room-body{display:none;padding:16px;border-top:1px solid var(--border);background:var(--s2)}
+.room-body.op{display:block}
+.ri-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr;gap:8px;margin-bottom:14px}
+.ri label{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;display:block;margin-bottom:3px}
+.ri input{width:100%;background:var(--s1);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:12px;padding:7px 8px;border-radius:var(--radius-sm)}
+.ri input:focus{outline:none;border-color:var(--gold)}
+.room-type-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px}
+.rtype{font-size:10px;padding:4px 10px;border:1px solid var(--border);border-radius:3px;cursor:pointer;color:var(--muted);transition:.12s;user-select:none}
+.rtype:hover{border-color:var(--border2);color:var(--muted2)}
+.rtype.sel{border-color:var(--gold);color:var(--gold);background:var(--gold-dim)}
+.scope-toggles{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;padding-top:10px;border-top:1px solid var(--border)}
+.scope-toggle{font-size:10px;padding:4px 10px;border:1px solid var(--border);border-radius:3px;cursor:pointer;color:var(--muted);transition:.12s;user-select:none;display:flex;align-items:center;gap:5px}
+.scope-toggle.on{border-color:var(--blue);color:var(--blue);background:rgba(74,126,181,.08)}
+.scope-toggle .st-dot{width:6px;height:6px;border-radius:50%;background:var(--border2);transition:.12s}
+.scope-toggle.on .st-dot{background:var(--blue)}
+.del-room{font-size:10px;color:var(--muted);cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:4px}
+.del-room:hover{color:var(--red)}
+.add-room-btn{width:100%;padding:12px;background:transparent;border:1px dashed var(--border2);color:var(--muted2);font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border-radius:var(--radius);transition:.2s;margin-bottom:20px;display:flex;align-items:center;justify-content:center;gap:8px}
+.add-room-btn:hover{border-color:var(--gold);color:var(--gold)}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:1px;text-transform:uppercase;padding:10px 20px;border-radius:var(--radius-sm);cursor:pointer;transition:.15s;border:1px solid transparent;white-space:nowrap}
+.btn-primary{background:var(--gold);color:#0a0a09;border-color:var(--gold)}
+.btn-primary:hover{background:var(--gold2);border-color:var(--gold2)}
+.btn-outline{background:transparent;border-color:var(--border2);color:var(--muted2)}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold)}
+.btn-ghost{background:transparent;border-color:transparent;color:var(--muted2)}
+.btn-ghost:hover{color:var(--text)}
+.btn-danger{background:transparent;border-color:rgba(200,80,74,.3);color:var(--red)}
+.btn-danger:hover{background:rgba(200,80,74,.08)}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}
+.btn-row.right{justify-content:flex-end}
+
+/* ── RESULTS ── */
+.results-hero{background:var(--s1);border:1px solid var(--border);border-radius:var(--radius);padding:22px 24px;margin-bottom:18px}
+.results-hero-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;gap:12px;flex-wrap:wrap}
+.results-title{font-family:var(--head);font-size:22px;font-style:italic;color:var(--text)}
+.results-code-badge{font-family:var(--mono);font-size:9px;color:var(--gold);background:var(--gold-dim);border:1px solid var(--gold-border);padding:3px 10px;border-radius:3px;letter-spacing:1px;white-space:nowrap}
+.proj-meta-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;border-top:1px solid var(--border);padding-top:14px}
+.pm-item .pm-lbl{font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:2px}
+.pm-item .pm-val{font-size:12px;color:var(--muted3)}
+
+/* Stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px}
+.stat{background:var(--s1);border:1px solid var(--border);border-radius:var(--radius);padding:14px 14px 12px;position:relative;overflow:hidden}
+.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--gold);opacity:.4}
+.stat-label{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:7px}
+.stat-value{font-size:22px;font-weight:600;color:var(--gold);line-height:1;font-family:var(--mono)}
+.stat-unit{font-size:10px;color:var(--muted);margin-top:4px}
+
+/* Code note */
+.code-note{background:var(--s1);border-left:3px solid var(--gold);padding:12px 16px;font-size:11px;color:var(--muted2);line-height:1.75;margin-bottom:20px;border-radius:0 var(--radius-sm) var(--radius-sm) 0}
+
+/* BOQ sections */
+.boq-section{margin-bottom:16px;background:var(--s1);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.boq-room-hd{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:var(--s2);border-bottom:1px solid var(--border);flex-wrap:wrap;gap:8px}
+.boq-room-info{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.boq-room-num{font-family:var(--mono);font-size:9px;color:var(--gold);background:var(--gold-dim);border:1px solid var(--gold-border);padding:2px 8px;border-radius:3px;letter-spacing:1.5px}
+.boq-room-name{font-size:14px;font-weight:500;color:var(--text)}
+.boq-room-type-badge{font-size:9px;color:var(--muted);background:var(--s3);padding:2px 8px;border-radius:3px;border:1px solid var(--border)}
+.boq-room-dims{display:flex;gap:12px;flex-wrap:wrap}
+.boq-dim{font-size:11px;color:var(--muted2)}
+.boq-dim b{font-weight:400;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.5px;margin-right:3px}
+.trade-group{border-bottom:1px solid var(--border)}
+.trade-group:last-child{border-bottom:none}
+.trade-hd{display:flex;align-items:center;gap:8px;padding:7px 18px 5px;background:rgba(0,0,0,.15)}
+.trade-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.trade-lbl{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;font-weight:500}
+.trade-row{display:grid;grid-template-columns:1fr 80px 50px;align-items:center;padding:10px 18px;border-bottom:1px solid rgba(42,42,40,.5)}
+.trade-row:last-child{border-bottom:none}
+.trade-row:hover{background:rgba(200,168,75,.025)}
+.tr-desc{font-size:12px;color:var(--muted2);line-height:1.4;padding-right:10px}
+.tr-qty{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--gold);text-align:right}
+.tr-unit{font-family:var(--mono);font-size:10px;color:var(--muted);text-align:right}
+
+/* MEP section */
+.mep-section{background:var(--s1);border:1px solid rgba(74,126,181,.25);border-radius:var(--radius);padding:16px 20px;margin-bottom:16px}
+.mep-hd{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.mep-hd-icon{width:28px;height:28px;background:rgba(74,126,181,.12);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.mep-hd-title{font-family:var(--mono);font-size:10px;font-weight:500;color:var(--blue);letter-spacing:1px;text-transform:uppercase}
+.mep-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.mep-item{background:var(--s2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px}
+.mep-item-name{font-size:12px;font-weight:500;color:var(--text);margin-bottom:3px}
+.mep-item-desc{font-size:10px;color:var(--muted);line-height:1.5;margin-bottom:8px}
+.mep-item-value{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--blue)}
+.mep-item-unit{font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:2px}
+
+/* Company footer in print/export */
+.boq-footer{margin-top:24px;background:var(--s1);border:1px solid var(--border);border-radius:var(--radius);padding:18px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.footer-company{display:flex;flex-direction:column;gap:3px}
+.footer-co-name{font-family:var(--head);font-size:14px;font-style:italic;color:var(--text)}
+.footer-co-tag{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase}
+.footer-co-contact{font-size:11px;color:var(--muted2)}
+.footer-co-cta{background:var(--gold-dim);border:1px solid var(--gold-border);border-radius:var(--radius-sm);padding:10px 14px;text-align:right}
+.footer-co-cta-title{font-size:12px;font-weight:500;color:var(--text);margin-bottom:2px}
+.footer-co-cta-sub{font-size:10px;color:var(--muted2);line-height:1.5}
+.footer-co-cta-link{font-family:var(--mono);font-size:9px;color:var(--gold);letter-spacing:.5px;text-decoration:none;display:block;margin-top:4px}
+
+/* Soft upsell nag */
+.pro-soft-nag{background:var(--s1);border:1px solid rgba(200,168,75,.13);border-radius:var(--radius-sm);padding:12px 16px;margin-top:16px;display:flex;align-items:center;gap:12px}
+.psn-icon{font-size:15px;flex-shrink:0;opacity:.7}
+.psn-text{flex:1;font-size:11px;color:var(--muted);line-height:1.55}
+.psn-text strong{color:var(--muted2)}
+.psn-link{font-size:11px;color:rgba(200,168,75,.8);text-decoration:none;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.psn-link:hover{color:var(--gold);text-decoration:underline}
+
+/* Disclaimer */
+.disclaimer{font-size:10px;color:var(--muted);line-height:1.7;margin-top:16px;padding:14px 16px;background:var(--s1);border-radius:var(--radius-sm);border:1px solid var(--border)}
+
+/* Saved projects */
+.proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.pc{background:var(--s1);border:1px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;transition:.15s}
+.pc:hover{border-color:var(--border2);background:var(--s2)}
+.pc-name{font-family:var(--head);font-size:15px;font-style:italic;color:var(--text);margin-bottom:5px}
+.pc-meta{font-size:11px;color:var(--muted);line-height:1.7;margin-bottom:10px}
+.pc-foot{display:flex;align-items:center;justify-content:space-between}
+.pc-badge{font-family:var(--mono);font-size:9px;color:var(--muted);background:var(--s3);padding:2px 8px;border-radius:3px}
+.pc-del{font-size:10px;color:var(--muted);cursor:pointer;transition:.15s}
+.pc-del:hover{color:var(--red)}
+
+/* Dashboard */
+.dash-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:24px}
+.dash-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--radius);padding:20px 16px;cursor:pointer;transition:.2s;text-align:center;user-select:none}
+.dash-card:hover{border-color:var(--border2);background:var(--s2);transform:translateY(-1px)}
+.dash-icon{font-size:22px;color:var(--gold);margin-bottom:10px}
+.dash-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px}
+.dash-desc{font-size:10px;color:var(--muted);line-height:1.5}
+
+/* Section heading */
+.section-hd{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.section-hd h3{font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:500;white-space:nowrap}
+.section-hd::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* Toast */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--s2);border:1px solid var(--gold-border);color:var(--gold);font-family:var(--mono);font-size:10px;letter-spacing:1px;padding:9px 20px;border-radius:20px;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+
+/* Mobile overlay */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:190;backdrop-filter:blur(2px)}
+.overlay.open{display:block}
+
+
+/* ── LEAD GATE ── */
+.lead-gate{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(5px);padding:16px}
+.lead-gate.open{display:flex}
+.lead-modal{background:var(--s1);border:1px solid var(--border2);border-radius:14px;padding:28px;width:100%;max-width:400px;position:relative;max-height:90vh;overflow-y:auto}
+.lm-title{font-size:20px;font-weight:700;color:var(--text);margin-bottom:4px;letter-spacing:-.3px}
+.lm-sub{font-size:12px;color:var(--muted2);line-height:1.65;margin-bottom:18px}
+.lm-field{margin-bottom:12px}
+.lm-label{font-size:10px;font-weight:600;color:var(--muted2);letter-spacing:.8px;text-transform:uppercase;display:block;margin-bottom:4px;font-family:var(--mono)}
+.lm-input,.lm-select{width:100%;background:var(--s2);border:1px solid var(--border);color:var(--text);font-family:var(--body);font-size:12px;padding:10px 12px;border-radius:var(--radius-sm);transition:.15s}
+.lm-input:focus,.lm-select:focus{outline:none;border-color:var(--gold)}
+.lm-err{font-size:10px;color:var(--red);margin-top:4px;display:none}
+.lm-err.show{display:block}
+.lm-submit{display:block;width:100%;background:var(--gold);color:#09090a;border:none;font-size:12px;font-weight:600;padding:12px;border-radius:var(--radius-sm);cursor:pointer;transition:.15s;margin-bottom:8px;letter-spacing:.1px}
+.lm-submit:hover{background:var(--gold2)}
+.lm-skip{display:block;text-align:center;font-size:11px;color:var(--muted);cursor:pointer;padding:6px;transition:.15s}
+.lm-skip:hover{color:var(--muted2)}
+.lm-note{font-size:10px;color:var(--muted);text-align:center;margin-top:10px;line-height:1.6}
+
+/* Print styles */
+@media print{
+  #print-company-profile{display:block!important}
+  #print-company-profile > div{page-break-before:always}
+}
+@media print{
+  .topbar,.sidebar,.phase-bar,.btn-row,.pro-soft-nag,.usage-wrap,.pro-hint{display:none!important}
+  .main{margin-left:0!important}
+  .panel{padding:0!important;max-width:none!important}
+  body{background:#fff!important;color:#111!important;font-family:Arial,sans-serif!important}
+  .stat-value{color:#7a5c10!important}
+  .boq-footer{border:1pt solid #c8a84b!important;background:#fffdf5!important}
+  .page-hd h1{color:#111!important;font-size:22pt!important}
+}
+
+/* Responsive */
+@media(max-width:900px){
+  .stats{grid-template-columns:1fr 1fr}
+  .proj-meta-grid{grid-template-columns:1fr 1fr}
+  .codes-grid{grid-template-columns:repeat(4,1fr)}
+  .dash-grid{grid-template-columns:1fr 1fr}
+  .mep-grid{grid-template-columns:1fr}
+  .ptype-grid{grid-template-columns:1fr 1fr 1fr}
+}
+@media(max-width:768px){
+  .burger{display:flex}
+  .sidebar{transform:translateX(-100%);top:56px}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0}
+  .panel{padding:20px 16px 40px}
+  .codes-grid{grid-template-columns:repeat(2,1fr);gap:7px}
+  .ptype-grid{grid-template-columns:1fr 1fr}
+  .stats{grid-template-columns:1fr 1fr}
+  .form-grid{grid-template-columns:1fr}
+  .ri-grid{grid-template-columns:1fr 1fr 1fr}
+  .ri-grid .ri:first-child{grid-column:1/-1}
+  .phase-step .ph-sub{display:none}
+  .proj-meta-grid{grid-template-columns:1fr 1fr}
+  .ph-name{font-size:9px}
+  .page-hd h1{font-size:22px}
+}
+@media(max-width:420px){
+  .panel{padding:16px 12px 32px}
+  .ptype-grid{grid-template-columns:1fr}
+  .codes-grid{grid-template-columns:1fr 1fr}
+  .stats{grid-template-columns:1fr 1fr}
+  .dash-grid{grid-template-columns:1fr}
+  .mep-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div id="toast"></div>
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="topbar-logo">
+    SiteCalc <span>Pro · BOQ</span>
+  </div>
+  <div class="topbar-right">
+    <div class="topbar-tag" id="free-tag">Free Plan</div>
+    <div class="topbar-tag pro" id="pro-tag" style="display:none">Pro ✦</div>
+    <button class="burger" onclick="toggleSidebar()">☰</button>
+  </div>
+</header>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-top">
+    <div class="project-type-badge" id="ptype-badge">⬡ No project</div>
+    <div class="project-name-display" id="sidebar-pname">Untitled project</div>
+    <div class="project-code-display" id="sidebar-pcode">No code selected</div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Workspace</div>
+    <div class="nav-item on" id="ni-dashboard" onclick="showPanel('dashboard')">
+      <span class="ni-icon">⊞</span> Dashboard
+    </div>
+    <div class="nav-item" id="ni-setup" onclick="showPanel('setup')">
+      <span class="ni-icon">◈</span> Project setup
+    </div>
+    <div class="nav-item" id="ni-rooms" onclick="showPanel('rooms')">
+      <span class="ni-icon">⬡</span> Rooms & spaces
+      <span class="ni-badge" id="rooms-badge">0</span>
+    </div>
+    <div class="nav-item" id="ni-results" onclick="showPanel('results')">
+      <span class="ni-icon">≡</span> BOQ results
+    </div>
+    <div class="nav-divider"></div>
+    <div class="nav-label">Projects</div>
+    <div class="nav-item" id="ni-saved" onclick="showPanel('saved')">
+      <span class="ni-icon">○</span> Saved projects
+      <span class="ni-badge" id="saved-badge">0</span>
+    </div>
+  </div>
+
+  <!-- Config -->
+  <div class="cfg-section">
+    <div class="cfg-row">
+      <span class="cfg-label">Units</span>
+      <select id="units" class="cfg-select">
+        <option value="metric">Metric (m, m², kg)</option>
+        <option value="imperial">Imperial (ft, ft², lb)</option>
+      </select>
+    </div>
+    <div class="cfg-row">
+      <span class="cfg-label">Currency</span>
+      <select id="currency" class="cfg-select">
+        <option value="SAR">SAR — Saudi Riyal</option>
+        <option value="AED">AED — UAE Dirham</option>
+        <option value="USD">USD — US Dollar</option>
+        <option value="GBP">GBP — British Pound</option>
+        <option value="EUR">EUR — Euro</option>
+        <option value="INR">INR — Indian Rupee</option>
+        <option value="AUD">AUD — Australian Dollar</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Pro hint -->
+  <div class="pro-hint" id="pro-hint">
+    <div class="pro-hint-title">✦ Upgrade to Pro</div>
+    <div class="pro-hint-body">Unlimited projects · PDF export · Priority support</div>
+    <a class="pro-hint-link" onclick="openProLink()">Get Pro — <span id="pro-hint-price">SAR 71</span> once →</a>
+  </div>
+
+  <!-- Usage meter -->
+  <div class="usage-wrap" id="usage-wrap">
+    <div class="usage-head">
+      <span class="usage-label">Free usage</span>
+      <span class="usage-pct" id="usage-pct">0%</span>
+    </div>
+    <div class="usage-track"><div class="usage-fill" id="usage-fill" style="width:0%"></div></div>
+    <div class="usage-msg" id="usage-msg">0 of 10 projects saved</div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+<!-- ─── DASHBOARD ─────────────────────────────────────────────────────────── -->
+<section class="panel on" id="panel-dashboard">
+  <div class="page-hd">
+    <h1>Welcome to <em>BOQ Estimator</em></h1>
+    <p>Professional bill of quantities for any construction project. Select a code, define your spaces, get instant quantities.</p>
+  </div>
+
+  <div class="dash-grid">
+    <div class="dash-card" onclick="showPanel('setup')">
+      <div class="dash-icon">＋</div>
+      <div class="dash-title">New project</div>
+      <div class="dash-desc">Start a fresh BOQ estimate with project details and building code</div>
+    </div>
+    <div class="dash-card" onclick="showPanel('saved')">
+      <div class="dash-icon">○</div>
+      <div class="dash-title">Saved projects</div>
+      <div class="dash-desc">Open a previously saved estimate to view or continue editing</div>
+    </div>
+    <div class="dash-card" onclick="window.location.href='cost-estimator.html'">
+      <div class="dash-icon">⊟</div>
+      <div class="dash-title">Cost estimator</div>
+      <div class="dash-desc">Turn BOQ quantities into a full priced cost report — App 02</div>
+    </div>
+  </div>
+
+  <!-- Building codes -->
+  <div class="section-hd"><h3>Supported standards</h3></div>
+  <div class="codes-grid" id="dash-codes-grid"></div>
+
+  <!-- Feature callouts -->
+  <div class="section-hd"><h3>What's new in v3</h3></div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:0">
+    <div style="background:var(--s1);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+      <div style="font-size:16px;margin-bottom:6px">🏗️</div>
+      <div style="font-size:12px;font-weight:500;color:var(--text);margin-bottom:3px">Project types</div>
+      <div style="font-size:11px;color:var(--muted);line-height:1.5">Residential, commercial, industrial, mixed-use & hospitality with type-specific scope</div>
+    </div>
+    <div style="background:var(--s1);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+      <div style="font-size:16px;margin-bottom:6px">⚡</div>
+      <div style="font-size:12px;font-weight:500;color:var(--text);margin-bottom:3px">MEP systems</div>
+      <div style="font-size:11px;color:var(--muted);line-height:1.5">Electrical, plumbing, HVAC, fire & safety quantities per code and project type</div>
+    </div>
+    <div style="background:var(--s1);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+      <div style="font-size:16px;margin-bottom:6px">📐</div>
+      <div style="font-size:12px;font-weight:500;color:var(--text);margin-bottom:3px">CAD-assisted entry</div>
+      <div style="font-size:11px;color:var(--muted);line-height:1.5">Upload your DWG file — app reads filename, guides you through area confirmation</div>
+    </div>
+    <div style="background:var(--s1);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px">
+      <div style="font-size:16px;margin-bottom:6px">📊</div>
+      <div style="font-size:12px;font-weight:500;color:var(--text);margin-bottom:3px">Expanded scope</div>
+      <div style="font-size:11px;color:var(--muted);line-height:1.5">11 structural items + full MEP systems + indirect costs across all project types</div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── SETUP ──────────────────────────────────────────────────────────────── -->
+<section class="panel" id="panel-setup">
+  <div class="page-hd">
+    <h1>Project <em>setup</em></h1>
+    <p>Select project type and building code first — they determine which quantities and MEP systems are calculated.</p>
+  </div>
+
+  <!-- Project type -->
+  <div class="section-hd"><h3>Project type</h3></div>
+  <div class="ptype-grid" id="ptype-grid">
+    <div class="ptype-card sel" data-type="Residential" onclick="selectPtype(this,'Residential')">
+      <div class="ptype-icon">🏠</div>
+      <div class="ptype-name">Residential</div>
+      <div class="ptype-sub">Villas, apartments, housing</div>
+    </div>
+    <div class="ptype-card" data-type="Commercial" onclick="selectPtype(this,'Commercial')">
+      <div class="ptype-icon">🏢</div>
+      <div class="ptype-name">Commercial</div>
+      <div class="ptype-sub">Offices, retail, business parks</div>
+    </div>
+    <div class="ptype-card" data-type="Mixed-use" onclick="selectPtype(this,'Mixed-use')">
+      <div class="ptype-icon">🏙️</div>
+      <div class="ptype-name">Mixed-use</div>
+      <div class="ptype-sub">Residential + retail combined</div>
+    </div>
+    <div class="ptype-card" data-type="Industrial" onclick="selectPtype(this,'Industrial')">
+      <div class="ptype-icon">🏭</div>
+      <div class="ptype-name">Industrial</div>
+      <div class="ptype-sub">Warehouses, factories, logistics</div>
+    </div>
+    <div class="ptype-card" data-type="Hospitality" onclick="selectPtype(this,'Hospitality')">
+      <div class="ptype-icon">🏨</div>
+      <div class="ptype-name">Hospitality</div>
+      <div class="ptype-sub">Hotels, resorts, serviced units</div>
+    </div>
+    <div class="ptype-card" data-type="Healthcare" onclick="selectPtype(this,'Healthcare')">
+      <div class="ptype-icon">🏥</div>
+      <div class="ptype-name">Healthcare</div>
+      <div class="ptype-sub">Clinics, hospitals, medical</div>
+    </div>
+  </div>
+
+  <!-- Building code -->
+  <div class="section-hd"><h3>Building code</h3></div>
+  <div class="codes-grid" id="setup-codes-grid"></div>
+
+  <!-- Entry method tabs -->
+  <div class="section-hd"><h3>Entry method</h3></div>
+  <div class="method-tabs">
+    <button class="method-tab on" id="tab-manual" onclick="setMethod('manual')">✏ Manual entry</button>
+    <button class="method-tab" id="tab-cad" onclick="setMethod('cad')">📐 CAD-assisted</button>
+  </div>
+
+  <!-- CAD upload zone -->
+  <div id="cad-section" style="display:none">
+    <div class="cad-upload-zone" id="cad-zone" ondragover="cadDragOver(event)" ondragleave="cadDragLeave(event)" ondrop="cadDrop(event)">
+      <input type="file" id="cad-file" accept=".dwg,.dxf,.pdf,.png,.jpg" onchange="handleCadFile(event)">
+      <div class="cad-icon">📐</div>
+      <div class="cad-title">Upload DWG / CAD / PDF file</div>
+      <div class="cad-sub">Drop your floor plan file here or click to browse.<br>Supported: .dwg · .dxf · .pdf · .png · .jpg</div>
+      <span class="cad-badge">CAD-ASSISTED ENTRY</span>
+    </div>
+    <div class="cad-result" id="cad-result">
+      <div class="cad-result-hd">
+        <div class="cad-result-icon">📄</div>
+        <div>
+          <div class="cad-result-name" id="cad-filename">drawing.dwg</div>
+          <div class="cad-result-sub">File detected — please confirm dimensions below</div>
+        </div>
+      </div>
+      <div style="background:var(--s2);border:1px solid var(--gold-border);border-radius:var(--radius-sm);padding:12px 14px;font-size:11px;color:var(--muted2);line-height:1.7;margin-bottom:12px">
+        <strong style="color:var(--gold);display:block;margin-bottom:4px">⚠ CAD-assisted entry</strong>
+        Your file has been registered. Since DWG parsing requires a desktop application, please review your drawing and enter the floor areas for each space in the Rooms section. The app will apply all code-correct factors automatically.
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="showPanel('rooms');showToast('Enter room dimensions from your drawing')">Continue to rooms →</button>
+        <button class="btn btn-outline" onclick="clearCad()">Clear file</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Project info -->
+  <div class="section-hd" id="project-info-hd"><h3>Project information</h3></div>
+  <div id="project-info-section">
+    <div class="form-grid">
+      <div class="field-wrap">
+        <label class="field-label">Project name <span>*</span></label>
+        <input class="field-input" id="pname" type="text" placeholder="e.g. Al Noor Villa — Phase 1">
+      </div>
+      <div class="field-wrap">
+        <label class="field-label">Client name</label>
+        <input class="field-input" id="pclient" type="text" placeholder="e.g. Mr. Abdullah Al-Rashid">
+      </div>
+      <div class="field-wrap">
+        <label class="field-label">Project location</label>
+        <input class="field-input" id="ploc" type="text" placeholder="e.g. Al Khobar, Eastern Province">
+      </div>
+      <div class="field-wrap">
+        <label class="field-label">Prepared by (QS name)</label>
+        <input class="field-input" id="pqs" type="text" placeholder="e.g. Eng. Mohammed Hassan">
+      </div>
+      <div class="field-wrap form-full">
+        <label class="field-label">Scope notes / assumptions</label>
+        <textarea class="field-textarea" id="pnotes" placeholder="e.g. Excludes external works, landscaping and FF&E. Quantities based on schematic drawings."></textarea>
+      </div>
+    </div>
+    <div class="btn-row right">
+      <button class="btn btn-outline" onclick="showPanel('dashboard')">← Back</button>
+      <button class="btn btn-primary" onclick="showPanel('rooms')">Continue to rooms →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ─── ROOMS ──────────────────────────────────────────────────────────────── -->
+<section class="panel" id="panel-rooms">
+  <div class="page-hd page-hd-row">
+    <div>
+      <h1>Rooms <em>&amp; spaces</em></h1>
+      <p>Add each room or zone. Scope toggles let you include MEP systems per space.</p>
+    </div>
+  </div>
+
+  <div class="rooms-toolbar">
+    <div class="rooms-count" id="rooms-count">0 rooms added</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-outline" onclick="showPanel('setup')">← Setup</button>
+      <button class="btn btn-primary" onclick="runCalc()">Calculate BOQ →</button>
+    </div>
+  </div>
+
+  <div id="rooms-list"></div>
+  <button class="add-room-btn" onclick="addRoom()">＋ Add room / space</button>
+
+  <div class="btn-row right">
+    <button class="btn btn-ghost" onclick="showPanel('setup')">← Back</button>
+    <button class="btn btn-primary" onclick="runCalc()">Calculate BOQ →</button>
+  </div>
+</section>
+
+<!-- ─── RESULTS ────────────────────────────────────────────────────────────── -->
+<section class="panel" id="panel-results">
+  <div id="results-out">
+    <div style="text-align:center;padding:60px 20px;color:var(--muted)">
+      <div style="font-size:32px;margin-bottom:10px">≡</div>
+      <div style="font-size:13px">Add rooms and calculate to see your BOQ here</div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── SAVED ──────────────────────────────────────────────────────────────── -->
+<section class="panel" id="panel-saved">
+  <div class="page-hd">
+    <h1>Saved <em>projects</em></h1>
+    <p>All projects saved locally on your device. Nothing leaves your browser.</p>
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap">
+    <button class="btn btn-primary" onclick="newProject()">＋ New project</button>
+  </div>
+  <div id="dash-count" style="font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:14px"></div>
+  <div id="saved-list"></div>
+</section>
+
+</main>
+<script>
+// ── CONSTANTS ─────────────────────────────────────────────────────────────
+const FREE_SAVE_LIMIT = 10;
+const FREE_PROJECT_LIMIT = 10;
+
+const REGS = {
+  KSA:{name:'Saudi Arabia — SBC 304',code:'SBC 304',slabGnd:.20,rebarSlab:80,rebarCol:160,wasteConc:1.05,bpm:12,wasteBk:1.05,mortarPer:25,twf:1.12,tww:1.10,paintCov:8,plasterCov:1.5,elec_psm:280,plumb_psm:320,hvac_psm:420,fire_psm:85,note:'SBC 304 (based on ACI 318). Min concrete C25. Steel fy=420 MPa. 40mm cover exterior. Increase to 50mm for Eastern Province coastal sites.'},
+  UAE:{name:'UAE — IBC / ACI 318',code:'IBC/ACI',slabGnd:.20,rebarSlab:85,rebarCol:165,wasteConc:1.05,bpm:12,wasteBk:1.05,mortarPer:25,twf:1.12,tww:1.10,paintCov:8,plasterCov:1.5,elec_psm:320,plumb_psm:380,hvac_psm:520,fire_psm:100,note:'UAE follows IBC with local DM/AD amendments. 50mm cover for coastal XS/XA exposure. MEW electrical standards apply.'},
+  UK:{name:'UK — EC2 / BS 8110',code:'EC2/BS',slabGnd:.175,rebarSlab:75,rebarCol:150,wasteConc:1.05,bpm:10,wasteBk:1.05,mortarPer:30,twf:1.10,tww:1.08,paintCov:10,plasterCov:2.0,elec_psm:145,plumb_psm:185,hvac_psm:220,fire_psm:55,note:'BS 8110 / EC2 EN 1992-1-1. C25/30 typical. 175mm two-way slab residential. IEE Wiring Regs 18th Ed. BS 6700 plumbing.'},
+  US:{name:'United States — ACI 318-19',code:'ACI 318',slabGnd:.178,rebarSlab:78,rebarCol:155,wasteConc:1.05,bpm:12.5,wasteBk:1.05,mortarPer:28,twf:1.10,tww:1.10,paintCov:9,plasterCov:1.8,elec_psm:180,plumb_psm:220,hvac_psm:280,fire_psm:65,note:"ACI 318-19. f'c=4000psi typical. fy=60,000psi (Gr60). NEC electrical. UPC plumbing. NFPA 101 life safety."},
+  EU:{name:'Europe — Eurocode 2',code:'EC2',slabGnd:.18,rebarSlab:75,rebarCol:150,wasteConc:1.05,bpm:10,wasteBk:1.04,mortarPer:30,twf:1.10,tww:1.08,paintCov:10,plasterCov:2.0,elec_psm:165,plumb_psm:200,hvac_psm:260,fire_psm:60,note:'EC2 EN 1992-1-1. C25/30 concrete. fy=500MPa B500B. XC1 interior, XC3/4 exterior. HD Directive electrical. EN 806 plumbing.'},
+  IN:{name:'India — IS 456:2000',code:'IS 456',slabGnd:.125,rebarSlab:70,rebarCol:145,wasteConc:1.07,bpm:9.5,wasteBk:1.06,mortarPer:22,twf:1.10,tww:1.10,paintCov:8,plasterCov:1.2,elec_psm:2200,plumb_psm:2800,hvac_psm:3500,fire_psm:700,note:'IS 456:2000. M20 min moderate exposure. Fe415/500 steel. IS 732 electrical. IS 1239 plumbing. NBC fire provisions.'},
+  AU:{name:'Australia — AS 3600-2018',code:'AS 3600',slabGnd:.18,rebarSlab:75,rebarCol:155,wasteConc:1.05,bpm:12.5,wasteBk:1.05,mortarPer:28,twf:1.10,tww:1.08,paintCov:10,plasterCov:2.0,elec_psm:220,plumb_psm:280,hvac_psm:350,fire_psm:80,note:'AS 3600-2018. N32 typical. D500N fy=500MPa. 20-30mm cover. AS/NZS 3000 electrical. AS 3500 plumbing. BCA Part E fire.'},
+  INTL:{name:'International / Generic',code:'Generic',slabGnd:.20,rebarSlab:80,rebarCol:160,wasteConc:1.05,bpm:12,wasteBk:1.05,mortarPer:25,twf:1.12,tww:1.10,paintCov:9,plasterCov:1.5,elec_psm:180,plumb_psm:220,hvac_psm:280,fire_psm:65,note:'Generic industry-average factors. Verify all quantities against your local building code before use.'},
+};
+
+const CODES = [
+  ['🇸🇦','SBC 304','Saudi Arabia','KSA','SA'],
+  ['🇦🇪','IBC / ACI','UAE','UAE','AE'],
+  ['🇬🇧','EC2 / BS 8110','United Kingdom','UK','GB'],
+  ['🇺🇸','ACI 318-19','United States','US','US'],
+  ['🇪🇺','Eurocode 2','Europe','EU','EU'],
+  ['🇮🇳','IS 456:2000','India','IN','IN'],
+  ['🇦🇺','AS 3600-2018','Australia','AU','AU'],
+  ['🌐','Generic','International','INTL','—'],
+];
+
+const RTYPES = ['Bedroom','Living room','Kitchen','Bathroom','Dining room','Study','Hall / Corridor','Garage','Store / Utility','Office space','Retail space','Lobby','Meeting room','Plant room','Mechanical room'];
+const PTYPE_ICONS = {Residential:'🏠',Commercial:'🏢','Mixed-use':'🏙️',Industrial:'🏭',Hospitality:'🏨',Healthcare:'🏥'};
+
+// MEP multipliers by project type (relative to residential baseline)
+const MEP_MULTIPLIERS = {
+  Residential:  {elec:1.0, plumb:1.0, hvac:1.0, fire:1.0},
+  Commercial:   {elec:1.6, plumb:0.9, hvac:1.8, fire:1.4},
+  'Mixed-use':  {elec:1.3, plumb:1.1, hvac:1.4, fire:1.2},
+  Industrial:   {elec:1.4, plumb:0.7, hvac:0.8, fire:1.8},
+  Hospitality:  {elec:1.5, plumb:1.6, hvac:2.0, fire:1.5},
+  Healthcare:   {elec:2.0, plumb:1.8, hvac:2.4, fire:2.0},
+};
+
+// ── STATE ──────────────────────────────────────────────────────────────────
+let rooms = [];
+let rid = 0;
+let selectedCode = 'KSA';
+let selectedPtype = 'Residential';
+let entryMethod = 'manual';
+let cadFile = null;
+
+function isPro(){var s=sessionStorage.getItem('boq_access')||'';return s.indexOf('ok_BOQ')===0;}
+function openProLink(){window.open('https://wa.me/966511759092?text=Hi%2C+I+want+to+upgrade+BOQ+to+Pro+(SAR+71)','_blank');}
+function getReg(){return REGS[selectedCode]||REGS.KSA;}
+function getUnit(){return document.getElementById('units').value;}
+function toM(v){return getUnit()==='metric'?+v:+v*0.3048;}
+function dA(v){return getUnit()==='metric'?v.toFixed(1):+(v*10.764).toFixed(1);}
+function dV(v){return getUnit()==='metric'?v.toFixed(2):+(v*35.315).toFixed(2);}
+function dK(v){return getUnit()==='metric'?Math.round(v):Math.round(v*2.205);}
+function aU(){return getUnit()==='metric'?'m²':'ft²';}
+function vU(){return getUnit()==='metric'?'m³':'ft³';}
+function kU(){return getUnit()==='metric'?'kg':'lb';}
+
+// ── NAVIGATION ────────────────────────────────────────────────────────────
+function showPanel(id){
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('on');});
+  var el = document.getElementById('panel-'+id);
+  if(el) el.classList.add('on');
+  document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('on');});
+  var ni = document.getElementById('ni-'+id);
+  if(ni) ni.classList.add('on');
+  if(id==='saved') renderSaved();
+  if(id==='results') calculateBOQ();
+  closeSidebar();
+  window.scrollTo(0,0);
+}
+
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('open');
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+}
+
+// ── PROJECT TYPE ──────────────────────────────────────────────────────────
+function selectPtype(el, type){
+  document.querySelectorAll('.ptype-card').forEach(function(c){c.classList.remove('sel');});
+  el.classList.add('sel');
+  selectedPtype = type;
+  updateSidebarMeta();
+}
+
+// ── BUILDING CODE ─────────────────────────────────────────────────────────
+function buildCodesGrid(containerId){
+  var g = document.getElementById(containerId);
+  if(!g) return;
+  g.innerHTML = '';
+  CODES.forEach(function(c){
+    var d = document.createElement('div');
+    d.className = 'cc' + (c[3]===selectedCode?' active':'');
+    d.id = 'cc-'+containerId+'-'+c[3];
+    d.innerHTML = '<div class="cc-flag">'+c[0]+'</div><div class="cc-name">'+c[1]+'</div><div class="cc-country">'+c[2]+'</div>'
+      +'<div style="font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:1px;margin-top:2px;background:var(--s3);padding:1px 6px;border-radius:3px;display:inline-block">'+c[4]+'</div>';
+    d.onclick = function(){selectCode(c[3]);};
+    g.appendChild(d);
+  });
+}
+
+function selectCode(key){
+  selectedCode = key;
+  // Update all code grids
+  document.querySelectorAll('.cc').forEach(function(el){
+    var id = el.id.split('-').pop();
+    el.classList.toggle('active', id===key);
+  });
+  updateSidebarMeta();
+  showToast('Building code: '+REGS[key].name);
+}
+
+// ── SIDEBAR META ──────────────────────────────────────────────────────────
+function updateSidebarMeta(){
+  var pname = document.getElementById('pname').value || 'Untitled project';
+  document.getElementById('sidebar-pname').textContent = pname;
+  document.getElementById('project-type-badge').textContent = (PTYPE_ICONS[selectedPtype]||'⬡')+' '+selectedPtype;
+  document.getElementById('sidebar-pcode').textContent = REGS[selectedCode].code + ' · ' + REGS[selectedCode].name.split(' — ')[0];
+  document.getElementById('rooms-badge').textContent = rooms.length;
+}
+
+// ── ENTRY METHOD ──────────────────────────────────────────────────────────
+function setMethod(m){
+  entryMethod = m;
+  document.getElementById('tab-manual').classList.toggle('on', m==='manual');
+  document.getElementById('tab-cad').classList.toggle('on', m==='cad');
+  document.getElementById('cad-section').style.display = m==='cad'?'block':'none';
+  document.getElementById('project-info-hd').style.display = m==='cad'&&!cadFile?'none':'flex';
+  document.getElementById('project-info-section').style.display = m==='cad'&&!cadFile?'none':'block';
+}
+
+function cadDragOver(e){e.preventDefault();document.getElementById('cad-zone').classList.add('drag-over');}
+function cadDragLeave(){document.getElementById('cad-zone').classList.remove('drag-over');}
+function cadDrop(e){e.preventDefault();cadDragLeave();if(e.dataTransfer.files[0])processCadFile(e.dataTransfer.files[0]);}
+function handleCadFile(e){if(e.target.files[0])processCadFile(e.target.files[0]);}
+function processCadFile(f){
+  cadFile = f;
+  document.getElementById('cad-filename').textContent = f.name;
+  document.getElementById('cad-result').classList.add('show');
+  document.getElementById('project-info-hd').style.display = 'flex';
+  document.getElementById('project-info-section').style.display = 'block';
+  // Pre-fill project name from filename
+  var pn = document.getElementById('pname');
+  if(!pn.value) pn.value = f.name.replace(/\.[^.]+$/,'').replace(/[-_]/g,' ');
+  showToast('File registered — enter room dimensions below');
+}
+function clearCad(){cadFile=null;document.getElementById('cad-result').classList.remove('show');document.getElementById('cad-file').value='';}
+
+// ── ROOMS ─────────────────────────────────────────────────────────────────
+function addRoom(){
+  rid++;
+  rooms.push({id:rid,name:'Room '+rid,type:'Bedroom',L:5,W:4,H:3,doors:1,windows:2,
+    scope:{elec:true,plumb:false,hvac:true,fire:false}});
+  renderRooms();
+  updateSidebarMeta();
+}
+
+function deleteRoom(id){
+  rooms = rooms.filter(function(r){return r.id!==id;});
+  renderRooms();
+  updateSidebarMeta();
+}
+
+function toggleRoom(id){
+  var b = document.getElementById('rb-'+id);
+  var a = document.getElementById('ra-'+id);
+  if(b && a){
+    var op = b.classList.toggle('op');
+    a.classList.toggle('op', op);
+    a.textContent = op ? '×' : '+';
+  }
+}
+
+function setType(i, t, el){
+  rooms[i].type = t;
+  el.closest('.room-type-row').querySelectorAll('.rtype').forEach(function(e){e.classList.remove('sel');});
+  el.classList.add('sel');
+}
+
+function toggleScope(roomIndex, scope, el){
+  rooms[roomIndex].scope[scope] = !rooms[roomIndex].scope[scope];
+  el.classList.toggle('on', rooms[roomIndex].scope[scope]);
+  el.querySelector('.st-dot').style.background = rooms[roomIndex].scope[scope] ? 'var(--blue)' : 'var(--border2)';
+}
+
+function renderRooms(){
+  var u = getUnit()==='metric'?'m':'ft';
+  var c = document.getElementById('rooms-list');
+  var countEl = document.getElementById('rooms-count');
+  if(countEl) countEl.textContent = rooms.length + ' room' + (rooms.length===1?'':'s') + ' added';
+  if(!rooms.length){
+    c.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);border:1px dashed var(--border2);border-radius:var(--radius)"><div style="font-size:24px;margin-bottom:8px">⬡</div><div style="font-size:12px">No rooms yet — click "Add room" to begin</div></div>';
+    return;
+  }
+  c.innerHTML = rooms.map(function(r, i){
+    var scopeKeys = ['elec','plumb','hvac','fire'];
+    var scopeLabels = {elec:'⚡ Electrical',plumb:'💧 Plumbing',hvac:'❄️ HVAC',fire:'🔥 Fire safety'};
+    return '<div class="room-card">'
+      +'<div class="room-hd" onclick="toggleRoom('+r.id+')">'
+        +'<span class="room-num">ROOM '+String(i+1).padStart(2,'0')+'</span>'
+        +'<span class="room-title" id="rt-'+r.id+'">'+r.name+'</span>'
+        +'<span class="room-badge">'+r.type+'</span>'
+        +'<span class="room-arrow" id="ra-'+r.id+'">+</span>'
+      +'</div>'
+      +'<div class="room-body" id="rb-'+r.id+'">'
+        +'<div class="ri-grid">'
+          +'<div class="ri"><label>Room name</label><input value="'+r.name+'" oninput="rooms['+i+'].name=this.value;document.getElementById(\'rt-'+r.id+'\').textContent=this.value;updateSidebarMeta()"></div>'
+          +'<div class="ri"><label>L ('+u+')</label><input type="number" value="'+r.L+'" step="0.1" min="0.1" oninput="rooms['+i+'].L=+this.value"></div>'
+          +'<div class="ri"><label>W ('+u+')</label><input type="number" value="'+r.W+'" step="0.1" min="0.1" oninput="rooms['+i+'].W=+this.value"></div>'
+          +'<div class="ri"><label>H ('+u+')</label><input type="number" value="'+r.H+'" step="0.1" min="0.1" oninput="rooms['+i+'].H=+this.value"></div>'
+          +'<div class="ri"><label>Doors</label><input type="number" value="'+r.doors+'" min="0" max="20" oninput="rooms['+i+'].doors=+this.value"></div>'
+          +'<div class="ri"><label>Windows</label><input type="number" value="'+r.windows+'" min="0" max="30" oninput="rooms['+i+'].windows=+this.value"></div>'
+        +'</div>'
+        +'<div class="room-type-row">'
+          +RTYPES.map(function(t){return '<span class="rtype'+(r.type===t?' sel':'')+'" onclick="setType('+i+',\''+t+'\',this)">'+t+'</span>';}).join('')
+        +'</div>'
+        +'<div class="section-hd" style="margin-top:10px"><h3>MEP systems in this space</h3></div>'
+        +'<div class="scope-toggles">'
+          +scopeKeys.map(function(sk){
+            return '<span class="scope-toggle'+(r.scope[sk]?' on':'')+'" onclick="toggleScope('+i+',\''+sk+'\',this)">'
+              +'<span class="st-dot" style="background:'+(r.scope[sk]?'var(--blue)':'var(--border2)')+'"></span>'
+              +scopeLabels[sk]
+            +'</span>';
+          }).join('')
+        +'</div>'
+        +'<div style="margin-top:12px">'
+          +'<span class="del-room" onclick="deleteRoom('+r.id+')">✕ Remove room</span>'
+        +'</div>'
+      +'</div>'
+    +'</div>';
+  }).join('');
+}
+
+// ── CALCULATE BOQ ─────────────────────────────────────────────────────────
+function runCalc(){
+  if(!rooms.length){alert('Please add at least one room first.');return;}
+  calculateBOQ();
+  showPanel('results');
+}
+
+function calculateBOQ(){
+  var reg = getReg();
+  var pname  = document.getElementById('pname').value  || 'Untitled Project';
+  var pclient= document.getElementById('pclient').value|| '—';
+  var ploc   = document.getElementById('ploc').value   || '—';
+  var pqs    = document.getElementById('pqs').value    || '—';
+  var pnotes = document.getElementById('pnotes').value;
+  var cur    = document.getElementById('currency').value;
+  var now    = new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+
+  var tF=0,tW=0,tC=0,tR=0,tB=0,tT=0,tP=0,rows='';
+  // MEP accumulators
+  var mepArea=0, elecRooms=0, plumbRooms=0, hvacRooms=0, fireRooms=0;
+
+  rooms.forEach(function(r,ri){
+    var L=toM(r.L), W=toM(r.W), H=toM(r.H);
+    var fl=L*W;
+    var gw=2*(L+W)*H;
+    var op=r.doors*2+r.windows*1.5;
+    var wl=Math.max(0,gw-op);
+    var cv=fl*reg.slabGnd;
+    var slab=+(cv*reg.wasteConc).toFixed(2);
+    var rebar=Math.round(cv*reg.rebarSlab*reg.wasteConc*1.08);
+    var blk=Math.round(wl*reg.bpm*reg.wasteBk);
+    var mor=+(blk/reg.mortarPer).toFixed(1);
+    var ftl=+(fl*reg.twf).toFixed(2);
+    var wtl=+(wl*reg.tww).toFixed(2);
+    var adh=+((ftl+wtl)/4).toFixed(1);
+    var grt=+((ftl+wtl)/6).toFixed(1);
+    var pls=+(wl/reg.plasterCov).toFixed(1);
+    var prm=+(wl*0.12).toFixed(1);
+    var pnt=+(wl/reg.paintCov*2).toFixed(1);
+
+    tF+=fl;tW+=wl;tC+=slab;tR+=rebar;tB+=blk;tT+=ftl;tP+=pnt;
+    mepArea += fl;
+
+    // MEP scope tracking
+    if(r.scope.elec)  elecRooms += fl;
+    if(r.scope.plumb) plumbRooms += fl;
+    if(r.scope.hvac)  hvacRooms += fl;
+    if(r.scope.fire)  fireRooms += fl;
+
+    var trow=function(desc,qty,unit){
+      return '<div class="trade-row"><div class="tr-desc">'+desc+'</div><div class="tr-qty">'+qty+'</div><div class="tr-unit">'+unit+'</div></div>';
+    };
+
+    rows += '<div class="boq-section">'
+      +'<div class="boq-room-hd">'
+        +'<div class="boq-room-info">'
+          +'<span class="boq-room-num">ROOM '+String(ri+1).padStart(2,'0')+'</span>'
+          +'<span class="boq-room-name">'+r.name+'</span>'
+          +'<span class="boq-room-type-badge">'+r.type+'</span>'
+        +'</div>'
+        +'<div class="boq-room-dims">'
+          +'<span class="boq-dim"><b>L</b>'+dA(L)+'</span>'
+          +'<span class="boq-dim"><b>W</b>'+dA(W)+'</span>'
+          +'<span class="boq-dim"><b>H</b>'+dA(H)+'</span>'
+          +'<span class="boq-dim"><b>Doors</b>'+r.doors+'</span>'
+          +'<span class="boq-dim"><b>Windows</b>'+r.windows+'</span>'
+        +'</div>'
+      +'</div>'
+      // Concrete
+      +'<div class="trade-group"><div class="trade-hd"><div class="trade-dot" style="background:#5b94d4"></div><span class="trade-lbl" style="color:#5b94d4">Concrete &amp; reinforcement</span></div>'
+        +trow('Concrete slab — supply, pour &amp; finish ('+reg.slabGnd*1000+'mm depth + waste)',dV(slab),vU())
+        +trow('Reinforcement bars — slabs (80kg/m³, incl. 8% laps)',dK(rebar),kU())
+      +'</div>'
+      // Masonry
+      +'<div class="trade-group"><div class="trade-hd"><div class="trade-dot" style="background:#c8a84b"></div><span class="trade-lbl" style="color:#c8a84b">Masonry &amp; blockwork</span></div>'
+        +trow('Hollow blocks 200mm — supply &amp; lay (net wall after openings)',blk.toLocaleString(),'no.')
+        +trow('Mortar — supply &amp; apply (1:6 mix, 1 bag per '+reg.mortarPer+' blocks)',mor,'bags')
+      +'</div>'
+      // Tiling
+      +'<div class="trade-group"><div class="trade-hd"><div class="trade-dot" style="background:#5aad7e"></div><span class="trade-lbl" style="color:#5aad7e">Tiling &amp; finishes</span></div>'
+        +trow('Floor tiles — supply &amp; fix (incl. '+Math.round((reg.twf-1)*100)+'% waste)',dA(ftl),aU())
+        +trow('Wall tiles — supply &amp; fix (incl. '+Math.round((reg.tww-1)*100)+'% waste)',dA(wtl),aU())
+        +trow('Tile adhesive — supply &amp; apply',adh,'bags')
+        +trow('Tile grout — supply &amp; apply',grt,'bags')
+      +'</div>'
+      // Plaster & paint
+      +'<div class="trade-group"><div class="trade-hd"><div class="trade-dot" style="background:#b87bd4"></div><span class="trade-lbl" style="color:#b87bd4">Plastering &amp; painting</span></div>'
+        +trow('Wall plaster — 10mm coat',pls,'bags')
+        +trow('Primer — 1 coat (wall area / 8m² per L)',prm,'litres')
+        +trow('Emulsion paint — 2 coats (wall area / '+reg.paintCov+'m² per L)',pnt,'litres')
+      +'</div>'
+    +'</div>';
+  });
+
+  // MEP section
+  var mepMult = MEP_MULTIPLIERS[selectedPtype] || MEP_MULTIPLIERS.Residential;
+  var elecQty  = elecRooms  > 0 ? +(elecRooms  * reg.elec_psm  * mepMult.elec  / 1000).toFixed(2) : 0;
+  var plumbQty = plumbRooms > 0 ? +(plumbRooms * reg.plumb_psm * mepMult.plumb / 1000).toFixed(2) : 0;
+  var hvacQty  = hvacRooms  > 0 ? +(hvacRooms  * reg.hvac_psm  * mepMult.hvac  / 1000).toFixed(2) : 0;
+  var fireQty  = fireRooms  > 0 ? +(fireRooms  * reg.fire_psm  * mepMult.fire  / 1000).toFixed(2) : 0;
+
+  var hasMEP = elecRooms>0 || plumbRooms>0 || hvacRooms>0 || fireRooms>0;
+  var mepHtml = '';
+  if(hasMEP){
+    var mepItems = [];
+    if(elecRooms>0)  mepItems.push({name:'Electrical installation',desc:'Wiring, distribution boards, sockets, lighting & ELV ('+reg.code+')',val:elecRooms.toFixed(1)+' m² × '+reg.elec_psm+' ('+selectedPtype+'×'+mepMult.elec+')',unit:'provisional sum'});
+    if(plumbRooms>0) mepItems.push({name:'Plumbing & drainage',desc:'Supply pipes, drainage, sanitary fittings, hot & cold water system',val:plumbRooms.toFixed(1)+' m² × '+reg.plumb_psm+' ('+selectedPtype+'×'+mepMult.plumb+')',unit:'provisional sum'});
+    if(hvacRooms>0)  mepItems.push({name:'HVAC / Air conditioning',desc:'Split units / central plant, ducts, controls & BMS',val:hvacRooms.toFixed(1)+' m² × '+reg.hvac_psm+' ('+selectedPtype+'×'+mepMult.hvac+')',unit:'provisional sum'});
+    if(fireRooms>0)  mepItems.push({name:'Fire & safety systems',desc:'Sprinklers, detectors, alarms, hose reels, signage per '+reg.code,val:fireRooms.toFixed(1)+' m² × '+reg.fire_psm+' ('+selectedPtype+'×'+mepMult.fire+')',unit:'provisional sum'});
+
+    mepHtml = '<div class="mep-section">'
+      +'<div class="mep-hd"><div class="mep-hd-icon">⚡</div><div class="mep-hd-title">MEP Systems — '+selectedPtype+' ('+reg.code+')</div></div>'
+      +'<div class="mep-grid">'
+      +mepItems.map(function(m){
+        return '<div class="mep-item">'
+          +'<div class="mep-item-name">'+m.name+'</div>'
+          +'<div class="mep-item-desc">'+m.desc+'<br><span style="font-family:var(--mono);font-size:9px;color:var(--muted)">'+m.val+'</span></div>'
+          +'<div class="mep-item-value" style="font-size:12px;color:var(--muted2)">Included</div>'
+          +'<div class="mep-item-unit">Transfer to cost estimator for pricing</div>'
+        +'</div>';
+      }).join('')
+      +'</div>'
+      +'<div style="margin-top:10px;font-size:10px;color:var(--muted);line-height:1.6">MEP quantities shown as indicative provisional sums. Use Cost Estimator to apply unit rates and generate priced schedules. '
+      +'<a onclick="window.location.href=\'cost-estimator.html\'" style="color:var(--gold);cursor:pointer;text-decoration:underline">Open Cost Estimator →</a></div>'
+    +'</div>';
+  }
+
+  // Company footer
+  var companyFooter = '<div class="boq-footer" style="margin-top:24px;background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:0;overflow:hidden">'
+    +'<div style="background:var(--gold-dim);border-bottom:1px solid var(--gold-border);padding:14px 20px">'
+      +'<div style="font-family:var(--mono);font-size:9px;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:2px">About Al Qaswaa Al Sharqia Trading EST</div>'
+      +'<div style="font-size:13px;font-weight:700;color:var(--text);letter-spacing:-.2px">EPC Contractor — Eastern Province &amp; KSA</div>'
+    +'</div>'
+    +'<div style="padding:18px 20px">'
+      +'<p style="font-size:11px;color:var(--muted2);line-height:1.8;margin-bottom:12px">With 10+ years of proven EPC delivery experience, Al Qaswaa Al Sharqia Trading EST handles the full project lifecycle — design, civil &amp; structural works, MEP installation, fit-out, and handover. Trusted by Saudi Aramco, ROSHN, DAMAC, Royal Commission Jubail, Kanoo Group, SWCC and major private developers. Our largest completed project: 40 MWac solar + BESS power station in Kenya ($89M). If you are using this tool to estimate your project — we can deliver it.</p>'
+      +'<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px">'
+        +'<span style="font-size:9px;background:var(--s3);border:1px solid var(--border);color:var(--muted2);padding:3px 8px;border-radius:3px;font-family:var(--mono)">Saudi Aramco</span>'
+        +'<span style="font-size:9px;background:var(--s3);border:1px solid var(--border);color:var(--muted2);padding:3px 8px;border-radius:3px;font-family:var(--mono)">ROSHN</span>'
+        +'<span style="font-size:9px;background:var(--s3);border:1px solid var(--border);color:var(--muted2);padding:3px 8px;border-radius:3px;font-family:var(--mono)">DAMAC</span>'
+        +'<span style="font-size:9px;background:var(--s3);border:1px solid var(--border);color:var(--muted2);padding:3px 8px;border-radius:3px;font-family:var(--mono)">Royal Commission Jubail</span>'
+        +'<span style="font-size:9px;background:var(--s3);border:1px solid var(--border);color:var(--muted2);padding:3px 8px;border-radius:3px;font-family:var(--mono)">Kanoo Group</span>'
+        +'<span style="font-size:9px;background:var(--s3);border:1px solid var(--border);color:var(--muted2);padding:3px 8px;border-radius:3px;font-family:var(--mono)">SWCC</span>'
+      +'</div>'
+      +'<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid var(--border)">'
+        +'<div style="font-size:11px;color:var(--muted2)">'
+          +'<div style="font-weight:600;color:var(--text);margin-bottom:2px">Looking for an EPC contractor?</div>'
+          +'<div style="font-size:10px">Imran Khoje · <a href="tel:+966573524746" style="color:var(--gold);text-decoration:none">+966 57 352 4746</a> · <a href="mailto:info@qaswasharqia.com" style="color:var(--gold);text-decoration:none">info@qaswasharqia.com</a></div>'
+        +'</div>'
+        +'<div style="display:flex;gap:8px;flex-wrap:wrap">'
+          +'<a href="https://wa.me/966511759092?text=Hi+Imran%2C+I+found+Al+Qaswaa+through+BOQ+Estimator+and+I+have+a+construction+project+to+discuss" target="_blank" style="display:inline-block;background:var(--gold);color:#0a0a09;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;padding:8px 14px;border-radius:5px;text-decoration:none">💬 WhatsApp us</a>'
+          +'<a href="https://qaswasharqia.netlify.app" target="_blank" style="display:inline-block;background:transparent;border:1px solid var(--border2);color:var(--muted2);font-family:var(--mono);font-size:9px;letter-spacing:1px;padding:8px 14px;border-radius:5px;text-decoration:none">Website →</a>'
+        +'</div>'
+      +'</div>'
+    +'</div>'
+  +'</div>';
+
+  var softNag = getSoftNag(getFreeUsage());
+
+  document.getElementById('results-out').innerHTML =
+    // Results hero
+    '<div class="results-hero">'
+      +'<div class="results-hero-top">'
+        +'<div class="results-title">'+pname+'</div>'
+        +'<span class="results-code-badge">'+reg.code+' · '+selectedPtype+'</span>'
+      +'</div>'
+      +'<div class="proj-meta-grid">'
+        +'<div class="pm-item"><span class="pm-lbl">Client</span><span class="pm-val">'+pclient+'</span></div>'
+        +'<div class="pm-item"><span class="pm-lbl">Location</span><span class="pm-val">'+ploc+'</span></div>'
+        +'<div class="pm-item"><span class="pm-lbl">Prepared by</span><span class="pm-val">'+pqs+'</span></div>'
+        +'<div class="pm-item"><span class="pm-lbl">Date</span><span class="pm-val">'+now+'</span></div>'
+      +'</div>'
+    +'</div>'
+    // Stats
+    +'<div class="stats">'
+      +'<div class="stat"><div class="stat-label">Floor area</div><div class="stat-value">'+dA(tF)+'</div><div class="stat-unit">'+aU()+'</div></div>'
+      +'<div class="stat"><div class="stat-label">Net wall area</div><div class="stat-value">'+dA(tW)+'</div><div class="stat-unit">'+aU()+'</div></div>'
+      +'<div class="stat"><div class="stat-label">Concrete</div><div class="stat-value">'+dV(tC)+'</div><div class="stat-unit">'+vU()+'</div></div>'
+      +'<div class="stat"><div class="stat-label">Rebar</div><div class="stat-value">'+dK(tR)+'</div><div class="stat-unit">'+kU()+'</div></div>'
+      +'<div class="stat"><div class="stat-label">Blocks</div><div class="stat-value">'+tB.toLocaleString()+'</div><div class="stat-unit">units</div></div>'
+      +'<div class="stat"><div class="stat-label">Floor+wall tiles</div><div class="stat-value">'+dA(tT)+'</div><div class="stat-unit">'+aU()+'</div></div>'
+      +'<div class="stat"><div class="stat-label">Paint</div><div class="stat-value">'+tP.toFixed(1)+'</div><div class="stat-unit">litres</div></div>'
+      +'<div class="stat"><div class="stat-label">Rooms</div><div class="stat-value">'+rooms.length+'</div><div class="stat-unit">spaces</div></div>'
+    +'</div>'
+    // Code note
+    +'<div class="code-note">'+reg.note+'</div>'
+    // Room sections
+    +rows
+    // MEP section
+    +mepHtml
+    // Actions
+    +'<div class="btn-row">'
+      +'<button class="btn btn-outline" onclick="saveProject()">💾 Save project</button>'
+      +'<button class="btn btn-primary" onclick="printBOQ()">📄 Export PDF</button>'
+      +'<button class="btn btn-outline" onclick="window.location.href=\'cost-estimator.html\'">→ Cost Estimator</button>'
+      +'<button class="btn btn-ghost" onclick="showPanel(\'rooms\')">← Edit rooms</button>'
+    +'</div>'
+    +softNag
+    +(pnotes?'<div class="disclaimer"><strong style="color:var(--muted2);font-family:var(--mono);font-size:9px;letter-spacing:1px;text-transform:uppercase">Scope notes &nbsp;</strong>'+pnotes+'</div>':'')
+    +'<div class="disclaimer">All quantities are preliminary estimates for budgeting purposes only. Final quantities must be verified by a licensed structural engineer or QS per '+reg.name+'. Generated '+now+'.</div>'
+    +companyFooter;
+}
+
+// ── USAGE METER ───────────────────────────────────────────────────────────
+var FREE_PROJECT_LIMIT = 10, FREE_SAVE_LIMIT = 10;
+function getFreeUsage(){
+  var list=[];try{list=JSON.parse(localStorage.getItem('boq_v3')||'[]');}catch(e){}
+  var count=list.length;
+  var pct=Math.min(100,Math.round(count/FREE_PROJECT_LIMIT*100));
+  var status=pct<50?'low':pct<80?'mid':pct<100?'warn':'full';
+  return{count:count,pct:pct,status:status};
+}
+function updateUsageMeter(){
+  if(isPro()){document.getElementById('usage-wrap').style.display='none';document.getElementById('pro-hint').classList.remove('show');return;}
+  var u=getFreeUsage();
+  var fill=document.getElementById('usage-fill'),pctEl=document.getElementById('usage-pct'),msgEl=document.getElementById('usage-msg'),hint=document.getElementById('pro-hint');
+  if(!fill)return;
+  fill.style.width=u.pct+'%';
+  fill.className='usage-fill'+(u.status==='warn'?' warn':u.status==='full'?' high':'');
+  pctEl.textContent=u.pct+'%';
+  pctEl.style.color=u.status==='full'?'var(--red)':u.status==='warn'?'#c8803a':'';
+  var rem=FREE_PROJECT_LIMIT-u.count;
+  var msg='';
+  if(u.status==='low')msg=u.count+' of '+FREE_PROJECT_LIMIT+' projects saved';
+  else if(u.status==='mid')msg=u.count+' of '+FREE_PROJECT_LIMIT+' used — '+rem+' remaining';
+  else if(u.status==='warn')msg='Only '+rem+' slot'+(rem===1?'':'s')+' left. <a onclick="openProLink()">Upgrade →</a>';
+  else msg='Limit reached. <a onclick="openProLink()">Upgrade to Pro</a>';
+  msgEl.innerHTML=msg;
+  if(hint)hint.classList.toggle('show',u.pct>=70);
+  var priceEl=document.getElementById('pro-hint-price');
+  if(priceEl)priceEl.textContent=window.BOQ_PRO_DISPLAY||'SAR 71';
+}
+function getSoftNag(u){
+  if(isPro()||u.status==='low')return '';
+  var rem=FREE_PROJECT_LIMIT-u.count;
+  var icon=u.status==='full'?'📁':'⚡';
+  var msg=u.status==='full'?'<strong>Free limit reached.</strong> Delete a project or upgrade for unlimited storage.'
+    :'<strong>'+rem+' free slot'+(rem===1?'':'s')+' left.</strong> Pro gives unlimited projects, PDF export &amp; all updates for '+(window.BOQ_PRO_DISPLAY||'SAR 71')+' once.';
+  return '<div class="pro-soft-nag"><span class="psn-icon">'+icon+'</span><span class="psn-text">'+msg+'</span><a class="psn-link" onclick="openProLink()">Upgrade →</a></div>';
+}
+
+// ── SAVE / LOAD ───────────────────────────────────────────────────────────
+function saveProject(){
+  var key='boq_v3',list=[];try{list=JSON.parse(localStorage.getItem(key)||'[]');}catch(e){}
+  if(!isPro()&&list.length>=FREE_SAVE_LIMIT){
+    if(confirm('Free plan: '+FREE_SAVE_LIMIT+' saved projects limit reached.\n\nUpgrade to Pro for unlimited saves?\n\n'+(window.BOQ_PRO_DISPLAY||'SAR 71')+' — one-time, lifetime access.')){openProLink();}
+    return;
+  }
+  var proj={
+    id:'p'+Date.now(),
+    name:document.getElementById('pname').value||'Untitled',
+    client:document.getElementById('pclient').value,
+    location:document.getElementById('ploc').value,
+    qs:document.getElementById('pqs').value,
+    notes:document.getElementById('pnotes').value,
+    ptype:selectedPtype,
+    code:selectedCode,
+    units:document.getElementById('units').value,
+    currency:document.getElementById('currency').value,
+    rooms:JSON.parse(JSON.stringify(rooms)),
+    saved:new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})
+  };
+  list.unshift(proj);
+  try{localStorage.setItem(key,JSON.stringify(list.slice(0,isPro()?20:FREE_SAVE_LIMIT)));}catch(e){}
+  updateCount();updateUsageMeter();
+  showToast('Project saved: '+proj.name);
+}
+
+function loadProject(id){
+  var list=[];try{list=JSON.parse(localStorage.getItem('boq_v3')||'[]');}catch(e){}
+  var p=list.find(function(x){return x.id===id;});
+  if(!p)return;
+  document.getElementById('pname').value=p.name||'';
+  document.getElementById('pclient').value=p.client||'';
+  document.getElementById('ploc').value=p.location||'';
+  document.getElementById('pqs').value=p.qs||'';
+  document.getElementById('pnotes').value=p.notes||'';
+  selectedPtype=p.ptype||'Residential';
+  selectedCode=p.code||'KSA';
+  if(document.getElementById('units'))document.getElementById('units').value=p.units||'metric';
+  if(document.getElementById('currency'))document.getElementById('currency').value=p.currency||'SAR';
+  rooms=p.rooms||[];
+  rid=rooms.reduce(function(m,r){return Math.max(m,r.id||0);},0);
+  // Ensure scope exists on old rooms
+  rooms.forEach(function(r){if(!r.scope)r.scope={elec:true,plumb:false,hvac:true,fire:false};});
+  buildCodesGrid('setup-codes-grid');
+  buildCodesGrid('dash-codes-grid');
+  selectCode(selectedCode);
+  renderRooms();updateSidebarMeta();updateCount();
+  showPanel('rooms');
+}
+
+function deleteProject(id,e){
+  e.stopPropagation();
+  if(!confirm('Delete this project?'))return;
+  var list=[];try{list=JSON.parse(localStorage.getItem('boq_v3')||'[]');}catch(e){}
+  try{localStorage.setItem('boq_v3',JSON.stringify(list.filter(function(p){return p.id!==id;})));}catch(e){}
+  renderSaved();updateCount();updateUsageMeter();
+}
+
+function renderSaved(){
+  var list=[];try{list=JSON.parse(localStorage.getItem('boq_v3')||'[]');}catch(e){}
+  var el=document.getElementById('saved-list');
+  if(!list.length){
+    el.innerHTML='<div style="text-align:center;padding:48px 20px;color:var(--muted);border:1px dashed var(--border2);border-radius:var(--radius)"><div style="font-size:24px;margin-bottom:8px">○</div><div style="font-size:12px">No saved projects yet. Complete a BOQ and save it.</div></div>';
+    return;
+  }
+  el.innerHTML='<div class="proj-grid">'+list.map(function(p){
+    return '<div class="pc" onclick="loadProject(\''+p.id+'\')">'
+      +'<div class="pc-name">'+p.name+'</div>'
+      +'<div class="pc-meta">'+(p.client?'Client: '+p.client+'<br>':'')+(p.location?'Location: '+p.location+'<br>':'')+(PTYPE_ICONS[p.ptype]||'⬡')+' '+(p.ptype||'Residential')+' · '+(REGS[p.code]?REGS[p.code].code:p.code)+' · '+(p.rooms||[]).length+' rooms</div>'
+      +'<div class="pc-foot"><span class="pc-badge">'+p.saved+'</span><span class="pc-del" onclick="deleteProject(\''+p.id+'\',event)">✕ Delete</span></div>'
+    +'</div>';
+  }).join('')+'</div>';
+}
+
+function updateCount(){
+  var list=[];try{list=JSON.parse(localStorage.getItem('boq_v3')||'[]');}catch(e){}
+  var el=document.getElementById('dash-count');
+  if(el)el.textContent=list.length+' project'+(list.length===1?'':'s')+' saved';
+  var badge=document.getElementById('saved-badge');
+  if(badge)badge.textContent=list.length;
+  updateUsageMeter();
+}
+
+function newProject(){
+  ['pname','pclient','ploc','pqs','pnotes'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  rooms=[];rid=0;
+  selectedCode='KSA';selectedPtype='Residential';
+  buildCodesGrid('setup-codes-grid');
+  buildCodesGrid('dash-codes-grid');
+  selectCode('KSA');
+  renderRooms();updateSidebarMeta();
+  showPanel('setup');
+}
+
+// ── PRINT ─────────────────────────────────────────────────────────────────
+function printBOQ(){showPanel('results');setTimeout(function(){window.print();},250);}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────
+function showToast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.style.opacity='1';
+  clearTimeout(t._to);t._to=setTimeout(function(){t.style.opacity='0';},2400);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+buildCodesGrid('dash-codes-grid');
+buildCodesGrid('setup-codes-grid');
+selectCode('KSA');
+
+// Add default room
+addRoom();
+rooms[0]={id:1,name:'Master bedroom',type:'Bedroom',L:5,W:4.5,H:3,doors:1,windows:2,
+  scope:{elec:true,plumb:false,hvac:true,fire:false}};
+renderRooms();
+updateSidebarMeta();
+updateCount();
+
+// Set locale currency
+(function(){
+  var cur=window.BOQ_CURRENCY||'SAR';
+  var sel=document.getElementById('currency');
+  if(sel){for(var i=0;i<sel.options.length;i++){if(sel.options[i].value===cur){sel.selectedIndex=i;break;}}}
+})();
+
+// Auto-detect region code
+(function(){
+  var cc=window.BOQ_REGION||'SA';
+  var map={'SA':'KSA','AE':'UAE','GB':'UK','US':'US','IN':'IN','AU':'AU'};
+  var code=map[cc]||'KSA';
+  selectedCode=code;
+  buildCodesGrid('dash-codes-grid');
+  buildCodesGrid('setup-codes-grid');
+  selectCode(code);
+})();
+
+// Input listener for sidebar update
+document.getElementById('pname').addEventListener('input', updateSidebarMeta);
+</script>
+<div id="print-company-profile" style="display:none">
+<div style="page-break-before:always;padding:32px 0;font-family:Arial,sans-serif">
+  <div style="border:2px solid #c8a84b;border-radius:8px;padding:28px 32px;max-width:700px;margin:0 auto">
+    <div style="display:flex;align-items:flex-start;gap:24px;margin-bottom:20px">
+      <div style="width:60px;height:60px;background:rgba(200,168,75,.15);border:1.5px solid #c8a84b;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#c8a84b;font-family:Georgia,serif;flex-shrink:0">QS</div>
+      <div><div style="font-size:20px;font-weight:700;color:#111;margin-bottom:2px;font-family:Georgia,serif">Al Qaswaa Al Sharqia Trading EST</div>
+      <div style="font-size:11px;color:#7a6010;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">مؤسسة القصواء الشرقية للتجارة</div>
+      <div style="font-size:12px;color:#444;font-weight:500">Full-Service EPC Contractor · Eastern Province, Saudi Arabia</div></div>
+    </div>
+    <div style="border-top:1px solid #e8d090;padding-top:16px;margin-bottom:16px">
+      <div style="font-size:13px;font-weight:700;color:#111;margin-bottom:8px">About Us</div>
+      <div style="font-size:12px;color:#444;line-height:1.8">Al Qaswaa Al Sharqia Trading EST is a licensed full-cycle EPC (Engineering, Procurement &amp; Construction) contractor headquartered in the Eastern Province of Saudi Arabia. We deliver turnkey construction projects across residential, commercial, industrial and hospitality sectors — from concept design through to final handover.<br><br>Our team has <strong>proven experience delivering projects within Royal Commission jurisdictions</strong> including Jubail Industrial City, meeting the stringent quality, safety and compliance standards required by Saudi Arabia's premier development authorities. We are fully registered and compliant with Saudi Contractors Authority (SCA) requirements.</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px">
+      <div style="background:#fffdf5;border:1px solid #e8d090;border-radius:5px;padding:10px;text-align:center"><div style="font-size:18px;font-weight:700;color:#c8a84b;font-family:monospace">EPC</div><div style="font-size:10px;color:#666;margin-top:2px">Full cycle delivery</div></div>
+      <div style="background:#fffdf5;border:1px solid #e8d090;border-radius:5px;padding:10px;text-align:center"><div style="font-size:18px;font-weight:700;color:#c8a84b;font-family:monospace">RC</div><div style="font-size:10px;color:#666;margin-top:2px">Royal Commission proven</div></div>
+      <div style="background:#fffdf5;border:1px solid #e8d090;border-radius:5px;padding:10px;text-align:center"><div style="font-size:18px;font-weight:700;color:#c8a84b;font-family:monospace">SCA</div><div style="font-size:10px;color:#666;margin-top:2px">Registered contractor</div></div>
+    </div>
+    <div style="border-top:1px solid #e8d090;padding-top:14px">
+      <div style="font-size:13px;font-weight:700;color:#111;margin-bottom:8px">Looking for a trusted EPC contractor for your next project?</div>
+      <div style="font-size:12px;color:#444;line-height:1.7;margin-bottom:12px">If this estimate has helped you scope your project, let us help you build it. We offer competitive proposals, transparent pricing and full accountability from groundbreaking to handover. Contact us today for a no-obligation discussion.</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div style="background:#c8a84b;border-radius:5px;padding:10px;text-align:center">
+          <div style="font-size:9px;color:rgba(0,0,0,.6);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px">WhatsApp / Call</div>
+          <div style="font-size:14px;font-weight:700;color:#0a0a09">+966 51 175 9092</div>
+          <div style="font-size:11px;color:rgba(0,0,0,.7)">Imran Khoje · <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="7b1216091a153b0a1a080c1a08131a090a121a55181416">[email&#160;protected]</a></div>
+        </div>
+        <div style="border:1.5px solid #c8a84b;border-radius:5px;padding:10px;text-align:center">
+          <div style="font-size:9px;color:#7a6010;letter-spacing:1px;text-transform:uppercase;margin-bottom:2px">Email &amp; Web</div>
+          <div style="font-size:12px;font-weight:600;color:#111"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="aec7c0c8c1eedfcfddd9cfddc6cfdcdfc7cf80cdc1c3">[email&#160;protected]</a></div>
+          <div style="font-size:10px;color:#7a6010;margin-top:2px">qaswa-sharqia.netlify.app</div>
+          <div style="font-size:11px;color:#444;margin-top:2px">+966 57 352 4746</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js">
+// ── LEAD GATE ─────────────────────────────────────────────────────────────
+function checkLeadGate(){
+  if(!localStorage.getItem('boq_lead')){
+    document.getElementById('lead-gate').classList.add('open');
+  }
+}
+function submitLeadGate(){
+  var n=document.getElementById('lg-name').value.trim();
+  var e=document.getElementById('lg-email').value.trim();
+  var p=document.getElementById('lg-purpose').value;
+  var err=document.getElementById('lg-err');
+  if(!n||!e||!p){err.classList.add('show');return;}
+  err.classList.remove('show');
+  var lead={name:n,email:e,phone:document.getElementById('lg-phone').value.trim(),purpose:p,source:'BOQ Estimator',ts:new Date().toISOString()};
+  localStorage.setItem('boq_lead',JSON.stringify(lead));
+  document.getElementById('lead-gate').classList.remove('open');
+  showToast('Welcome, '+n.split(' ')[0]+'! Start by selecting a building code.');
+}
+function skipLeadGate(){
+  document.getElementById('lead-gate').classList.remove('open');
+}
+// Run on load
+window.addEventListener('DOMContentLoaded', function(){ setTimeout(checkLeadGate, 800); });
+
+</script><script>
+/* ── LEAD GATE ─────────────────────────────────────────────────────────── */
+/* ── LEAD GATE — shared across BOQ & Cost Estimator ─────────────────────
+   Collects name, email, phone, purpose before granting free or pro access.
+   Free: 10 projects max. Pro: monthly or annual, WhatsApp order flow.
+   ──────────────────────────────────────────────────────────────────────── */
+
+// ── STYLES (injected once) ──────────────────────────────────────────────
+var LG_CSS = `
+<style id="lg-styles">
+.lg-overlay{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:9000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);padding:16px}
+.lg-modal{background:#111110;border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:36px 32px;max-width:460px;width:100%;position:relative;max-height:90vh;overflow-y:auto}
+.lg-close{position:absolute;top:14px;right:16px;background:none;border:none;color:#6a6860;font-size:20px;cursor:pointer;line-height:1;transition:.15s}
+.lg-close:hover{color:#e8e6de}
+.lg-logo{font-family:'Playfair Display',serif;font-size:13px;font-style:italic;color:#c8a84b;letter-spacing:.5px;margin-bottom:4px}
+.lg-eyebrow{font-family:'DM Mono',monospace;font-size:9px;color:#6a6860;letter-spacing:2px;text-transform:uppercase;margin-bottom:18px}
+.lg-title{font-family:'Playfair Display',serif;font-size:24px;color:#e8e6de;margin-bottom:6px;line-height:1.2}
+.lg-title em{color:#c8a84b;font-style:italic}
+.lg-sub{font-size:12px;color:#9a9890;line-height:1.7;margin-bottom:22px}
+.lg-field{margin-bottom:12px}
+.lg-label{font-family:'DM Mono',monospace;font-size:9px;color:#6a6860;letter-spacing:1.5px;text-transform:uppercase;display:block;margin-bottom:4px}
+.lg-input,.lg-select{width:100%;background:#181816;border:1px solid rgba(255,255,255,.09);color:#e8e6de;font-family:'Sora',sans-serif;font-size:12px;padding:10px 13px;border-radius:7px;transition:.15s;outline:none}
+.lg-input:focus,.lg-select:focus{border-color:#c8a84b;background:#212120}
+.lg-input.err,.lg-select.err{border-color:#c8504a}
+.lg-err-msg{font-size:10px;color:#c8504a;margin-top:3px;display:none}
+.lg-err-msg.show{display:block}
+.lg-divider{display:flex;align-items:center;gap:12px;margin:16px 0;color:#6a6860;font-size:11px}
+.lg-divider::before,.lg-divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.07)}
+.lg-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;font-family:'DM Mono',monospace;font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;padding:12px;border-radius:7px;cursor:pointer;transition:.15s;border:1px solid transparent;text-decoration:none;margin-bottom:9px}
+.lg-btn-primary{background:#c8a84b;color:#0a0a09;border-color:#c8a84b}
+.lg-btn-primary:hover{background:#e8c96a}
+.lg-btn-outline{background:transparent;border-color:rgba(255,255,255,.14);color:#9a9890}
+.lg-btn-outline:hover{border-color:#c8a84b;color:#c8a84b}
+.lg-plans{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.lg-plan{background:#181816;border:1px solid rgba(255,255,255,.09);border-radius:10px;padding:16px;cursor:pointer;transition:.2s;user-select:none;position:relative}
+.lg-plan:hover{border-color:rgba(255,255,255,.18)}
+.lg-plan.sel{border-color:#c8a84b;background:rgba(200,168,75,.1)}
+.lg-plan.sel::after{content:'✓';position:absolute;top:8px;right:10px;font-size:11px;color:#c8a84b;font-weight:700}
+.lg-plan-label{font-family:'DM Mono',monospace;font-size:9px;color:#6a6860;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px}
+.lg-plan-price{font-family:'DM Mono',monospace;font-size:22px;font-weight:500;color:#c8a84b;line-height:1;margin-bottom:2px}
+.lg-plan-period{font-size:10px;color:#6a6860;margin-bottom:8px}
+.lg-plan-note{font-size:10px;color:#9a9890;line-height:1.5}
+.lg-savings{background:rgba(74,155,106,.1);border:1px solid rgba(74,155,106,.25);border-radius:5px;padding:4px 10px;font-family:'DM Mono',monospace;font-size:9px;color:#4a9b6a;letter-spacing:.5px;display:inline-block;margin-top:5px}
+.lg-note{font-size:10px;color:#6a6860;text-align:center;line-height:1.6;margin-top:10px}
+.lg-step{display:none}.lg-step.on{display:block}
+.lg-progress{display:flex;gap:6px;margin-bottom:22px}
+.lg-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.12);transition:.3s}
+.lg-dot.done{background:#c8a84b}
+.lg-dot.active{background:#c8a84b;box-shadow:0 0 8px rgba(200,168,75,.4)}
+</style>
+`;
+
+// ── COMPANY INFO ────────────────────────────────────────────────────────
+var LG_COMPANY = {
+  name: 'SiteCalc Pro',
+  contact_name: 'Imran Khoje',
+  email: 'info@qaswasharqia.com',
+  phone: '+966511759092',
+  phone2: '+966573524746',
+  wa: '966511759092',
+  website: 'https://qaswa-sharqia.netlify.app',
+};
+
+// ── PRICING (region-aware) ──────────────────────────────────────────────
+var LG_PRICES = {
+  SAR: {monthly:'SAR 29', annual:'SAR 249', monthly_num:29, annual_num:249, monthly_save:'', annual_save:'Save 30%', sym:'SAR '},
+  AED: {monthly:'AED 29', annual:'AED 249', monthly_num:29, annual_num:249, monthly_save:'', annual_save:'Save 30%', sym:'AED '},
+  GBP: {monthly:'£6',    annual:'£49',     monthly_num:6,  annual_num:49,  monthly_save:'', annual_save:'Save 32%', sym:'£'},
+  USD: {monthly:'$8',    annual:'$65',     monthly_num:8,  annual_num:65,  monthly_save:'', annual_save:'Save 32%', sym:'$'},
+  EUR: {monthly:'€7',    annual:'€59',     monthly_num:7,  annual_num:59,  monthly_save:'', annual_save:'Save 30%', sym:'€'},
+  INR: {monthly:'₹599',  annual:'₹4,999',  monthly_num:599,annual_num:4999,monthly_save:'', annual_save:'Save 30%', sym:'₹'},
+  AUD: {monthly:'A$12',  annual:'A$99',    monthly_num:12, annual_num:99,  monthly_save:'', annual_save:'Save 31%', sym:'A$'},
+};
+
+function lgGetPrices() {
+  return LG_PRICES[window.BOQ_CURRENCY||window.COST_CURRENCY||'SAR'] || LG_PRICES.SAR;
+}
+
+// ── STATE ───────────────────────────────────────────────────────────────
+var LG_STATE = {plan:'free', billing:'annual', step:1};
+var LG_LEAD = {};
+var LG_RESOLVE = null;
+
+// ── MAIN ENTRY POINT ────────────────────────────────────────────────────
+// Returns a promise that resolves to {plan:'free'|'monthly'|'annual', lead:{...}}
+// or rejects if user closes without completing
+function lgShow(mode) {
+  // mode: 'free' | 'pro' | 'any'
+  return new Promise(function(resolve, reject) {
+    LG_RESOLVE = resolve;
+    LG_STATE.plan = (mode === 'pro') ? 'monthly' : 'free';
+    LG_STATE.step = 1;
+    lgInject(mode);
+  });
+}
+
+function lgInject(mode) {
+  // Remove existing if any
+  var existing = document.getElementById('lg-container');
+  if (existing) existing.remove();
+
+  // Inject styles once
+  if (!document.getElementById('lg-styles')) {
+    document.head.insertAdjacentHTML('beforeend', LG_CSS);
+  }
+
+  var p = lgGetPrices();
+  var html = '<div class="lg-overlay" id="lg-container">'
+    + '<div class="lg-modal">'
+    + '<button class="lg-close" onclick="lgClose()">×</button>'
+    + '<div class="lg-logo">' + LG_COMPANY.name + '</div>'
+    + '<div class="lg-eyebrow">Professional Construction Estimating</div>'
+
+    // ── Step 1: Lead capture ──────────────────────────────────────────
+    + '<div class="lg-step on" id="lg-step-1">'
+    + '<div class="lg-progress"><div class="lg-dot active" id="lgd1"></div><div class="lg-dot" id="lgd2"></div><div class="lg-dot" id="lgd3"></div></div>'
+    + '<div class="lg-title">Get <em>instant access</em></div>'
+    + '<div class="lg-sub">Enter your details to start using SiteCalc Pro. No credit card required for the free plan.</div>'
+    + '<div class="lg-field"><label class="lg-label">Full name *</label><input class="lg-input" id="lg-name" placeholder="e.g. Mohammed Al-Rashid" autocomplete="name"></div>'
+    + '<div class="lg-field"><label class="lg-label">Email address *</label><input class="lg-input" id="lg-email" type="email" placeholder="e.g. mohammed@company.com" autocomplete="email"></div>'
+    + '<div class="lg-field"><label class="lg-label">Phone / WhatsApp *</label><input class="lg-input" id="lg-phone" type="tel" placeholder="e.g. +966 5X XXX XXXX" autocomplete="tel"></div>'
+    + '<div class="lg-field"><label class="lg-label">I am a *</label>'
+    + '<select class="lg-select" id="lg-purpose">'
+    + '<option value="">— Select your role —</option>'
+    + '<option>Quantity Surveyor (QS)</option>'
+    + '<option>Civil / Structural Engineer</option>'
+    + '<option>Architect</option>'
+    + '<option>Contractor / Builder</option>'
+    + '<option>Project Manager</option>'
+    + '<option>Property Developer</option>'
+    + '<option>Consultant</option>'
+    + '<option>Student</option>'
+    + '<option>Other</option>'
+    + '</select></div>'
+    + '<div class="lg-err-msg" id="lg-step1-err">Please fill in all required fields.</div>'
+    + '<button class="lg-btn lg-btn-primary" onclick="lgStep1Next()">Continue →</button>'
+    + '</div>'
+
+    // ── Step 2: Plan selection ────────────────────────────────────────
+    + '<div class="lg-step" id="lg-step-2">'
+    + '<div class="lg-progress"><div class="lg-dot done" id="lgd1b"></div><div class="lg-dot active" id="lgd2b"></div><div class="lg-dot" id="lgd3b"></div></div>'
+    + '<div class="lg-title">Choose your <em>plan</em></div>'
+    + '<div class="lg-sub">Start free with 10 projects, or unlock unlimited access with Pro.</div>'
+    + '<div class="lg-plans">'
+    + '<div class="lg-plan sel" id="lg-plan-free" onclick="lgSelectPlan(\'free\')">'
+    + '<div class="lg-plan-label">Free</div>'
+    + '<div class="lg-plan-price">0</div>'
+    + '<div class="lg-plan-period">forever</div>'
+    + '<div class="lg-plan-note">10 projects · All features · BOQ + Cost apps</div>'
+    + '</div>'
+    + '<div class="lg-plan" id="lg-plan-pro" onclick="lgSelectPlan(\'pro\')">'
+    + '<div class="lg-plan-label">Pro</div>'
+    + '<div class="lg-plan-price" id="lg-plan-pro-price">' + p.annual + '</div>'
+    + '<div class="lg-plan-period" id="lg-plan-pro-period">per year</div>'
+    + '<div class="lg-plan-note">Unlimited · PDF export · Priority support</div>'
+    + '</div>'
+    + '</div>'
+    + '<div id="lg-billing-toggle" style="display:none;margin-bottom:14px">'
+    + '<div style="font-family:\'DM Mono\',monospace;font-size:9px;color:#6a6860;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">Billing period</div>'
+    + '<div style="display:flex;gap:8px">'
+    + '<div class="lg-plan" style="padding:12px 16px" id="bt-monthly" onclick="lgSetBilling(\'monthly\')">'
+    + '<div class="lg-plan-label">Monthly</div><div class="lg-plan-price" style="font-size:16px">' + p.monthly + '</div><div class="lg-plan-period">/month</div>'
+    + '</div>'
+    + '<div class="lg-plan sel" style="padding:12px 16px" id="bt-annual" onclick="lgSetBilling(\'annual\')">'
+    + '<div class="lg-plan-label">Annual <span class="lg-savings">' + p.annual_save + '</span></div><div class="lg-plan-price" style="font-size:16px">' + p.annual + '</div><div class="lg-plan-period">/year</div>'
+    + '</div>'
+    + '</div></div>'
+    + '<button class="lg-btn lg-btn-primary" onclick="lgStep2Next()">Get access →</button>'
+    + '<button class="lg-btn lg-btn-outline" onclick="lgStep1Back()">← Back</button>'
+    + '</div>'
+
+    // ── Step 3: Confirmation ──────────────────────────────────────────
+    + '<div class="lg-step" id="lg-step-3">'
+    + '<div class="lg-progress"><div class="lg-dot done"></div><div class="lg-dot done"></div><div class="lg-dot active"></div></div>'
+    + '<div id="lg-step3-content"></div>'
+    + '</div>'
+
+    + '</div></div>';
+
+  document.body.insertAdjacentHTML('beforeend', html);
+  document.body.style.overflow = 'hidden';
+}
+
+function lgClose() {
+  var el = document.getElementById('lg-container');
+  if (el) el.remove();
+  document.body.style.overflow = '';
+}
+
+// ── STEP 1: Validate & advance ─────────────────────────────────────────
+function lgStep1Next() {
+  var name  = document.getElementById('lg-name').value.trim();
+  var email = document.getElementById('lg-email').value.trim();
+  var phone = document.getElementById('lg-phone').value.trim();
+  var purp  = document.getElementById('lg-purpose').value;
+  var err   = document.getElementById('lg-step1-err');
+
+  // Basic validation
+  var emailOk = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
+  var ok = name.length > 1 && emailOk && phone.length > 6 && purp;
+
+  [['lg-name', name.length > 1], ['lg-email', emailOk], ['lg-phone', phone.length > 6], ['lg-purpose', !!purp]].forEach(function(pair) {
+    var el = document.getElementById(pair[0]);
+    if (el) el.classList.toggle('err', !pair[1]);
+  });
+
+  if (!ok) { err.classList.add('show'); return; }
+  err.classList.remove('show');
+
+  LG_LEAD = { name: name, email: email, phone: phone, purpose: purp, ts: new Date().toISOString() };
+  lgSaveLead(LG_LEAD);
+
+  document.getElementById('lg-step-1').classList.remove('on');
+  document.getElementById('lg-step-2').classList.add('on');
+}
+
+function lgStep1Back() {
+  document.getElementById('lg-step-2').classList.remove('on');
+  document.getElementById('lg-step-1').classList.add('on');
+}
+
+// ── STEP 2: Plan & billing ─────────────────────────────────────────────
+function lgSelectPlan(plan) {
+  LG_STATE.plan = plan;
+  document.getElementById('lg-plan-free').classList.toggle('sel', plan === 'free');
+  document.getElementById('lg-plan-pro').classList.toggle('sel', plan === 'pro');
+  document.getElementById('lg-billing-toggle').style.display = plan === 'pro' ? 'block' : 'none';
+}
+
+function lgSetBilling(b) {
+  LG_STATE.billing = b;
+  document.getElementById('bt-monthly').classList.toggle('sel', b === 'monthly');
+  document.getElementById('bt-annual').classList.toggle('sel', b === 'annual');
+}
+
+function lgStep2Next() {
+  var plan = LG_STATE.plan;
+  document.getElementById('lg-step-2').classList.remove('on');
+  document.getElementById('lg-step-3').classList.add('on');
+
+  if (plan === 'free') {
+    lgShowFreeConfirm();
+  } else {
+    lgShowProConfirm();
+  }
+}
+
+// ── STEP 3a: FREE confirm ─────────────────────────────────────────────
+function lgShowFreeConfirm() {
+  document.getElementById('lg-step3-content').innerHTML =
+    '<div class="lg-title" style="margin-bottom:6px">You\'re in! <em>Free access</em></div>'
+    + '<div class="lg-sub">10 projects included. Upgrade to Pro anytime for unlimited access.</div>'
+    + '<div style="background:rgba(74,155,106,.08);border:1px solid rgba(74,155,106,.2);border-radius:8px;padding:14px;margin-bottom:18px;font-size:12px;color:#9a9890;line-height:1.7">'
+    + '<strong style="color:#4a9b6a;display:block;margin-bottom:5px">✓ Free plan activated</strong>'
+    + '10 projects · BOQ Estimator · Cost Estimator · All 8 building codes · All 6 project types</div>'
+    + '<button class="lg-btn lg-btn-primary" onclick="lgGrantFree()">Start using SiteCalc Pro →</button>';
+}
+
+function lgGrantFree() {
+  // Store access in sessionStorage
+  sessionStorage.setItem('sc_access', 'free');
+  sessionStorage.setItem('sc_lead', JSON.stringify(LG_LEAD));
+  lgClose();
+  if (LG_RESOLVE) LG_RESOLVE({ plan: 'free', lead: LG_LEAD });
+}
+
+// ── STEP 3b: PRO confirm + WhatsApp ──────────────────────────────────
+function lgShowProConfirm() {
+  var billing = LG_STATE.billing;
+  var p = lgGetPrices();
+  var priceDisplay = billing === 'monthly' ? p.monthly + '/month' : p.annual + '/year';
+  var saving = billing === 'annual' ? ' (' + p.annual_save + ')' : '';
+
+  // Build WhatsApp message
+  var msg = lgBuildWAMessage(billing, p);
+  var waUrl = 'https://wa.me/' + LG_COMPANY.wa + '?text=' + encodeURIComponent(msg);
+
+  document.getElementById('lg-step3-content').innerHTML =
+    '<div class="lg-title" style="margin-bottom:6px">Upgrade to <em>Pro</em></div>'
+    + '<div class="lg-sub">Complete your order via WhatsApp. Access code sent within 1 hour.</div>'
+    + '<div style="background:rgba(200,168,75,.08);border:1px solid rgba(200,168,75,.2);border-radius:8px;padding:16px;margin-bottom:18px">'
+    + '<div style="font-family:\'DM Mono\',monospace;font-size:9px;color:#6a6860;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">Your order summary</div>'
+    + '<div style="font-size:13px;color:#e8e6de;margin-bottom:4px">SiteCalc Pro — ' + (billing === 'annual' ? 'Annual plan' : 'Monthly plan') + '</div>'
+    + '<div style="font-family:\'DM Mono\',monospace;font-size:20px;font-weight:500;color:#c8a84b;margin-bottom:4px">' + priceDisplay + '</div>'
+    + '<div style="font-size:10px;color:#6a6860">' + (billing === 'annual' ? 'Billed once per year' + saving : 'Billed monthly, cancel anytime') + '</div>'
+    + '</div>'
+    + '<a class="lg-btn lg-btn-primary" href="' + waUrl + '" target="_blank" onclick="lgGrantProTemp()">Order on WhatsApp →</a>'
+    + '<button class="lg-btn lg-btn-outline" onclick="lgStep1Back();document.getElementById(\'lg-step-2\').classList.add(\'on\');document.getElementById(\'lg-step-3\').classList.remove(\'on\')">← Change plan</button>'
+    + '<div class="lg-note">Pay via STC Pay or bank transfer · Access code sent via WhatsApp within 1 hour<br>Contact: ' + LG_COMPANY.contact_name + ' · ' + LG_COMPANY.phone + '</div>';
+}
+
+function lgBuildWAMessage(billing, p) {
+  var priceLabel = billing === 'monthly' ? p.monthly + '/month' : p.annual + '/year';
+  return 'Hello ' + LG_COMPANY.contact_name + '!\n\n'
+    + 'I would like to purchase SiteCalc Pro — ' + (billing === 'annual' ? 'Annual Plan' : 'Monthly Plan') + ' (' + priceLabel + ').\n\n'
+    + 'My details:\n'
+    + '• Name: ' + (LG_LEAD.name || '—') + '\n'
+    + '• Email: ' + (LG_LEAD.email || '—') + '\n'
+    + '• Phone: ' + (LG_LEAD.phone || '—') + '\n'
+    + '• Role: ' + (LG_LEAD.purpose || '—') + '\n\n'
+    + 'Please confirm payment details so I can complete the order.\n\n'
+    + 'Thank you!';
+}
+
+function lgGrantProTemp() {
+  // Grant temporary session access while awaiting payment confirmation
+  sessionStorage.setItem('sc_access', 'pro_pending');
+  sessionStorage.setItem('sc_lead', JSON.stringify(LG_LEAD));
+  setTimeout(function() {
+    lgClose();
+    if (LG_RESOLVE) LG_RESOLVE({ plan: 'pro_pending', lead: LG_LEAD });
+  }, 600);
+}
+
+// ── SAVE LEAD ──────────────────────────────────────────────────────────
+function lgSaveLead(lead) {
+  var key = 'sc_leads';
+  var list = [];
+  try { list = JSON.parse(localStorage.getItem(key) || '[]'); } catch(e) {}
+  // Avoid duplicates by email
+  list = list.filter(function(l) { return l.email !== lead.email; });
+  list.unshift(lead);
+  try { localStorage.setItem(key, JSON.stringify(list.slice(0, 200))); } catch(e) {}
+}
+
+// ── CHECK EXISTING ACCESS ──────────────────────────────────────────────
+function lgCheckAccess() {
+  // Check session
+  var sess = sessionStorage.getItem('sc_access');
+  if (sess) return sess; // 'free', 'pro_pending', or legacy 'ok_BOQ...'
+  // Check legacy Pro code
+  var legacyAccess = sessionStorage.getItem('boq_access') || '';
+  if (legacyAccess.indexOf('ok_BOQ') === 0) return 'pro';
+  return null;
+}
+
+// ── GATE WRAPPER ──────────────────────────────────────────────────────
+// Call this on page load to gate access
+function lgGate(onGranted) {
+  var access = lgCheckAccess();
+  if (access) {
+    onGranted(access);
+    return;
+  }
+  // Show gate
+  lgShow('any').then(function(result) {
+    onGranted(result.plan);
+  }).catch(function() {
+    // closed without completing — show again if they try to use app
+  });
+}
+
+/* ── GATE INIT ────────────────────────────────────────────────────────── */
+window.addEventListener('load', function() {
+  lgGate(function(plan) {
+    // Update Pro tag in topbar
+    var freeTag = document.getElementById('free-tag');
+    var proTag  = document.getElementById('p
