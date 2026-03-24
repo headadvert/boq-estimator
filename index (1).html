@@ -1,0 +1,2054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BOQ Pro — Instant BOQ & Cost Estimator | GCC & Global</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #C9A84C;
+  --gold-light: #E8C97A;
+  --gold-dim: #8B6E2E;
+  --ink: #0D0D0D;
+  --ink-2: #141414;
+  --ink-3: #1E1E1E;
+  --ink-4: #2A2A2A;
+  --steel: #3A3A3A;
+  --mist: #8A8A8A;
+  --chalk: #F0EDE6;
+  --white: #FFFFFF;
+  --green: #2ECC71;
+  --red: #E74C3C;
+  --blue: #3498DB;
+  --wa-green: #25D366;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--ink);
+  color: var(--chalk);
+  overflow-x: hidden;
+}
+
+/* ============ UTILITY ============ */
+.mono { font-family: 'DM Mono', monospace; }
+.gold { color: var(--gold); }
+.hidden { display: none !important; }
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 14px 28px; border-radius: 4px;
+  font-family: 'DM Sans', sans-serif; font-weight: 600;
+  font-size: 15px; cursor: pointer; border: none;
+  transition: all 0.2s ease; text-decoration: none;
+}
+.btn-gold { background: var(--gold); color: var(--ink); }
+.btn-gold:hover { background: var(--gold-light); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(201,168,76,0.35); }
+.btn-outline { background: transparent; color: var(--gold); border: 1.5px solid var(--gold); }
+.btn-outline:hover { background: var(--gold); color: var(--ink); }
+.btn-wa { background: var(--wa-green); color: white; }
+.btn-wa:hover { background: #20ba58; transform: translateY(-1px); }
+.btn-ghost { background: var(--ink-3); color: var(--chalk); border: 1px solid var(--steel); }
+.btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+.section { padding: 90px 0; }
+.container { max-width: 1180px; margin: 0 auto; padding: 0 28px; }
+.tag {
+  display: inline-block; background: rgba(201,168,76,0.12);
+  border: 1px solid rgba(201,168,76,0.3); color: var(--gold);
+  font-size: 11px; font-weight: 600; letter-spacing: 2px;
+  text-transform: uppercase; padding: 5px 14px; border-radius: 2px;
+  margin-bottom: 16px;
+}
+h1,h2,h3,h4 { font-family: 'Bebas Neue', sans-serif; letter-spacing: 1px; }
+
+/* ============ NAV ============ */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  background: rgba(13,13,13,0.92); backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(201,168,76,0.15);
+  padding: 0 28px; height: 64px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.nav-logo { font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: var(--white); letter-spacing: 2px; }
+.nav-logo span { color: var(--gold); }
+.nav-links { display: flex; gap: 32px; list-style: none; }
+.nav-links a { color: var(--mist); text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.2s; }
+.nav-links a:hover { color: var(--gold); }
+.nav-actions { display: flex; gap: 12px; align-items: center; }
+
+/* ============ HERO ============ */
+#hero {
+  min-height: 100vh; display: flex; align-items: center;
+  position: relative; overflow: hidden; padding-top: 64px;
+  background: var(--ink);
+}
+.hero-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(201,168,76,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(201,168,76,0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+.hero-glow {
+  position: absolute; width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 70%);
+  top: 50%; left: 50%; transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.hero-content { position: relative; z-index: 1; max-width: 760px; }
+.hero-eyebrow {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 24px;
+}
+.hero-dot { width: 8px; height: 8px; background: var(--gold); border-radius: 50%; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.3)} }
+.hero-eyebrow span { color: var(--gold); font-size: 13px; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase; }
+#hero h1 { font-size: clamp(52px,7vw,96px); line-height: 0.95; color: var(--white); margin-bottom: 28px; }
+#hero h1 em { color: var(--gold); font-style: normal; }
+.hero-sub { font-size: 18px; color: var(--mist); line-height: 1.65; margin-bottom: 44px; max-width: 560px; }
+.hero-ctas { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 60px; }
+.hero-stats { display: flex; gap: 48px; }
+.stat-item { }
+.stat-num { font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: var(--gold); letter-spacing: 1px; }
+.stat-label { font-size: 12px; color: var(--mist); text-transform: uppercase; letter-spacing: 1px; }
+
+/* ============ MARQUEE ============ */
+.marquee-wrap { background: var(--ink-2); border-top: 1px solid rgba(201,168,76,0.1); border-bottom: 1px solid rgba(201,168,76,0.1); padding: 16px 0; overflow: hidden; }
+.marquee-track { display: flex; gap: 48px; animation: marquee 25s linear infinite; white-space: nowrap; }
+@keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+.marquee-item { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--mist); letter-spacing: 2px; text-transform: uppercase; }
+.marquee-item span { color: var(--gold); margin-right: 8px; }
+
+/* ============ FEATURES ============ */
+#features { background: var(--ink-2); }
+.features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; margin-top: 60px; }
+.feat-card {
+  background: var(--ink-3); padding: 36px 32px;
+  border: 1px solid var(--ink-4); position: relative; overflow: hidden;
+  transition: border-color 0.3s;
+}
+.feat-card:hover { border-color: rgba(201,168,76,0.3); }
+.feat-card::before { content:''; position:absolute; top:0;left:0;right:0; height:2px; background: linear-gradient(90deg,transparent,var(--gold),transparent); opacity:0; transition:opacity 0.3s; }
+.feat-card:hover::before { opacity:1; }
+.feat-icon { font-size: 28px; margin-bottom: 20px; }
+.feat-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--white); margin-bottom: 10px; letter-spacing: 0.5px; }
+.feat-desc { font-size: 14px; color: var(--mist); line-height: 1.65; }
+
+/* ============ HOW IT WORKS ============ */
+.steps { display: grid; grid-template-columns: repeat(3,1fr); gap: 40px; margin-top: 60px; position: relative; }
+.steps::before { content:''; position:absolute; top:36px; left:16%;right:16%; height:1px; background: linear-gradient(90deg,transparent,var(--gold),var(--gold),transparent); }
+.step { text-align: center; }
+.step-num { width: 72px; height: 72px; border-radius: 50%; background: var(--ink-3); border: 2px solid var(--gold); display: flex; align-items: center; justify-content: center; font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--gold); margin: 0 auto 20px; position: relative; z-index: 1; }
+.step-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--white); margin-bottom: 10px; }
+.step-desc { font-size: 14px; color: var(--mist); line-height: 1.65; }
+
+/* ============ SCOPE ============ */
+#scope { background: var(--ink-2); }
+.scope-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-top: 50px; }
+.scope-card {
+  background: var(--ink-3); border: 1px solid var(--ink-4);
+  padding: 24px 20px; border-radius: 2px;
+  transition: all 0.25s;
+}
+.scope-card:hover { border-color: rgba(201,168,76,0.4); transform: translateY(-3px); }
+.scope-icon { font-size: 24px; margin-bottom: 12px; }
+.scope-name { font-weight: 700; font-size: 14px; color: var(--white); margin-bottom: 8px; }
+.scope-items { list-style: none; }
+.scope-items li { font-size: 12px; color: var(--mist); padding: 3px 0; display: flex; gap: 6px; }
+.scope-items li::before { content: '—'; color: var(--gold-dim); }
+
+/* ============ PRICING ============ */
+.pricing-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; margin-top: 60px; }
+.price-card {
+  background: var(--ink-3); border: 1px solid var(--ink-4);
+  padding: 40px 32px; border-radius: 4px; position: relative;
+}
+.price-card.featured { border-color: var(--gold); background: linear-gradient(160deg, var(--ink-3), rgba(201,168,76,0.05)); }
+.price-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--gold); color: var(--ink); font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 4px 14px; border-radius: 20px; }
+.price-plan { font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: var(--white); margin-bottom: 20px; }
+.price-amt { font-family: 'Bebas Neue', sans-serif; font-size: 52px; color: var(--gold); line-height: 1; }
+.price-cur { font-size: 18px; vertical-align: super; }
+.price-per { font-size: 14px; color: var(--mist); margin-bottom: 28px; }
+.price-feats { list-style: none; margin-bottom: 32px; }
+.price-feats li { font-size: 14px; color: var(--mist); padding: 8px 0; border-bottom: 1px solid var(--ink-4); display: flex; gap: 10px; align-items: center; }
+.price-feats li::before { content: '✓'; color: var(--gold); font-weight: 700; }
+
+/* ============ EPC COMPANY ============ */
+#epc { background: var(--ink-2); border-top: 2px solid rgba(201,168,76,0.2); border-bottom: 2px solid rgba(201,168,76,0.2); }
+.epc-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+.epc-left h2 { font-size: clamp(40px,5vw,68px); line-height: 0.95; margin-bottom: 20px; }
+.epc-left p { color: var(--mist); font-size: 16px; line-height: 1.7; margin-bottom: 32px; }
+.epc-contact { display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; }
+.epc-contact a { color: var(--chalk); text-decoration: none; font-size: 15px; display: flex; gap: 10px; align-items: center; transition: color 0.2s; }
+.epc-contact a:hover { color: var(--gold); }
+.epc-right { background: var(--ink-3); border: 1px solid var(--ink-4); padding: 40px; border-radius: 4px; }
+.epc-logo-block { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; }
+.epc-initials { width: 60px; height: 60px; background: var(--gold); color: var(--ink); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-family: 'Bebas Neue', sans-serif; font-size: 22px; }
+.epc-name { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--white); }
+.epc-sub { font-size: 13px; color: var(--mist); }
+.epc-services { display: flex; flex-wrap: wrap; gap: 8px; }
+.epc-service-tag { background: var(--ink-4); color: var(--mist); font-size: 12px; padding: 5px 12px; border-radius: 2px; border: 1px solid var(--steel); }
+
+/* ============ TRUSTED ============ */
+#trusted { background: var(--ink); }
+.logos-grid { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; margin-top: 48px; }
+.logo-pill { background: var(--ink-3); border: 1px solid var(--ink-4); padding: 14px 28px; border-radius: 2px; font-family: 'DM Mono', monospace; font-size: 13px; color: var(--mist); font-weight: 500; transition: all 0.2s; }
+.logo-pill:hover { border-color: rgba(201,168,76,0.3); color: var(--gold); }
+
+/* ============ PROJECTS ============ */
+.projects-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-top: 48px; }
+.proj-card { background: var(--ink-3); border: 1px solid var(--ink-4); padding: 28px 24px; border-radius: 2px; transition: all 0.25s; }
+.proj-card:hover { border-color: rgba(201,168,76,0.3); transform: translateY(-3px); }
+.proj-type { font-size: 11px; color: var(--gold); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px; }
+.proj-name { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--white); margin-bottom: 6px; }
+.proj-loc { font-size: 13px; color: var(--mist); }
+
+/* ============ FINAL CTA ============ */
+#final-cta { background: linear-gradient(160deg, var(--ink-2), var(--ink-3)); text-align: center; }
+#final-cta h2 { font-size: clamp(44px,6vw,80px); margin-bottom: 20px; }
+#final-cta p { color: var(--mist); font-size: 17px; margin-bottom: 40px; }
+.cta-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+/* ============ FOOTER ============ */
+footer { background: var(--ink-2); border-top: 1px solid var(--ink-4); padding: 48px 0 28px; }
+.footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; margin-bottom: 48px; }
+.footer-brand p { color: var(--mist); font-size: 14px; line-height: 1.7; margin: 16px 0; }
+.footer-col h4 { font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: var(--white); margin-bottom: 16px; }
+.footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.footer-col ul li a { color: var(--mist); font-size: 14px; text-decoration: none; transition: color 0.2s; }
+.footer-col ul li a:hover { color: var(--gold); }
+.footer-bottom { border-top: 1px solid var(--ink-4); padding-top: 24px; display: flex; justify-content: space-between; align-items: center; }
+.footer-bottom p { font-size: 13px; color: var(--steel); }
+
+/* ============ SECTION HEADERS ============ */
+.section-header { max-width: 640px; }
+.section-header.centered { max-width: 640px; margin: 0 auto; text-align: center; }
+.section-header h2 { font-size: clamp(36px,5vw,64px); color: var(--white); margin-bottom: 16px; line-height: 0.95; }
+.section-header p { color: var(--mist); font-size: 16px; line-height: 1.65; }
+
+/* ============ APP SHELL ============ */
+#app-shell {
+  display: none; position: fixed; inset: 0; z-index: 2000;
+  background: var(--ink); flex-direction: column;
+}
+#app-shell.active { display: flex; }
+
+/* App Nav */
+.app-nav {
+  height: 56px; background: var(--ink-2); border-bottom: 1px solid var(--ink-4);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px; flex-shrink: 0;
+}
+.app-nav-left { display: flex; align-items: center; gap: 20px; }
+.app-nav-title { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--gold); letter-spacing: 1px; }
+.app-back { background: none; border: none; color: var(--mist); cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 6px; transition: color 0.2s; }
+.app-back:hover { color: var(--gold); }
+
+/* App Body */
+.app-body { display: flex; flex: 1; overflow: hidden; }
+
+/* Sidebar */
+.app-sidebar {
+  width: 240px; background: var(--ink-2); border-right: 1px solid var(--ink-4);
+  padding: 24px 0; flex-shrink: 0; overflow-y: auto;
+}
+.sidebar-steps { list-style: none; }
+.sidebar-step {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 20px; cursor: pointer; transition: background 0.15s;
+  border-left: 3px solid transparent; font-size: 14px; color: var(--mist);
+}
+.sidebar-step.active { background: rgba(201,168,76,0.08); border-left-color: var(--gold); color: var(--chalk); }
+.sidebar-step.done { color: var(--green); }
+.sidebar-step-num { width: 24px; height: 24px; border-radius: 50%; background: var(--ink-4); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+.sidebar-step.active .sidebar-step-num { background: var(--gold); color: var(--ink); }
+.sidebar-step.done .sidebar-step-num { background: var(--green); color: var(--ink); }
+
+/* App Main */
+.app-main { flex: 1; overflow-y: auto; padding: 32px 40px; }
+.app-panel { display: none; }
+.app-panel.active { display: block; }
+.panel-title { font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: var(--white); margin-bottom: 8px; }
+.panel-sub { font-size: 14px; color: var(--mist); margin-bottom: 32px; }
+
+/* Form Elements */
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+.form-group { display: flex; flex-direction: column; gap: 8px; }
+.form-group.full { grid-column: 1/-1; }
+label { font-size: 13px; font-weight: 600; color: var(--mist); text-transform: uppercase; letter-spacing: 0.8px; }
+input, select, textarea {
+  background: var(--ink-3); border: 1px solid var(--ink-4);
+  color: var(--chalk); font-family: 'DM Sans', sans-serif; font-size: 14px;
+  padding: 12px 16px; border-radius: 4px; width: 100%;
+  transition: border-color 0.2s;
+}
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--gold); }
+input::placeholder { color: var(--steel); }
+select option { background: var(--ink-3); }
+
+/* Input Method Toggle */
+.method-toggle { display: flex; gap: 16px; margin-bottom: 32px; }
+.method-btn {
+  flex: 1; padding: 20px 24px; background: var(--ink-3);
+  border: 2px solid var(--ink-4); border-radius: 4px; cursor: pointer;
+  transition: all 0.2s; text-align: left;
+}
+.method-btn.selected { border-color: var(--gold); background: rgba(201,168,76,0.06); }
+.method-btn-title { font-weight: 700; font-size: 15px; color: var(--white); margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+.method-btn-desc { font-size: 13px; color: var(--mist); }
+
+/* Room Builder */
+.room-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+.room-card { background: var(--ink-3); border: 1px solid var(--ink-4); border-radius: 4px; padding: 16px 20px; }
+.room-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.room-card-title { font-weight: 700; font-size: 14px; color: var(--white); }
+.room-card-dims { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+.remove-btn { background: none; border: none; color: var(--mist); cursor: pointer; font-size: 16px; transition: color 0.2s; }
+.remove-btn:hover { color: var(--red); }
+.add-room-btn { width: 100%; padding: 12px; background: rgba(201,168,76,0.08); border: 1.5px dashed rgba(201,168,76,0.3); border-radius: 4px; color: var(--gold); font-weight: 600; cursor: pointer; transition: all 0.2s; }
+.add-room-btn:hover { background: rgba(201,168,76,0.15); }
+
+/* Upload Zone */
+.upload-zone {
+  border: 2px dashed rgba(201,168,76,0.3); border-radius: 8px;
+  padding: 60px 40px; text-align: center; cursor: pointer;
+  transition: all 0.2s; background: rgba(201,168,76,0.03);
+}
+.upload-zone:hover { border-color: var(--gold); background: rgba(201,168,76,0.07); }
+.upload-icon { font-size: 48px; margin-bottom: 16px; }
+.upload-title { font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: var(--white); margin-bottom: 8px; }
+.upload-sub { color: var(--mist); font-size: 14px; margin-bottom: 4px; }
+.upload-types { font-size: 12px; color: var(--steel); font-family: 'DM Mono', monospace; }
+
+/* Scope Checkboxes */
+.scope-select-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 12px; margin-top: 16px; }
+.scope-check-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  background: var(--ink-3); border: 1px solid var(--ink-4);
+  padding: 14px 16px; border-radius: 4px; cursor: pointer;
+  transition: all 0.2s;
+}
+.scope-check-item.selected { border-color: rgba(201,168,76,0.5); background: rgba(201,168,76,0.05); }
+.scope-check-icon { font-size: 20px; margin-top: 1px; }
+.scope-check-body { flex: 1; }
+.scope-check-title { font-weight: 700; font-size: 14px; color: var(--white); margin-bottom: 3px; }
+.scope-check-desc { font-size: 12px; color: var(--mist); }
+.scope-checkbox { width: 18px; height: 18px; border: 2px solid var(--steel); border-radius: 3px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.scope-check-item.selected .scope-checkbox { background: var(--gold); border-color: var(--gold); }
+
+/* BOQ Table */
+.boq-table-wrap { overflow-x: auto; margin-top: 20px; }
+.boq-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.boq-table th { background: var(--ink-4); color: var(--gold); text-align: left; padding: 12px 16px; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; border: 1px solid var(--steel); }
+.boq-table td { padding: 11px 16px; border: 1px solid var(--ink-4); color: var(--chalk); }
+.boq-table tr:hover td { background: rgba(201,168,76,0.04); }
+.boq-section-row td { background: rgba(201,168,76,0.08); font-weight: 700; color: var(--gold); font-family: 'Bebas Neue', sans-serif; font-size: 15px; letter-spacing: 0.5px; }
+.boq-total-row td { background: rgba(201,168,76,0.12); font-weight: 700; color: var(--white); border-top: 2px solid var(--gold); }
+.amount-cell { text-align: right; font-family: 'DM Mono', monospace; }
+
+/* Cost Summary Cards */
+.cost-summary { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-bottom: 32px; }
+.cost-card { background: var(--ink-3); border: 1px solid var(--ink-4); padding: 24px; border-radius: 4px; }
+.cost-card.highlight { border-color: var(--gold); background: rgba(201,168,76,0.05); }
+.cost-label { font-size: 12px; color: var(--mist); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+.cost-value { font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: var(--white); }
+.cost-value.big { font-size: 42px; color: var(--gold); }
+.cost-sub { font-size: 12px; color: var(--steel); margin-top: 4px; }
+
+/* Panel Nav */
+.panel-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--ink-4); }
+
+/* Progress Bar */
+.app-progress { height: 3px; background: var(--ink-4); }
+.app-progress-bar { height: 100%; background: linear-gradient(90deg,var(--gold),var(--gold-light)); transition: width 0.4s ease; }
+
+/* ============ SIGNUP MODAL ============ */
+#signup-modal {
+  display: none; position: fixed; inset: 0; z-index: 5000;
+  background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
+  align-items: center; justify-content: center;
+}
+#signup-modal.active { display: flex; }
+.modal-box {
+  background: var(--ink-2); border: 1px solid rgba(201,168,76,0.25);
+  border-radius: 8px; padding: 48px; max-width: 520px; width: 90%;
+  position: relative; animation: slideUp 0.35s ease;
+}
+@keyframes slideUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+.modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: var(--white); margin-bottom: 8px; }
+.modal-sub { color: var(--mist); font-size: 15px; margin-bottom: 32px; }
+.modal-close { position:absolute;top:16px;right:16px;background:none;border:none;color:var(--mist);font-size:20px;cursor:pointer; }
+.modal-form { display: flex; flex-direction: column; gap: 16px; }
+.phone-row { display: grid; grid-template-columns: 120px 1fr; gap: 10px; }
+.modal-submit { background: var(--gold); color: var(--ink); border: none; padding: 16px; border-radius: 4px; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+.modal-submit:hover { background: var(--gold-light); transform: translateY(-1px); }
+.modal-trust { text-align: center; font-size: 12px; color: var(--steel); margin-top: 12px; }
+
+/* Success Animation */
+#success-screen {
+  display: none; flex-direction: column; align-items: center;
+  justify-content: center; text-align: center; gap: 20px;
+}
+#success-screen.active { display: flex; }
+.success-icon { font-size: 64px; animation: bounce 0.6s ease; }
+@keyframes bounce { 0%{transform:scale(0)} 60%{transform:scale(1.2)} 100%{transform:scale(1)} }
+.success-title { font-family: 'Bebas Neue', sans-serif; font-size: 40px; color: var(--white); }
+.progress-bar-wrap { width: 300px; height: 6px; background: var(--ink-4); border-radius: 3px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg,var(--gold),var(--gold-light)); border-radius: 3px; animation: fill 2.5s ease forwards; }
+@keyframes fill { from{width:0} to{width:100%} }
+
+/* ============ UPGRADE LOCK ============ */
+.upgrade-lock {
+  display: none; position: absolute; inset: 0; z-index: 100;
+  background: rgba(13,13,13,0.9); backdrop-filter: blur(4px);
+  align-items: center; justify-content: center; flex-direction: column;
+  text-align: center; gap: 16px; border-radius: 4px;
+}
+.upgrade-lock.active { display: flex; }
+.lock-icon { font-size: 48px; }
+.lock-title { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--white); }
+.lock-sub { color: var(--mist); font-size: 14px; max-width: 300px; }
+
+/* ============ ANALYZE OVERLAY ============ */
+#analyze-overlay {
+  display: none; position: fixed; inset: 0; z-index: 4000;
+  background: rgba(0,0,0,0.92); align-items: center; justify-content: center;
+  flex-direction: column; gap: 20px; text-align: center;
+}
+#analyze-overlay.active { display: flex; }
+.analyze-dots { display: flex; gap: 10px; }
+.analyze-dots span { width: 12px; height: 12px; background: var(--gold); border-radius: 50%; animation: dotBounce 1.2s infinite; }
+.analyze-dots span:nth-child(2){animation-delay:0.2s}
+.analyze-dots span:nth-child(3){animation-delay:0.4s}
+@keyframes dotBounce { 0%,100%{transform:translateY(0);opacity:0.4} 50%{transform:translateY(-10px);opacity:1} }
+.analyze-title { font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: var(--white); }
+.analyze-sub { color: var(--mist); font-size: 14px; }
+.analyze-steps-list { list-style: none; text-align: left; display: flex; flex-direction: column; gap: 8px; }
+.analyze-steps-list li { font-size: 13px; color: var(--mist); display: flex; align-items: center; gap: 10px; }
+.analyze-steps-list li .done-mark { color: var(--green); }
+.analyze-steps-list li .pending-mark { color: var(--gold); animation: pulse 1s infinite; }
+
+/* ============ CONTINGENCY SLIDER ============ */
+.slider-wrap { margin: 16px 0; }
+.slider-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.slider-label { font-size: 13px; color: var(--mist); }
+.slider-val { font-family: 'DM Mono', monospace; font-size: 14px; color: var(--gold); font-weight: 500; }
+input[type=range] { -webkit-appearance: none; width: 100%; height: 4px; background: var(--ink-4); border-radius: 2px; outline: none; border: none; padding: 0; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; background: var(--gold); border-radius: 50%; cursor: pointer; }
+input[type=range]:focus { border: none; }
+
+/* ============ RESPONSIVE ============ */
+@media(max-width:900px) {
+  .features-grid { grid-template-columns: 1fr 1fr; }
+  .steps::before { display: none; }
+  .steps { grid-template-columns: 1fr; }
+  .scope-grid { grid-template-columns: 1fr 1fr; }
+  .pricing-grid { grid-template-columns: 1fr; }
+  .epc-inner { grid-template-columns: 1fr; gap: 40px; }
+  .projects-grid { grid-template-columns: 1fr 1fr; }
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+  .form-row { grid-template-columns: 1fr; }
+  .cost-summary { grid-template-columns: 1fr; }
+  .scope-select-grid { grid-template-columns: 1fr; }
+  .app-sidebar { display: none; }
+  nav .nav-links { display: none; }
+}
+@media(max-width:600px) {
+  .features-grid, .scope-grid, .projects-grid { grid-template-columns: 1fr; }
+  .pricing-grid { grid-template-columns: 1fr; }
+  .footer-grid { grid-template-columns: 1fr; }
+  .hero-stats { flex-wrap: wrap; gap: 24px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ====== NAV ====== -->
+<nav>
+  <div class="nav-logo">BOQ<span>PRO</span></div>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#scope">Scope</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#epc">About</a></li>
+    <li><a href="#trusted">Clients</a></li>
+  </ul>
+  <div class="nav-actions">
+    <a href="#" class="btn btn-ghost" style="padding:10px 20px;font-size:13px;" onclick="openApp('estimate')">Login</a>
+    <a href="#" class="btn btn-gold" style="padding:10px 20px;font-size:13px;" onclick="openApp('boq')">Generate BOQ</a>
+  </div>
+</nav>
+
+<!-- ====== LANDING PAGE ====== -->
+<div id="landing">
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-eyebrow">
+        <div class="hero-dot"></div>
+        <span>GCC's #1 BOQ & Cost Estimator</span>
+      </div>
+      <h1>Generate Accurate<br><em>BOQ & Cost</em><br>in 30 Seconds</h1>
+      <p class="hero-sub">Professional Bill of Quantities with full material takeoff, regional pricing, and EPC-grade cost breakdowns — for Saudi Arabia, UAE, UK, US & beyond.</p>
+      <div class="hero-ctas">
+        <button class="btn btn-gold" onclick="openApp('boq')" style="font-size:16px;padding:16px 32px;">
+          📋 Generate BOQ
+        </button>
+        <button class="btn btn-outline" onclick="openApp('estimate')" style="font-size:16px;padding:16px 32px;">
+          💰 Estimate Cost
+        </button>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-item">
+          <div class="stat-num">8+</div>
+          <div class="stat-label">Countries</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">6</div>
+          <div class="stat-label">Project Types</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">40+</div>
+          <div class="stat-label">Scope Items</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">10K+</div>
+          <div class="stat-label">BOQs Generated</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-track">
+    <span class="marquee-item"><span>✓</span>Saudi Arabia</span>
+    <span class="marquee-item"><span>✓</span>UAE</span>
+    <span class="marquee-item"><span>✓</span>United Kingdom</span>
+    <span class="marquee-item"><span>✓</span>United States</span>
+    <span class="marquee-item"><span>✓</span>Europe</span>
+    <span class="marquee-item"><span>✓</span>India</span>
+    <span class="marquee-item"><span>✓</span>Australia</span>
+    <span class="marquee-item"><span>✓</span>Global Standards</span>
+    <span class="marquee-item"><span>✓</span>Civil & Structural</span>
+    <span class="marquee-item"><span>✓</span>MEP Systems</span>
+    <span class="marquee-item"><span>✓</span>Façade & Cladding</span>
+    <span class="marquee-item"><span>✓</span>Interior Fit-out</span>
+    <span class="marquee-item"><span>✓</span>Solar & Energy</span>
+    <span class="marquee-item"><span>✓</span>Material Takeoff</span>
+    <!-- duplicate for seamless loop -->
+    <span class="marquee-item"><span>✓</span>Saudi Arabia</span>
+    <span class="marquee-item"><span>✓</span>UAE</span>
+    <span class="marquee-item"><span>✓</span>United Kingdom</span>
+    <span class="marquee-item"><span>✓</span>United States</span>
+    <span class="marquee-item"><span>✓</span>Europe</span>
+    <span class="marquee-item"><span>✓</span>India</span>
+    <span class="marquee-item"><span>✓</span>Australia</span>
+    <span class="marquee-item"><span>✓</span>Global Standards</span>
+    <span class="marquee-item"><span>✓</span>Civil & Structural</span>
+    <span class="marquee-item"><span>✓</span>MEP Systems</span>
+    <span class="marquee-item"><span>✓</span>Façade & Cladding</span>
+    <span class="marquee-item"><span>✓</span>Interior Fit-out</span>
+    <span class="marquee-item"><span>✓</span>Solar & Energy</span>
+    <span class="marquee-item"><span>✓</span>Material Takeoff</span>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section class="section" id="features">
+  <div class="container">
+    <div class="section-header">
+      <div class="tag">Features</div>
+      <h2>Everything You Need<br>for Professional Estimation</h2>
+      <p>From quick estimates to detailed EPC-grade BOQs — built for contractors, consultants, and developers.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feat-card">
+        <div class="feat-icon">📐</div>
+        <div class="feat-title">Manual + CAD Input</div>
+        <div class="feat-desc">Enter room-by-room dimensions manually, or upload DWG/DXF drawings. Our system auto-extracts areas, rooms, and wall lengths.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🌍</div>
+        <div class="feat-title">Multi-Country Pricing</div>
+        <div class="feat-desc">Region-calibrated rates for Saudi Arabia, UAE, UK, US, Europe, India, and Australia. Stay accurate with real market data.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">📋</div>
+        <div class="feat-title">Full A-Z Scope</div>
+        <div class="feat-desc">Civil, structural, MEP, façade, interior fit-out, solar, landscaping — every trade covered. Select what you need per project.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🧱</div>
+        <div class="feat-title">Material Takeoff</div>
+        <div class="feat-desc">Get exact quantities of cement bags, rebar tonnage, tiles, paint cans, cable lengths — ready to send to suppliers.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">📄</div>
+        <div class="feat-title">Branded PDF Export</div>
+        <div class="feat-desc">Generate a professional, cover-paged BOQ PDF — with your project details, cost summary, and EPC contact for procurement.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">☀️</div>
+        <div class="feat-title">Solar ROI Calculator</div>
+        <div class="feat-desc">Size your solar system, estimate battery and inverter costs, and calculate ROI and payback period — fully integrated in the BOQ.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section" style="background:var(--ink)">
+  <div class="container">
+    <div class="section-header centered">
+      <div class="tag">How It Works</div>
+      <h2>From Zero to BOQ<br>in Three Steps</h2>
+      <p>No training. No complexity. Start estimating instantly — upgrade when you're ready.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-title">Input Your Project</div>
+        <div class="step-desc">Enter project details, dimensions, and finishing level manually — or upload your CAD drawing for automatic extraction.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-title">Select Scope & Region</div>
+        <div class="step-desc">Choose your country for accurate pricing, then select the trades and scopes you want included in the BOQ.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-title">Generate & Export</div>
+        <div class="step-desc">Instantly view your full BOQ with quantities, rates, and cost summary. Export a professional PDF branded report.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SCOPE -->
+<section class="section" id="scope">
+  <div class="container">
+    <div class="section-header">
+      <div class="tag">Full Scope Coverage</div>
+      <h2>Every Trade.<br>Every System.</h2>
+      <p>From earthworks to solar — BOQ Pro covers every line item a professional estimate requires.</p>
+    </div>
+    <div class="scope-grid">
+      <div class="scope-card">
+        <div class="scope-icon">🏗️</div>
+        <div class="scope-name">Civil & Structural</div>
+        <ul class="scope-items">
+          <li>Excavation & siteworks</li>
+          <li>Backfilling & compaction</li>
+          <li>Raft / pile / footing foundations</li>
+          <li>Concrete & reinforcement</li>
+        </ul>
+      </div>
+      <div class="scope-card">
+        <div class="scope-icon">🧱</div>
+        <div class="scope-name">Masonry & Finishes</div>
+        <ul class="scope-items">
+          <li>Blockwork & masonry</li>
+          <li>Plastering & rendering</li>
+          <li>Painting & coatings</li>
+          <li>Tiling & flooring</li>
+        </ul>
+      </div>
+      <div class="scope-card">
+        <div class="scope-icon">⚡</div>
+        <div class="scope-name">MEP Systems</div>
+        <ul class="scope-items">
+          <li>HVAC (central & split)</li>
+          <li>Electrical systems</li>
+          <li>Plumbing & drainage</li>
+          <li>Firefighting systems</li>
+        </ul>
+      </div>
+      <div class="scope-card">
+        <div class="scope-icon">🔩</div>
+        <div class="scope-name">Steel & Industrial</div>
+        <ul class="scope-items">
+          <li>Structural steelwork</li>
+          <li>Pre-engineered buildings</li>
+          <li>Steel roofing & cladding</li>
+          <li>Industrial structures</li>
+        </ul>
+      </div>
+      <div class="scope-card">
+        <div class="scope-icon">🏢</div>
+        <div class="scope-name">Façade & External</div>
+        <ul class="scope-items">
+          <li>Curtain wall systems</li>
+          <li>ACP / glass / stone cladding</li>
+          <li>Landscaping & irrigation</li>
+          <li>Roads & pavements</li>
+        </ul>
+      </div>
+      <div class="scope-card">
+        <div class="scope-icon">🪑</div>
+        <div class="scope-name">Interior Fit-out</div>
+        <ul class="scope-items">
+          <li>False ceiling systems</li>
+          <li>Partitions & drywalls</li>
+          <li>Flooring & finishes</li>
+          <li>Joinery & millwork</li>
+        </ul>
+      </div>
+      <div class="scope-card">
+        <div class="scope-icon">☀️</div>
+        <div class="scope-name">Solar & Energy</div>
+        <ul class="scope-items">
+          <li>Solar system sizing</li>
+          <li>Battery & inverter costing</li>
+          <li>Grid connection & metering</li>
+          <li>ROI / payback calculation</li>
+        </ul>
+      </div>
+      <div class="scope-card">
+        <div class="scope-icon">📊</div>
+        <div class="scope-name">Advanced Features</div>
+        <ul class="scope-items">
+          <li>Full material takeoff</li>
+          <li>Project timeline estimate</li>
+          <li>Lifecycle cost analysis</li>
+          <li>Contingency % adjustment</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="section" id="pricing" style="background:var(--ink-2)">
+  <div class="container">
+    <div class="section-header centered">
+      <div class="tag">Pricing</div>
+      <h2>Simple, Transparent<br>Pricing</h2>
+      <p>Start free — no credit card. Upgrade via WhatsApp when you're ready to scale.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div class="price-plan">Free</div>
+        <div class="price-amt"><span class="price-cur"></span>0</div>
+        <div class="price-per">Forever free</div>
+        <ul class="price-feats">
+          <li>10 projects included</li>
+          <li>Manual input method</li>
+          <li>All scope categories</li>
+          <li>Cost summary view</li>
+          <li>PDF export (watermarked)</li>
+        </ul>
+        <button class="btn btn-ghost" style="width:100%;justify-content:center;" onclick="openApp('boq')">Start Free</button>
+      </div>
+      <div class="price-card featured">
+        <div class="price-badge">MOST POPULAR</div>
+        <div class="price-plan">Monthly</div>
+        <div class="price-amt"><span class="price-cur">SAR </span>55</div>
+        <div class="price-per">per month</div>
+        <ul class="price-feats">
+          <li>Unlimited projects</li>
+          <li>CAD / DWG upload</li>
+          <li>Full material takeoff</li>
+          <li>Solar ROI calculator</li>
+          <li>Clean PDF (no watermark)</li>
+          <li>Multi-country rates</li>
+        </ul>
+        <a href="https://wa.me/966511759092?text=Hello%2C+I+want+to+upgrade+BOQ+Pro.+Plan%3A+Monthly+(SAR+55)" target="_blank" class="btn btn-wa" style="width:100%;justify-content:center;">💬 Upgrade via WhatsApp</a>
+      </div>
+      <div class="price-card">
+        <div class="price-plan">Annual</div>
+        <div class="price-amt"><span class="price-cur">SAR </span>480</div>
+        <div class="price-per">per year — save 27%</div>
+        <ul class="price-feats">
+          <li>Everything in Monthly</li>
+          <li>Priority support</li>
+          <li>Admin panel access</li>
+          <li>Custom rate adjustments</li>
+          <li>Team access (up to 3)</li>
+          <li>Lifecycle cost analysis</li>
+        </ul>
+        <a href="https://wa.me/966511759092?text=Hello%2C+I+want+to+upgrade+BOQ+Pro.+Plan%3A+Annual+(SAR+480)" target="_blank" class="btn btn-wa" style="width:100%;justify-content:center;">💬 Upgrade via WhatsApp</a>
+      </div>
+    </div>
+    <!-- Access Code -->
+    <div style="margin-top:40px;background:var(--ink-3);border:1px solid var(--ink-4);border-radius:4px;padding:32px;display:flex;align-items:center;gap:32px;flex-wrap:wrap;">
+      <div>
+        <div class="tag" style="margin-bottom:8px;">Have an Access Code?</div>
+        <p style="color:var(--mist);font-size:14px;">Enter your BOQ Pro access code to unlock your subscription instantly.</p>
+      </div>
+      <div style="display:flex;gap:10px;flex:1;min-width:280px;">
+        <input id="access-code-input" type="text" placeholder="BOQ-XXXX-USER" style="flex:1;" oninput="this.value=this.value.toUpperCase()">
+        <button class="btn btn-gold" onclick="validateCode()">Activate</button>
+      </div>
+      <div id="code-msg" style="font-size:13px;display:none;"></div>
+    </div>
+  </div>
+</section>
+
+<!-- EPC COMPANY -->
+<section class="section" id="epc">
+  <div class="container">
+    <div class="epc-inner">
+      <div class="epc-left">
+        <div class="tag">From the Builders of this Tool</div>
+        <h2>Need Someone<br>to <em style="color:var(--gold);font-style:normal;">Actually Build</em> It?</h2>
+        <p>We don't just estimate — we deliver. Al Qaswaa Al Sharqia is a full EPC contractor with 10+ years of experience across the Eastern Province of Saudi Arabia and beyond.</p>
+        <p style="margin-top:-16px;">If you're estimating — we can build it.</p>
+        <div class="epc-contact">
+          <a href="tel:+966511759092">📞 +966 51 175 9092</a>
+          <a href="tel:+966573524746">📞 +966 57 352 4746</a>
+          <a href="mailto:info@qaswasharqia.com">✉ info@qaswasharqia.com</a>
+          <a href="https://qaswasharqia.netlify.app/" target="_blank">🌐 qaswasharqia.netlify.app</a>
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+          <a href="https://wa.me/966511759092?text=Hello%2C+I+need+EPC+contracting+services." target="_blank" class="btn btn-wa">💬 WhatsApp Us</a>
+          <a href="https://qaswasharqia.netlify.app/" target="_blank" class="btn btn-outline">View Website →</a>
+        </div>
+      </div>
+      <div class="epc-right">
+        <div class="epc-logo-block">
+          <div class="epc-initials">AQ</div>
+          <div>
+            <div class="epc-name">Al Qaswaa Al Sharqia Trading EST</div>
+            <div class="epc-sub">EPC Contractor · Eastern Province, Saudi Arabia</div>
+          </div>
+        </div>
+        <p style="font-size:14px;color:var(--mist);line-height:1.7;margin-bottom:20px;">We handle design, procurement, civil works, MEP systems, interior fit-out, and project handover — end to end.</p>
+        <div style="font-size:12px;color:var(--mist);font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;">Our Services</div>
+        <div class="epc-services">
+          <span class="epc-service-tag">EPC Contracting</span>
+          <span class="epc-service-tag">Residential</span>
+          <span class="epc-service-tag">Commercial</span>
+          <span class="epc-service-tag">Industrial</span>
+          <span class="epc-service-tag">Solar Energy</span>
+          <span class="epc-service-tag">MEP Systems</span>
+          <span class="epc-service-tag">Interior Fit-out</span>
+          <span class="epc-service-tag">Project Management</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRUSTED BY -->
+<section class="section" id="trusted" style="background:var(--ink-2)">
+  <div class="container">
+    <div class="section-header centered">
+      <div class="tag">Trusted By</div>
+      <h2>Used Across the Kingdom's<br>Biggest Projects</h2>
+    </div>
+    <div class="logos-grid">
+      <div class="logo-pill">Saudi Aramco</div>
+      <div class="logo-pill">ROSHN</div>
+      <div class="logo-pill">DAMAC</div>
+      <div class="logo-pill">Royal Commission Jubail</div>
+      <div class="logo-pill">Kanoo Group</div>
+      <div class="logo-pill">SWCC</div>
+      <div class="logo-pill">Mall of Dhahran</div>
+      <div class="logo-pill">MAMMOET</div>
+    </div>
+    <div style="margin-top:60px;">
+      <div class="section-header centered" style="margin-bottom:40px;">
+        <div class="tag">Key Projects</div>
+        <h2>Our Portfolio</h2>
+      </div>
+      <div class="projects-grid">
+        <div class="proj-card">
+          <div class="proj-type">Sports & Entertainment</div>
+          <div class="proj-name">Aramco Stadium</div>
+          <div class="proj-loc">📍 Khobar, Eastern Province</div>
+        </div>
+        <div class="proj-card">
+          <div class="proj-type">High-Rise Residential</div>
+          <div class="proj-name">Lamar Towers</div>
+          <div class="proj-loc">📍 Jeddah, Saudi Arabia</div>
+        </div>
+        <div class="proj-card">
+          <div class="proj-type">Mixed-Use Tower</div>
+          <div class="proj-name">Jewel Tower</div>
+          <div class="proj-loc">📍 Jeddah, Saudi Arabia</div>
+        </div>
+        <div class="proj-card">
+          <div class="proj-type">Infrastructure</div>
+          <div class="proj-name">Royal Commission Jubail</div>
+          <div class="proj-loc">📍 Jubail Industrial City</div>
+        </div>
+        <div class="proj-card">
+          <div class="proj-type">Commercial</div>
+          <div class="proj-name">Commercial Offices</div>
+          <div class="proj-loc">📍 Dammam, Eastern Province</div>
+        </div>
+        <div class="proj-card" style="display:flex;align-items:center;justify-content:center;border-style:dashed;border-color:rgba(201,168,76,0.25);">
+          <div style="text-align:center;">
+            <div style="font-size:32px;margin-bottom:8px;">+</div>
+            <div style="font-size:13px;color:var(--mist);">Your Project Next?</div>
+            <a href="https://wa.me/966511759092" target="_blank" style="color:var(--gold);font-size:13px;text-decoration:none;">Contact us →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="section" id="final-cta">
+  <div class="container">
+    <h2>Ready to Generate<br><em style="color:var(--gold);font-style:normal;">Your BOQ?</em></h2>
+    <p>Join thousands of contractors and consultants using BOQ Pro across the GCC.</p>
+    <div class="cta-buttons">
+      <button class="btn btn-gold" onclick="openApp('boq')" style="font-size:16px;padding:18px 36px;">📋 Generate BOQ — It's Free</button>
+      <a href="https://wa.me/966511759092?text=Hello%2C+I+want+to+know+more+about+BOQ+Pro." target="_blank" class="btn btn-wa" style="font-size:16px;padding:18px 36px;">💬 Talk to Us on WhatsApp</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="nav-logo" style="font-size:24px;margin-bottom:12px;">BOQ<span style="color:var(--gold)">PRO</span></div>
+        <p>Professional BOQ & Cost Estimation for the GCC and beyond. Built by EPC contractors, for the industry.</p>
+        <div style="display:flex;gap:12px;margin-top:16px;">
+          <a href="https://wa.me/966511759092" target="_blank" class="btn btn-wa" style="padding:10px 20px;font-size:13px;">💬 WhatsApp</a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#scope">Scope Coverage</a></li>
+          <li><a href="#pricing">Pricing</a></li>
+          <li><a href="#" onclick="openApp('boq')">Generate BOQ</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#epc">About Al Qaswaa</a></li>
+          <li><a href="#trusted">Projects</a></li>
+          <li><a href="https://qaswasharqia.netlify.app/" target="_blank">Company Website</a></li>
+          <li><a href="mailto:info@qaswasharqia.com">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <ul>
+          <li><a href="tel:+966511759092">+966 51 175 9092</a></li>
+          <li><a href="tel:+966573524746">+966 57 352 4746</a></li>
+          <li><a href="mailto:info@qaswasharqia.com">info@qaswasharqia.com</a></li>
+          <li><a href="mailto:qaswasharqia@gmail.com">qaswasharqia@gmail.com</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 BOQ Pro · Al Qaswaa Al Sharqia Trading EST. All rights reserved.</p>
+      <p style="font-family:'DM Mono',monospace;">Eastern Province, Saudi Arabia</p>
+    </div>
+  </div>
+</footer>
+
+</div><!-- /landing -->
+
+<!-- ====== APP SHELL ====== -->
+<div id="app-shell">
+  <div class="app-progress"><div class="app-progress-bar" id="progress-bar" style="width:20%"></div></div>
+  <div class="app-nav">
+    <div class="app-nav-left">
+      <button class="app-back" onclick="closeApp()">← Back to Home</button>
+      <div class="app-nav-title">BOQ PRO — Estimator</div>
+    </div>
+    <div style="display:flex;gap:12px;align-items:center;">
+      <span id="project-count-badge" style="font-size:12px;color:var(--mist);font-family:'DM Mono',monospace;"></span>
+      <button class="btn btn-gold" style="padding:8px 20px;font-size:13px;" onclick="generateBOQ()">⚡ Generate BOQ</button>
+    </div>
+  </div>
+  <div class="app-body">
+    <!-- Sidebar -->
+    <div class="app-sidebar">
+      <ul class="sidebar-steps">
+        <li class="sidebar-step active" id="step-tab-1" onclick="goToStep(1)">
+          <div class="sidebar-step-num">1</div> Project Info
+        </li>
+        <li class="sidebar-step" id="step-tab-2" onclick="goToStep(2)">
+          <div class="sidebar-step-num">2</div> Input Method
+        </li>
+        <li class="sidebar-step" id="step-tab-3" onclick="goToStep(3)">
+          <div class="sidebar-step-num">3</div> Scope & Settings
+        </li>
+        <li class="sidebar-step" id="step-tab-4" onclick="goToStep(4)">
+          <div class="sidebar-step-num">4</div> BOQ Output
+        </li>
+        <li class="sidebar-step" id="step-tab-5" onclick="goToStep(5)">
+          <div class="sidebar-step-num">5</div> Cost Summary
+        </li>
+      </ul>
+      <div style="padding:20px;margin-top:auto;">
+        <div style="background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.2);border-radius:4px;padding:16px;">
+          <div style="font-size:12px;color:var(--gold);font-weight:700;margin-bottom:6px;">Need to Build It?</div>
+          <div style="font-size:12px;color:var(--mist);margin-bottom:10px;">Al Qaswaa Al Sharqia · EPC Contractor</div>
+          <a href="https://wa.me/966511759092?text=Hello%2C+I+need+EPC+services." target="_blank" style="display:block;text-align:center;background:var(--wa-green);color:white;border-radius:4px;padding:8px;font-size:12px;font-weight:700;text-decoration:none;">💬 WhatsApp</a>
+        </div>
+      </div>
+    </div>
+    <!-- Main -->
+    <div class="app-main">
+
+      <!-- STEP 1: Project Info -->
+      <div class="app-panel active" id="panel-1">
+        <div class="panel-title">Project Information</div>
+        <div class="panel-sub">Tell us about your project to calibrate pricing and scope.</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Project Name</label>
+            <input type="text" id="proj-name" placeholder="e.g. Al Noor Villa — Riyadh">
+          </div>
+          <div class="form-group">
+            <label>Project Type</label>
+            <select id="proj-type">
+              <option value="">Select type...</option>
+              <option>Residential — Villa</option>
+              <option>Residential — Apartments</option>
+              <option>Commercial — Office</option>
+              <option>Commercial — Retail</option>
+              <option>Mixed-Use</option>
+              <option>Industrial</option>
+              <option>Hospitality</option>
+              <option>Healthcare</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Country / Region</label>
+            <select id="proj-country">
+              <option value="">Select country...</option>
+              <option value="SA">Saudi Arabia (SAR)</option>
+              <option value="UAE">UAE (AED)</option>
+              <option value="UK">United Kingdom (GBP)</option>
+              <option value="US">United States (USD)</option>
+              <option value="EU">Europe (EUR)</option>
+              <option value="IN">India (INR)</option>
+              <option value="AU">Australia (AUD)</option>
+              <option value="GLOBAL">Global Standard (USD)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Finishing Level</label>
+            <select id="proj-finish">
+              <option value="">Select level...</option>
+              <option value="basic">Basic / Economy</option>
+              <option value="standard">Standard</option>
+              <option value="premium">Premium</option>
+              <option value="luxury">Luxury</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Number of Floors</label>
+            <input type="number" id="proj-floors" placeholder="e.g. 3" min="1" max="100">
+          </div>
+          <div class="form-group">
+            <label>Total Built-up Area (m²)</label>
+            <input type="number" id="proj-area" placeholder="e.g. 450" min="1">
+          </div>
+          <div class="form-group full">
+            <label>Project Location / City</label>
+            <input type="text" id="proj-location" placeholder="e.g. Dammam, Eastern Province">
+          </div>
+          <div class="form-group full">
+            <label>Brief Description (optional)</label>
+            <textarea id="proj-desc" rows="3" placeholder="Any special requirements, notes, or scope clarifications..." style="resize:vertical;"></textarea>
+          </div>
+        </div>
+        <div class="panel-nav">
+          <div></div>
+          <button class="btn btn-gold" onclick="goToStep(2)">Next: Input Method →</button>
+        </div>
+      </div>
+
+      <!-- STEP 2: Input Method -->
+      <div class="app-panel" id="panel-2">
+        <div class="panel-title">Choose Input Method</div>
+        <div class="panel-sub">Enter dimensions manually or upload your CAD drawing for automatic extraction.</div>
+        <div class="method-toggle">
+          <div class="method-btn selected" id="method-manual" onclick="selectMethod('manual')">
+            <div class="method-btn-title">✏️ Manual Input</div>
+            <div class="method-btn-desc">Enter room types, dimensions, and quantities step by step. Recommended for new projects.</div>
+          </div>
+          <div class="method-btn" id="method-cad" onclick="selectMethod('cad')">
+            <div class="method-btn-title">📐 CAD / DWG Upload</div>
+            <div class="method-btn-desc">Upload your .dwg or .dxf drawing. We'll extract areas, rooms, and wall lengths automatically.</div>
+          </div>
+        </div>
+
+        <!-- Manual Input Panel -->
+        <div id="manual-panel">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <div style="font-weight:700;color:var(--white);font-size:15px;">Room / Space Builder</div>
+            <div id="live-area" class="mono" style="font-size:13px;color:var(--gold);">Total GFA: 0 m²</div>
+          </div>
+          <div class="room-list" id="room-list"></div>
+          <button class="add-room-btn" onclick="addRoom()">+ Add Room / Space</button>
+        </div>
+
+        <!-- CAD Upload Panel -->
+        <div id="cad-panel" class="hidden">
+          <div class="upload-zone" onclick="simulateCADUpload()">
+            <input type="file" id="cad-file" accept=".dwg,.dxf,.pdf" style="display:none;" onchange="handleCADFile(this)">
+            <div class="upload-icon">📐</div>
+            <div class="upload-title">Drag & Drop Your Drawing</div>
+            <div class="upload-sub">or click to browse</div>
+            <div class="upload-types">Accepted: .DWG · .DXF · .PDF</div>
+          </div>
+          <div id="cad-result" class="hidden" style="margin-top:20px;">
+            <div style="background:rgba(46,204,113,0.1);border:1px solid rgba(46,204,113,0.3);border-radius:4px;padding:20px;margin-bottom:16px;">
+              <div style="color:var(--green);font-weight:700;margin-bottom:8px;">✓ Drawing Analyzed Successfully</div>
+              <div style="font-size:13px;color:var(--mist);">Auto-extracted: 4 rooms · 342 m² GFA · 186 m wall length</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-nav">
+          <button class="btn btn-ghost" onclick="goToStep(1)">← Back</button>
+          <button class="btn btn-gold" onclick="goToStep(3)">Next: Select Scope →</button>
+        </div>
+      </div>
+
+      <!-- STEP 3: Scope & Settings -->
+      <div class="app-panel" id="panel-3">
+        <div class="panel-title">Scope & Settings</div>
+        <div class="panel-sub">Select the trades and disciplines to include in your BOQ.</div>
+
+        <div style="font-weight:700;font-size:14px;color:var(--white);margin-bottom:12px;">📦 Select Scope Items</div>
+        <div class="scope-select-grid" id="scope-grid"></div>
+
+        <div style="margin-top:32px;">
+          <div style="font-weight:700;font-size:14px;color:var(--white);margin-bottom:16px;">⚙️ Adjustments</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Contingency (%)</label>
+              <div class="slider-wrap">
+                <div class="slider-row">
+                  <span class="slider-label">Contingency allowance</span>
+                  <span class="slider-val" id="contingency-val">10%</span>
+                </div>
+                <input type="range" min="0" max="25" value="10" id="contingency" oninput="document.getElementById('contingency-val').textContent=this.value+'%'">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Design & Engineering (%)</label>
+              <div class="slider-wrap">
+                <div class="slider-row">
+                  <span class="slider-label">Professional fees</span>
+                  <span class="slider-val" id="design-val">8%</span>
+                </div>
+                <input type="range" min="0" max="20" value="8" id="design-fee" oninput="document.getElementById('design-val').textContent=this.value+'%'">
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Currency Display</label>
+              <select id="currency-select">
+                <option value="SAR">SAR — Saudi Riyal</option>
+                <option value="AED">AED — UAE Dirham</option>
+                <option value="USD">USD — US Dollar</option>
+                <option value="GBP">GBP — British Pound</option>
+                <option value="EUR">EUR — Euro</option>
+                <option value="INR">INR — Indian Rupee</option>
+                <option value="AUD">AUD — Australian Dollar</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>VAT (%)</label>
+              <input type="number" id="vat-rate" value="15" min="0" max="30" placeholder="15">
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-nav">
+          <button class="btn btn-ghost" onclick="goToStep(2)">← Back</button>
+          <button class="btn btn-gold" onclick="generateBOQ()">⚡ Generate BOQ →</button>
+        </div>
+      </div>
+
+      <!-- STEP 4: BOQ Output -->
+      <div class="app-panel" id="panel-4">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;flex-wrap:wrap;gap:12px;">
+          <div>
+            <div class="panel-title" id="boq-proj-title">Project BOQ</div>
+            <div class="panel-sub">Full Bill of Quantities with quantities, rates, and amounts.</div>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn btn-ghost" style="font-size:13px;" onclick="exportPDF()">📄 Export PDF</button>
+            <button class="btn btn-gold" style="font-size:13px;" onclick="goToStep(5)">Cost Summary →</button>
+          </div>
+        </div>
+
+        <div style="background:var(--ink-3);border:1px solid var(--ink-4);border-radius:4px;padding:20px;margin-bottom:24px;display:flex;gap:40px;flex-wrap:wrap;">
+          <div><div class="mono" style="font-size:11px;color:var(--mist);margin-bottom:4px;">PROJECT</div><div id="boq-name-disp" style="font-weight:700;color:var(--white);">—</div></div>
+          <div><div class="mono" style="font-size:11px;color:var(--mist);margin-bottom:4px;">TYPE</div><div id="boq-type-disp" style="font-weight:700;color:var(--white);">—</div></div>
+          <div><div class="mono" style="font-size:11px;color:var(--mist);margin-bottom:4px;">REGION</div><div id="boq-region-disp" style="font-weight:700;color:var(--white);">—</div></div>
+          <div><div class="mono" style="font-size:11px;color:var(--mist);margin-bottom:4px;">GFA</div><div id="boq-area-disp" style="font-weight:700;color:var(--white);">—</div></div>
+          <div><div class="mono" style="font-size:11px;color:var(--mist);margin-bottom:4px;">FINISH</div><div id="boq-finish-disp" style="font-weight:700;color:var(--white);">—</div></div>
+        </div>
+
+        <div class="boq-table-wrap">
+          <table class="boq-table" id="boq-table">
+            <thead>
+              <tr>
+                <th style="width:60px;">Item No.</th>
+                <th>Description</th>
+                <th style="width:70px;">Unit</th>
+                <th style="width:90px;">Quantity</th>
+                <th style="width:110px;">Rate</th>
+                <th style="width:120px;">Amount</th>
+              </tr>
+            </thead>
+            <tbody id="boq-body"></tbody>
+          </table>
+        </div>
+
+        <div style="margin-top:24px;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.2);border-radius:4px;padding:20px;">
+          <div style="font-size:11px;color:var(--mist);text-align:right;margin-bottom:8px;">RATES ARE INDICATIVE — BASED ON REGIONAL MARKET DATA</div>
+          <div style="display:flex;justify-content:flex-end;flex-direction:column;align-items:flex-end;gap:6px;">
+            <div style="display:flex;gap:24px;font-size:14px;"><span style="color:var(--mist);">Subtotal</span><span class="mono" id="subtotal-val" style="color:var(--chalk);">—</span></div>
+            <div style="display:flex;gap:24px;font-size:14px;"><span style="color:var(--mist);">Contingency</span><span class="mono" id="contingency-amt" style="color:var(--chalk);">—</span></div>
+            <div style="display:flex;gap:24px;font-size:14px;"><span style="color:var(--mist);">Design Fees</span><span class="mono" id="design-amt" style="color:var(--chalk);">—</span></div>
+            <div style="display:flex;gap:24px;font-size:14px;"><span style="color:var(--mist);">VAT</span><span class="mono" id="vat-amt" style="color:var(--chalk);">—</span></div>
+            <div style="display:flex;gap:24px;font-size:18px;font-weight:700;padding-top:8px;border-top:1px solid var(--gold);"><span style="color:var(--gold);">TOTAL</span><span class="mono" id="total-val" style="color:var(--gold);">—</span></div>
+          </div>
+        </div>
+
+        <!-- EPC CTA in BOQ -->
+        <div style="margin-top:24px;background:linear-gradient(135deg,rgba(201,168,76,0.08),rgba(201,168,76,0.03));border:1px solid rgba(201,168,76,0.25);border-radius:4px;padding:24px;">
+          <div style="font-weight:700;color:var(--gold);margin-bottom:8px;">📞 Looking for a Reliable EPC Contractor in Saudi Arabia?</div>
+          <p style="font-size:13px;color:var(--mist);margin-bottom:16px;">Send us this BOQ and we'll assist you with procurement, construction, and project delivery.</p>
+          <div style="display:flex;gap:20px;flex-wrap:wrap;font-size:13px;color:var(--chalk);margin-bottom:16px;">
+            <span>📧 info@qaswasharwia.com</span>
+            <span>📧 qaswasharqia@gmail.com</span>
+            <span>📞 +966 511759092</span>
+            <span>📞 +966 573524746</span>
+          </div>
+          <a href="https://wa.me/966511759092?text=Hello%2C+I+have+a+BOQ+ready+and+need+EPC+contracting+services." target="_blank" class="btn btn-wa" style="font-size:13px;">💬 Send BOQ via WhatsApp</a>
+        </div>
+
+        <div class="panel-nav">
+          <button class="btn btn-ghost" onclick="goToStep(3)">← Back</button>
+          <button class="btn btn-gold" onclick="goToStep(5)">View Cost Summary →</button>
+        </div>
+      </div>
+
+      <!-- STEP 5: Cost Summary -->
+      <div class="app-panel" id="panel-5">
+        <div class="panel-title">Cost Summary</div>
+        <div class="panel-sub">Full project cost breakdown with material takeoff and key metrics.</div>
+
+        <div class="cost-summary">
+          <div class="cost-card highlight">
+            <div class="cost-label">Total Project Cost</div>
+            <div class="cost-value big" id="cs-total">—</div>
+            <div class="cost-sub">incl. contingency & VAT</div>
+          </div>
+          <div class="cost-card">
+            <div class="cost-label">Cost per m²</div>
+            <div class="cost-value" id="cs-rate">—</div>
+            <div class="cost-sub">Based on <span id="cs-area">—</span> m² GFA</div>
+          </div>
+          <div class="cost-card">
+            <div class="cost-label">Construction Cost</div>
+            <div class="cost-value" id="cs-construction">—</div>
+            <div class="cost-sub">excl. design fees & VAT</div>
+          </div>
+        </div>
+
+        <!-- Scope Breakdown -->
+        <div style="background:var(--ink-3);border:1px solid var(--ink-4);border-radius:4px;padding:24px;margin-bottom:24px;">
+          <div style="font-weight:700;color:var(--white);margin-bottom:16px;">Scope Breakdown</div>
+          <div id="scope-breakdown"></div>
+        </div>
+
+        <!-- Material Takeoff -->
+        <div style="background:var(--ink-3);border:1px solid var(--ink-4);border-radius:4px;padding:24px;margin-bottom:24px;">
+          <div style="font-weight:700;color:var(--white);margin-bottom:16px;">🧱 Material Takeoff</div>
+          <div id="material-takeoff" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;"></div>
+        </div>
+
+        <!-- Timeline -->
+        <div style="background:var(--ink-3);border:1px solid var(--ink-4);border-radius:4px;padding:24px;margin-bottom:24px;">
+          <div style="font-weight:700;color:var(--white);margin-bottom:16px;">📅 Estimated Timeline</div>
+          <div id="timeline-output"></div>
+        </div>
+
+        <!-- Export Buttons -->
+        <div style="display:flex;gap:14px;flex-wrap:wrap;">
+          <button class="btn btn-gold" onclick="exportPDF()">📄 Export Full PDF Report</button>
+          <a href="https://wa.me/966511759092?text=Hello%2C+I+have+a+BOQ+ready.+I+need+your+EPC+services." target="_blank" class="btn btn-wa">💬 Send to EPC Contractor</a>
+          <button class="btn btn-ghost" onclick="resetApp()">🔄 Start New Project</button>
+        </div>
+
+        <div class="panel-nav">
+          <button class="btn btn-ghost" onclick="goToStep(4)">← Back to BOQ</button>
+          <div></div>
+        </div>
+      </div>
+
+    </div><!-- /app-main -->
+  </div><!-- /app-body -->
+</div><!-- /app-shell -->
+
+<!-- ====== SIGNUP MODAL ====== -->
+<div id="signup-modal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+
+    <!-- Form View -->
+    <div id="modal-form-view">
+      <div style="font-size:32px;margin-bottom:8px;">📊</div>
+      <div class="modal-title">Your BOQ is Ready</div>
+      <div class="modal-sub">Where should we send it? Create your free account to access your results.</div>
+      <div class="modal-form">
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" id="su-name" placeholder="Your full name">
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="su-email" placeholder="you@company.com">
+        </div>
+        <div class="form-group">
+          <label>Phone Number</label>
+          <div class="phone-row">
+            <select id="su-code">
+              <option value="+966">🇸🇦 +966</option>
+              <option value="+971">🇦🇪 +971</option>
+              <option value="+44">🇬🇧 +44</option>
+              <option value="+1">🇺🇸 +1</option>
+              <option value="+91">🇮🇳 +91</option>
+              <option value="+61">🇦🇺 +61</option>
+              <option value="+33">🇫🇷 +33</option>
+              <option value="+49">🇩🇪 +49</option>
+            </select>
+            <input type="tel" id="su-phone" placeholder="55 123 4567">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Your Purpose</label>
+          <select id="su-purpose">
+            <option value="">Select purpose...</option>
+            <option>Contractor / Builder</option>
+            <option>Consultant / QS</option>
+            <option>Developer / Owner</option>
+            <option>Procurement Team</option>
+            <option>Student / Research</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <button class="modal-submit" onclick="submitSignup()">🚀 Access My BOQ — Free</button>
+        <div class="modal-trust">🔒 No spam. No credit card. Instant access.</div>
+      </div>
+    </div>
+
+    <!-- Success View -->
+    <div id="modal-success-view" class="hidden">
+      <div id="success-screen" class="active">
+        <div class="success-icon">🚀</div>
+        <div class="success-title">You're In!</div>
+        <div style="color:var(--mist);font-size:14px;">Setting up your BOQ workspace...</div>
+        <div class="progress-bar-wrap">
+          <div class="progress-fill"></div>
+        </div>
+        <div style="font-size:13px;color:var(--steel);">This takes 2-3 seconds...</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ====== ANALYZE OVERLAY ====== -->
+<div id="analyze-overlay">
+  <div class="analyze-dots">
+    <span></span><span></span><span></span>
+  </div>
+  <div class="analyze-title">Generating Your BOQ...</div>
+  <div class="analyze-sub">Applying regional rates and scope calculations</div>
+  <ul class="analyze-steps-list" id="analyze-list">
+    <li><span class="pending-mark">◉</span> Calculating floor areas</li>
+    <li><span style="color:var(--steel)">○</span> Applying regional rate multipliers</li>
+    <li><span style="color:var(--steel)">○</span> Computing material takeoff</li>
+    <li><span style="color:var(--steel)">○</span> Building BOQ table</li>
+    <li><span style="color:var(--steel)">○</span> Generating cost summary</li>
+  </ul>
+</div>
+
+<script>
+// ============ STATE ============
+let state = {
+  currentStep: 1,
+  method: 'manual',
+  rooms: [],
+  selectedScopes: [],
+  signedUp: false,
+  projectCount: parseInt(localStorage.getItem('boqProjectCount') || '0'),
+  userData: null,
+  boqData: null
+};
+
+// ============ SCOPE DEFINITIONS ============
+const SCOPES = [
+  { id: 'civil', icon: '🏗️', title: 'Civil & Structural', desc: 'Excavation, foundations, concrete, rebar' },
+  { id: 'masonry', icon: '🧱', title: 'Masonry & Finishes', desc: 'Blockwork, plastering, painting, tiling' },
+  { id: 'mep', icon: '⚡', title: 'MEP Systems', desc: 'HVAC, electrical, plumbing, fire fighting' },
+  { id: 'steel', icon: '🔩', title: 'Steel & Industrial', desc: 'Structural steel, PEB systems' },
+  { id: 'facade', icon: '🏢', title: 'Façade & External', desc: 'Curtain wall, cladding, landscaping, roads' },
+  { id: 'fitout', icon: '🪑', title: 'Interior Fit-out', desc: 'False ceiling, partitions, flooring, joinery' },
+  { id: 'solar', icon: '☀️', title: 'Solar & Energy', desc: 'PV system, battery, inverter, ROI calc' },
+  { id: 'advanced', icon: '📊', title: 'Advanced Analytics', desc: 'Timeline, lifecycle cost, material takeoff' }
+];
+
+// ============ REGIONAL RATES (SAR/m²) ============
+const RATES = {
+  SA: { basic: 1800, standard: 2600, premium: 3800, luxury: 5500 },
+  UAE: { basic: 2100, standard: 3000, premium: 4500, luxury: 6500 },
+  UK: { basic: 1500, standard: 2200, premium: 3500, luxury: 5200 },
+  US: { basic: 1600, standard: 2400, premium: 3700, luxury: 5000 },
+  EU: { basic: 1400, standard: 2100, premium: 3200, luxury: 4800 },
+  IN: { basic: 450, standard: 800, premium: 1400, luxury: 2200 },
+  AU: { basic: 1700, standard: 2500, premium: 3800, luxury: 5500 },
+  GLOBAL: { basic: 1600, standard: 2400, premium: 3600, luxury: 5000 }
+};
+
+const CURRENCY = {
+  SA: 'SAR', UAE: 'AED', UK: 'GBP', US: 'USD',
+  EU: 'EUR', IN: 'INR', AU: 'AUD', GLOBAL: 'USD'
+};
+
+const SCOPE_WEIGHTS = {
+  civil: 0.28, masonry: 0.10, mep: 0.22, steel: 0.08,
+  facade: 0.10, fitout: 0.12, solar: 0.05, advanced: 0.05
+};
+
+// ============ INIT ============
+function init() {
+  renderScopeGrid();
+  renderRooms();
+  updateBadge();
+}
+
+function updateBadge() {
+  const badge = document.getElementById('project-count-badge');
+  const remaining = Math.max(0, 10 - state.projectCount);
+  badge.textContent = state.signedUp ? 'Free Plan · ' + remaining + ' projects left' : '';
+}
+
+// ============ NAV ============
+function openApp(mode) {
+  document.getElementById('landing').style.display = 'none';
+  document.getElementById('app-shell').classList.add('active');
+  document.body.style.overflow = 'hidden';
+  goToStep(1);
+}
+
+function closeApp() {
+  document.getElementById('landing').style.display = 'block';
+  document.getElementById('app-shell').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+function goToStep(n) {
+  // Update panels
+  document.querySelectorAll('.app-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + n).classList.add('active');
+
+  // Update sidebar
+  document.querySelectorAll('.sidebar-step').forEach((s, i) => {
+    s.classList.remove('active', 'done');
+    if (i + 1 === n) s.classList.add('active');
+    if (i + 1 < n) s.classList.add('done');
+  });
+
+  state.currentStep = n;
+
+  // Progress bar
+  document.getElementById('progress-bar').style.width = (n / 5 * 100) + '%';
+}
+
+// ============ METHOD TOGGLE ============
+function selectMethod(m) {
+  state.method = m;
+  document.getElementById('method-manual').classList.toggle('selected', m === 'manual');
+  document.getElementById('method-cad').classList.toggle('selected', m === 'cad');
+  document.getElementById('manual-panel').classList.toggle('hidden', m !== 'manual');
+  document.getElementById('cad-panel').classList.toggle('hidden', m !== 'cad');
+}
+
+// ============ ROOMS ============
+let roomId = 0;
+function addRoom() {
+  roomId++;
+  const types = ['Living Room', 'Master Bedroom', 'Bedroom', 'Kitchen', 'Bathroom', 'Dining Room', 'Office', 'Store', 'Balcony', 'Garage', 'Lobby', 'Meeting Room'];
+  state.rooms.push({ id: roomId, type: types[Math.min(state.rooms.length, types.length - 1)], l: '', w: '', h: 3.0, qty: 1 });
+  renderRooms();
+}
+
+function renderRooms() {
+  const list = document.getElementById('room-list');
+  if (state.rooms.length === 0) {
+    list.innerHTML = '<div style="text-align:center;color:var(--mist);font-size:14px;padding:32px;">No rooms added yet. Click "Add Room" below.</div>';
+    updateLiveArea();
+    return;
+  }
+  const types = ['Living Room', 'Master Bedroom', 'Bedroom', 'Kitchen', 'Bathroom', 'Dining Room', 'Office', 'Store', 'Balcony', 'Garage', 'Lobby', 'Meeting Room', 'Corridor', 'Pantry', 'Server Room'];
+  list.innerHTML = state.rooms.map(r => `
+    <div class="room-card">
+      <div class="room-card-header">
+        <div class="room-card-title">Room ${r.id}</div>
+        <button class="remove-btn" onclick="removeRoom(${r.id})">✕</button>
+      </div>
+      <div class="room-card-dims">
+        <div class="form-group">
+          <label>Type</label>
+          <select onchange="updateRoom(${r.id},'type',this.value)">
+            ${types.map(t => `<option ${t===r.type?'selected':''}>${t}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Length (m)</label>
+          <input type="number" value="${r.l}" placeholder="5.0" min="0" step="0.1" onchange="updateRoom(${r.id},'l',parseFloat(this.value)||0)">
+        </div>
+        <div class="form-group">
+          <label>Width (m)</label>
+          <input type="number" value="${r.w}" placeholder="4.0" min="0" step="0.1" onchange="updateRoom(${r.id},'w',parseFloat(this.value)||0)">
+        </div>
+        <div class="form-group">
+          <label>Qty</label>
+          <input type="number" value="${r.qty}" min="1" max="50" onchange="updateRoom(${r.id},'qty',parseInt(this.value)||1)">
+        </div>
+      </div>
+    </div>
+  `).join('');
+  updateLiveArea();
+}
+
+function updateRoom(id, key, val) {
+  const r = state.rooms.find(r => r.id === id);
+  if (r) { r[key] = val; updateLiveArea(); }
+}
+
+function removeRoom(id) {
+  state.rooms = state.rooms.filter(r => r.id !== id);
+  renderRooms();
+}
+
+function updateLiveArea() {
+  let total = 0;
+  state.rooms.forEach(r => { total += (parseFloat(r.l)||0) * (parseFloat(r.w)||0) * (r.qty||1); });
+  document.getElementById('live-area').textContent = 'Total GFA: ' + total.toFixed(1) + ' m²';
+}
+
+// ============ SCOPE GRID ============
+function renderScopeGrid() {
+  const grid = document.getElementById('scope-grid');
+  grid.innerHTML = SCOPES.map(s => `
+    <div class="scope-check-item ${state.selectedScopes.includes(s.id) ? 'selected' : ''}" onclick="toggleScope('${s.id}')">
+      <div class="scope-check-icon">${s.icon}</div>
+      <div class="scope-check-body">
+        <div class="scope-check-title">${s.title}</div>
+        <div class="scope-check-desc">${s.desc}</div>
+      </div>
+      <div class="scope-checkbox">${state.selectedScopes.includes(s.id) ? '✓' : ''}</div>
+    </div>
+  `).join('');
+}
+
+function toggleScope(id) {
+  const idx = state.selectedScopes.indexOf(id);
+  if (idx === -1) state.selectedScopes.push(id);
+  else state.selectedScopes.splice(idx, 1);
+  renderScopeGrid();
+}
+
+// ============ SIMULATE CAD ============
+function simulateCADUpload() {
+  document.getElementById('cad-file').click();
+}
+function handleCADFile(input) {
+  if (!input.files.length) return;
+  const overlay = document.getElementById('analyze-overlay');
+  overlay.classList.add('active');
+  setTimeout(() => {
+    overlay.classList.remove('active');
+    document.getElementById('cad-result').classList.remove('hidden');
+    // Autofill
+    document.getElementById('proj-area').value = '342';
+    document.getElementById('proj-floors').value = '2';
+  }, 3000);
+}
+
+// ============ GENERATE BOQ ============
+function generateBOQ() {
+  // Check signup
+  if (!state.signedUp) {
+    showSignupModal();
+    return;
+  }
+
+  // Check limit
+  if (state.projectCount >= 10) {
+    showUpgradeLock();
+    return;
+  }
+
+  // Show analyze overlay
+  const overlay = document.getElementById('analyze-overlay');
+  overlay.classList.add('active');
+
+  // Animate steps
+  const steps = document.querySelectorAll('#analyze-list li');
+  steps.forEach((s, i) => {
+    setTimeout(() => {
+      s.innerHTML = '<span class="pending-mark">◉</span> ' + s.textContent.trim();
+      if (i > 0) steps[i-1].innerHTML = '<span class="done-mark">✓</span> ' + steps[i-1].textContent.trim();
+    }, i * 600);
+  });
+
+  setTimeout(() => {
+    overlay.classList.remove('active');
+    state.projectCount++;
+    localStorage.setItem('boqProjectCount', state.projectCount);
+    buildBOQData();
+    renderBOQ();
+    renderCostSummary();
+    goToStep(4);
+    updateBadge();
+  }, 3500);
+}
+
+// ============ BUILD BOQ DATA ============
+function buildBOQData() {
+  const country = document.getElementById('proj-country').value || 'SA';
+  const finish = document.getElementById('proj-finish').value || 'standard';
+  const area = parseFloat(document.getElementById('proj-area').value) || calcGFA();
+  const baseRate = RATES[country]?.[finish] || 2600;
+  const scopes = state.selectedScopes.length > 0 ? state.selectedScopes : SCOPES.map(s => s.id);
+  const currency = CURRENCY[country] || 'SAR';
+  const contingency = parseFloat(document.getElementById('contingency').value) / 100;
+  const designFee = parseFloat(document.getElementById('design-fee').value) / 100;
+  const vat = parseFloat(document.getElementById('vat-rate').value) / 100;
+
+  const items = [];
+  let itemNo = 1;
+
+  const scopeDetails = {
+    civil: {
+      title: 'CIVIL & STRUCTURAL WORKS',
+      rows: [
+        { desc: 'Site Clearance & Preparation', unit: 'm²', qtyFactor: 1.15, rateFactor: 55 },
+        { desc: 'Earthworks — Excavation', unit: 'm³', qtyFactor: 0.9, rateFactor: 75 },
+        { desc: 'Compaction & Backfilling', unit: 'm³', qtyFactor: 0.6, rateFactor: 45 },
+        { desc: 'Raft Foundation (incl. blinding)', unit: 'm²', qtyFactor: 0.35, rateFactor: 680 },
+        { desc: 'Reinforced Concrete — Columns', unit: 'm³', qtyFactor: 0.04, rateFactor: 1200 },
+        { desc: 'Reinforced Concrete — Slabs', unit: 'm³', qtyFactor: 0.15, rateFactor: 980 },
+        { desc: 'Reinforced Concrete — Beams', unit: 'm³', qtyFactor: 0.08, rateFactor: 1050 },
+        { desc: 'High Yield Reinforcement Steel (rebar)', unit: 'ton', qtyFactor: 0.05, rateFactor: 3200 }
+      ]
+    },
+    masonry: {
+      title: 'MASONRY & INTERNAL FINISHES',
+      rows: [
+        { desc: 'Blockwork — External Walls (200mm)', unit: 'm²', qtyFactor: 0.6, rateFactor: 95 },
+        { desc: 'Blockwork — Internal Walls (100mm)', unit: 'm²', qtyFactor: 0.9, rateFactor: 72 },
+        { desc: 'Sand & Cement Plastering (both sides)', unit: 'm²', qtyFactor: 1.8, rateFactor: 38 },
+        { desc: 'Painting — Emulsion (2 coats)', unit: 'm²', qtyFactor: 2.2, rateFactor: 22 },
+        { desc: 'Floor Tiling — Porcelain (600x600)', unit: 'm²', qtyFactor: 1.0, rateFactor: 145 },
+        { desc: 'Wall Tiling — Bathrooms (300x600)', unit: 'm²', qtyFactor: 0.4, rateFactor: 130 }
+      ]
+    },
+    mep: {
+      title: 'MECHANICAL, ELECTRICAL & PLUMBING (MEP)',
+      rows: [
+        { desc: 'HVAC System — Central Package Units', unit: 'TR', qtyFactor: 0.035, rateFactor: 3500 },
+        { desc: 'HVAC — Ductwork & Insulation', unit: 'm²', qtyFactor: 0.8, rateFactor: 180 },
+        { desc: 'Electrical — HV/LV Distribution', unit: 'LS', qtyFactor: 0.001, rateFactor: 120000 },
+        { desc: 'Electrical — Lighting & Power', unit: 'm²', qtyFactor: 1.0, rateFactor: 220 },
+        { desc: 'Plumbing — Cold & Hot Water Systems', unit: 'm²', qtyFactor: 1.0, rateFactor: 130 },
+        { desc: 'Drainage — Internal & External', unit: 'm', qtyFactor: 0.5, rateFactor: 250 },
+        { desc: 'Fire Fighting — Sprinkler System', unit: 'm²', qtyFactor: 1.0, rateFactor: 165 },
+        { desc: 'Fire Alarm & Detection System', unit: 'm²', qtyFactor: 1.0, rateFactor: 85 }
+      ]
+    },
+    steel: {
+      title: 'STEEL & INDUSTRIAL STRUCTURES',
+      rows: [
+        { desc: 'Structural Steelwork — Primary Frame', unit: 'ton', qtyFactor: 0.04, rateFactor: 4800 },
+        { desc: 'Steel Decking & Purlins', unit: 'm²', qtyFactor: 0.5, rateFactor: 320 },
+        { desc: 'Steel Staircase & Balustrade', unit: 'flight', qtyFactor: 0.005, rateFactor: 18000 },
+        { desc: 'Anti-Corrosion Treatment & Painting', unit: 'ton', qtyFactor: 0.04, rateFactor: 950 }
+      ]
+    },
+    facade: {
+      title: 'FAÇADE, EXTERNAL & SITE WORKS',
+      rows: [
+        { desc: 'External Wall Cladding — ACP System', unit: 'm²', qtyFactor: 0.35, rateFactor: 420 },
+        { desc: 'Curtain Wall — Aluminium & Glass', unit: 'm²', qtyFactor: 0.15, rateFactor: 1800 },
+        { desc: 'External Insulation & Render System', unit: 'm²', qtyFactor: 0.5, rateFactor: 180 },
+        { desc: 'Landscaping — Hard & Soft', unit: 'm²', qtyFactor: 0.3, rateFactor: 250 },
+        { desc: 'External Pavements & Roads', unit: 'm²', qtyFactor: 0.4, rateFactor: 195 },
+        { desc: 'Boundary Wall & Security Fencing', unit: 'm', qtyFactor: 0.15, rateFactor: 650 }
+      ]
+    },
+    fitout: {
+      title: 'INTERIOR FIT-OUT',
+      rows: [
+        { desc: 'Suspended False Ceiling — Gypsum Grid', unit: 'm²', qtyFactor: 0.85, rateFactor: 180 },
+        { desc: 'Partitions — Metal Stud Drywall', unit: 'm²', qtyFactor: 0.5, rateFactor: 145 },
+        { desc: 'Raised Access Flooring', unit: 'm²', qtyFactor: 0.2, rateFactor: 380 },
+        { desc: 'Built-in Joinery & Cabinetry', unit: 'm', qtyFactor: 0.15, rateFactor: 1800 },
+        { desc: 'Doors — Solid Core with Frames & Hardware', unit: 'No.', qtyFactor: 0.06, rateFactor: 2800 },
+        { desc: 'Sanitary Fittings & Fixtures', unit: 'No.', qtyFactor: 0.03, rateFactor: 3200 }
+      ]
+    },
+    solar: {
+      title: 'SOLAR ENERGY SYSTEM',
+      rows: [
+        { desc: 'Solar PV Panels (400W monocrystalline)', unit: 'kWp', qtyFactor: 0.015, rateFactor: 3200 },
+        { desc: 'String Inverters & MPPT Controllers', unit: 'kWp', qtyFactor: 0.015, rateFactor: 1200 },
+        { desc: 'Mounting Structure — Roof / Ground', unit: 'kWp', qtyFactor: 0.015, rateFactor: 650 },
+        { desc: 'Battery Storage System (LiFePO4)', unit: 'kWh', qtyFactor: 0.008, rateFactor: 2800 },
+        { desc: 'DC/AC Cabling & Protection Devices', unit: 'LS', qtyFactor: 0.0005, rateFactor: 25000 }
+      ]
+    },
+    advanced: {
+      title: 'PRELIMINARIES & GENERAL REQUIREMENTS',
+      rows: [
+        { desc: 'Contractor Preliminaries & Mobilization', unit: 'LS', qtyFactor: 0.0008, rateFactor: 85000 },
+        { desc: 'Temporary Works & Site Hoarding', unit: 'm', qtyFactor: 0.1, rateFactor: 350 },
+        { desc: 'Quality Assurance & Testing', unit: '%', qtyFactor: 0.0001, rateFactor: area * baseRate * 0.02 },
+        { desc: 'Health, Safety & Environment (HSE)', unit: 'LS', qtyFactor: 0.0006, rateFactor: 45000 },
+        { desc: 'As-Built Drawings & O&M Manuals', unit: 'LS', qtyFactor: 0.0003, rateFactor: 22000 }
+      ]
+    }
+  };
+
+  let subtotal = 0;
+  const scopes = state.selectedScopes.length > 0 ? state.selectedScopes : ['civil','masonry','mep','fitout'];
+
+  scopes.forEach(scopeId => {
+    const def = scopeDetails[scopeId];
+    if (!def) return;
+    items.push({ type: 'section', title: def.title });
+    def.rows.forEach(row => {
+      const qty = parseFloat((area * row.qtyFactor).toFixed(2));
+      const rate = parseFloat((baseRate * row.rateFactor / 2600).toFixed(0));
+      const amt = parseFloat((qty * rate).toFixed(0));
+      subtotal += amt;
+      items.push({ itemNo: itemNo++, desc: row.desc, unit: row.unit, qty, rate, amt });
+    });
+  });
+
+  const contingencyAmt = subtotal * contingency;
+  const designAmt = subtotal * designFee;
+  const vatAmt = (subtotal + contingencyAmt + designAmt) * vat;
+  const total = subtotal + contingencyAmt + designAmt + vatAmt;
+
+  state.boqData = { items, subtotal, contingencyAmt, designAmt, vatAmt, total, currency, area, country, finish, scopes };
+}
+
+function calcGFA() {
+  if (state.rooms.length > 0) {
+    return state.rooms.reduce((sum, r) => sum + (r.l||0)*(r.w||0)*(r.qty||1), 0);
+  }
+  return 250;
+}
+
+function fmt(n, cur) {
+  return (cur || 'SAR') + ' ' + Math.round(n).toLocaleString();
+}
+
+// ============ RENDER BOQ ============
+function renderBOQ() {
+  const d = state.boqData;
+  const projName = document.getElementById('proj-name').value || 'Untitled Project';
+  const projType = document.getElementById('proj-type').value || '—';
+
+  document.getElementById('boq-name-disp').textContent = projName;
+  document.getElementById('boq-type-disp').textContent = projType;
+  document.getElementById('boq-region-disp').textContent = d.country;
+  document.getElementById('boq-area-disp').textContent = d.area.toFixed(0) + ' m²';
+  document.getElementById('boq-finish-disp').textContent = d.finish;
+
+  const tbody = document.getElementById('boq-body');
+  tbody.innerHTML = d.items.map(item => {
+    if (item.type === 'section') {
+      return `<tr class="boq-section-row"><td colspan="6">${item.title}</td></tr>`;
+    }
+    return `<tr>
+      <td class="mono">${item.itemNo}</td>
+      <td>${item.desc}</td>
+      <td>${item.unit}</td>
+      <td class="mono">${item.qty.toLocaleString()}</td>
+      <td class="mono">${fmt(item.rate, d.currency)}</td>
+      <td class="mono amount-cell">${fmt(item.amt, d.currency)}</td>
+    </tr>`;
+  }).join('');
+
+  // Add total row
+  tbody.innerHTML += `<tr class="boq-total-row">
+    <td colspan="5" style="text-align:right;font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:0.5px;">CONSTRUCTION SUBTOTAL</td>
+    <td class="mono amount-cell">${fmt(d.subtotal, d.currency)}</td>
+  </tr>`;
+
+  // Totals
+  document.getElementById('subtotal-val').textContent = fmt(d.subtotal, d.currency);
+  document.getElementById('contingency-amt').textContent = fmt(d.contingencyAmt, d.currency);
+  document.getElementById('design-amt').textContent = fmt(d.designAmt, d.currency);
+  document.getElementById('vat-amt').textContent = fmt(d.vatAmt, d.currency);
+  document.getElementById('total-val').textContent = fmt(d.total, d.currency);
+}
+
+// ============ RENDER COST SUMMARY ============
+function renderCostSummary() {
+  const d = state.boqData;
+  document.getElementById('cs-total').textContent = fmt(d.total, d.currency);
+  document.getElementById('cs-rate').textContent = fmt(d.total / d.area, d.currency) + '/m²';
+  document.getElementById('cs-area').textContent = d.area.toFixed(0);
+  document.getElementById('cs-construction').textContent = fmt(d.subtotal, d.currency);
+
+  // Scope breakdown bars
+  const breakdown = document.getElementById('scope-breakdown');
+  const activeScopes = d.scopes;
+  const scopeAmts = {};
+  let runningTotal = 0;
+  activeScopes.forEach(sid => {
+    const weight = SCOPE_WEIGHTS[sid] || 0.1;
+    scopeAmts[sid] = d.subtotal * weight;
+    runningTotal += scopeAmts[sid];
+  });
+
+  breakdown.innerHTML = activeScopes.map(sid => {
+    const scope = SCOPES.find(s => s.id === sid);
+    if (!scope) return '';
+    const pct = ((scopeAmts[sid] / d.subtotal) * 100).toFixed(1);
+    return `<div style="margin-bottom:14px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+        <span style="font-size:13px;color:var(--chalk);">${scope.icon} ${scope.title}</span>
+        <span class="mono" style="font-size:13px;color:var(--gold);">${fmt(scopeAmts[sid], d.currency)}</span>
+      </div>
+      <div style="height:6px;background:var(--ink-4);border-radius:3px;overflow:hidden;">
+        <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--gold),var(--gold-light));border-radius:3px;transition:width 0.8s ease;"></div>
+      </div>
+      <div style="font-size:11px;color:var(--mist);margin-top:3px;">${pct}% of construction cost</div>
+    </div>`;
+  }).join('');
+
+  // Material takeoff
+  const mt = document.getElementById('material-takeoff');
+  const area = d.area;
+  const materials = [
+    { name: 'Concrete (m³)', qty: Math.round(area * 0.22) + ' m³' },
+    { name: 'Rebar Steel', qty: Math.round(area * 0.05) + ' tons' },
+    { name: 'Cement Bags', qty: Math.round(area * 2.8) + ' bags' },
+    { name: 'CMU Blocks', qty: Math.round(area * 15) + ' nos.' },
+    { name: 'Plaster (bags)', qty: Math.round(area * 3.5) + ' bags' },
+    { name: 'Paint (liters)', qty: Math.round(area * 4.2) + ' L' },
+    { name: 'Floor Tiles', qty: Math.round(area * 1.05) + ' m²' },
+    { name: 'HVAC Capacity', qty: Math.round(area * 0.035) + ' TR' },
+    { name: 'Electrical Load', qty: Math.round(area * 0.075) + ' kW' }
+  ];
+
+  mt.innerHTML = materials.map(m => `
+    <div style="background:var(--ink-4);border-radius:4px;padding:14px 16px;">
+      <div style="font-size:11px;color:var(--mist);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;">${m.name}</div>
+      <div class="mono" style="font-size:16px;font-weight:500;color:var(--gold);">${m.qty}</div>
+    </div>
+  `).join('');
+
+  // Timeline
+  const floors = parseInt(document.getElementById('proj-floors').value) || 2;
+  const months = Math.round(area / 100 * 1.2 * (floors * 0.3));
+  const tl = document.getElementById('timeline-output');
+  tl.innerHTML = `
+    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+      ${[
+        {phase:'Design & Permitting', dur: Math.round(months*0.2)+' months', icon:'📐'},
+        {phase:'Foundation & Structure', dur: Math.round(months*0.35)+' months', icon:'🏗️'},
+        {phase:'MEP Rough-in', dur: Math.round(months*0.2)+' months', icon:'⚡'},
+        {phase:'Finishes & Fit-out', dur: Math.round(months*0.2)+' months', icon:'🪑'},
+        {phase:'Testing & Handover', dur: Math.round(months*0.05)+' months', icon:'✅'},
+      ].map(p => `<div style="background:var(--ink-4);border-radius:4px;padding:14px;flex:1;min-width:140px;">
+        <div style="font-size:20px;margin-bottom:6px;">${p.icon}</div>
+        <div style="font-size:12px;color:var(--mist);margin-bottom:3px;">${p.phase}</div>
+        <div class="mono" style="font-size:14px;color:var(--gold);">${p.dur}</div>
+      </div>`).join('')}
+    </div>
+    <div style="margin-top:12px;font-size:13px;color:var(--mist);">Estimated Total Duration: <strong style="color:var(--white);">${months} months</strong> · Indicative schedule only.</div>
+  `;
+}
+
+// ============ SIGNUP MODAL ============
+function showSignupModal() {
+  document.getElementById('signup-modal').classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('signup-modal').classList.remove('active');
+}
+
+function submitSignup() {
+  const name = document.getElementById('su-name').value.trim();
+  const email = document.getElementById('su-email').value.trim();
+  if (!name || !email) { alert('Please enter your name and email.'); return; }
+
+  state.userData = {
+    name, email,
+    phone: document.getElementById('su-code').value + document.getElementById('su-phone').value,
+    purpose: document.getElementById('su-purpose').value
+  };
+
+  // Show success animation
+  document.getElementById('modal-form-view').classList.add('hidden');
+  document.getElementById('modal-success-view').classList.remove('hidden');
+
+  setTimeout(() => {
+    state.signedUp = true;
+    closeModal();
+    document.getElementById('modal-form-view').classList.remove('hidden');
+    document.getElementById('modal-success-view').classList.add('hidden');
+    generateBOQ();
+  }, 2800);
+}
+
+// ============ UPGRADE LOCK ============
+function showUpgradeLock() {
+  alert('🔒 You\'ve reached your 10-project free limit.\n\nUpgrade via WhatsApp for unlimited projects.\n\nPlan: Monthly SAR 55 | Annual SAR 480');
+  window.open("https://wa.me/966511759092?text=Hello%2C+I+want+to+upgrade+BOQ+Pro.+Name%3A+" + encodeURIComponent(state.userData?.name || '') + "+Email%3A+" + encodeURIComponent(state.userData?.email || '') + "+Plan%3A+Monthly%2FAnnual", '_blank');
+}
+
+// ============ CODE VALIDATION ============
+function validateCode() {
+  const code = document.getElementById('access-code-input').value.trim();
+  const msg = document.getElementById('code-msg');
+  msg.style.display = 'block';
+  if (!code.startsWith('BOQ-') || code.length < 8) {
+    msg.style.color = 'var(--red)';
+    msg.textContent = '✕ Invalid code format. Expected: BOQ-XXXX-USER';
+    return;
+  }
+  // Demo: accept any valid-looking code
+  state.signedUp = true;
+  state.projectCount = 0;
+  msg.style.color = 'var(--green)';
+  msg.textContent = '✓ Code activated! Unlimited access unlocked.';
+  updateBadge();
+}
+
+// ============ EXPORT PDF (simulated) ============
+function exportPDF() {
+  if (!state.boqData) { alert('Please generate your BOQ first.'); return; }
+  const d = state.boqData;
+  const projName = document.getElementById('proj-name').value || 'Project';
+
+  // Build print window
+  const win = window.open('', '_blank', 'width=900,height=700');
+  win.document.write(`<!DOCTYPE html><html><head>
+  <meta charset="UTF-8">
+  <title>BOQ Report — ${projName}</title>
+  <style>
+    body{font-family:Arial,sans-serif;color:#222;max-width:900px;margin:0 auto;padding:32px;}
+    h1{font-size:32px;margin-bottom:4px;}
+    .gold{color:#B8860B;}
+    .header{border-bottom:3px solid #B8860B;padding-bottom:16px;margin-bottom:24px;}
+    .meta{display:flex;gap:40px;margin-bottom:24px;background:#f9f9f9;padding:16px;border-radius:4px;}
+    .meta-item{font-size:13px;}
+    .meta-label{color:#666;font-size:11px;text-transform:uppercase;letter-spacing:1px;}
+    table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:24px;}
+    th{background:#1a1a1a;color:#C9A84C;padding:10px 14px;text-align:left;font-size:11px;letter-spacing:1px;}
+    td{padding:9px 14px;border-bottom:1px solid #eee;}
+    .sec-row{background:#f5f0e0;font-weight:700;color:#8B6E2E;}
+    .total-row{background:#f0ede0;font-weight:700;border-top:2px solid #B8860B;}
+    .summary{background:#f9f9f9;padding:20px;margin-bottom:24px;border-left:4px solid #C9A84C;}
+    .cta-box{background:#1a1a1a;color:white;padding:24px;border-radius:4px;margin-top:32px;}
+    .cta-box h3{color:#C9A84C;margin-bottom:12px;}
+    .cta-box p{font-size:13px;line-height:1.6;color:#ccc;}
+    .footer{border-top:1px solid #ddd;padding-top:16px;margin-top:32px;font-size:11px;color:#999;text-align:center;}
+  </style>
+  </head><body>
+  <div class="header">
+    <h1 class="gold">BOQ PRO</h1>
+    <div style="font-size:14px;color:#666;">Bill of Quantities & Cost Report</div>
+    <div style="font-size:20px;font-weight:700;margin-top:8px;">${projName}</div>
+  </div>
+  <div class="meta">
+    <div class="meta-item"><div class="meta-label">Region</div><strong>${d.country}</strong></div>
+    <div class="meta-item"><div class="meta-label">GFA</div><strong>${d.area.toFixed(0)} m²</strong></div>
+    <div class="meta-item"><div class="meta-label">Finish Level</div><strong>${d.finish}</strong></div>
+    <div class="meta-item"><div class="meta-label">Generated</div><strong>${new Date().toLocaleDateString()}</strong></div>
+  </div>
+  <table>
+    <thead><tr><th>#</th><th>Description</th><th>Unit</th><th>Qty</th><th>Rate (${d.currency})</th><th>Amount (${d.currency})</th></tr></thead>
+    <tbody>
+      ${d.items.map(item => item.type === 'section'
+        ? `<tr class="sec-row"><td colspan="6">${item.title}</td></tr>`
+        : `<tr><td>${item.itemNo}</td><td>${item.desc}</td><td>${item.unit}</td><td>${item.qty.toLocaleString()}</td><td>${Math.round(item.rate).toLocaleString()}</td><td style="text-align:right;font-family:monospace;">${Math.round(item.amt).toLocaleString()}</td></tr>`
+      ).join('')}
+    </tbody>
+  </table>
+  <div class="summary">
+    <table style="width:400px;margin-left:auto;">
+      <tr><td>Construction Subtotal</td><td style="text-align:right;font-family:monospace;">${d.currency} ${Math.round(d.subtotal).toLocaleString()}</td></tr>
+      <tr><td>Contingency</td><td style="text-align:right;font-family:monospace;">${d.currency} ${Math.round(d.contingencyAmt).toLocaleString()}</td></tr>
+      <tr><td>Design & Engineering Fees</td><td style="text-align:right;font-family:monospace;">${d.currency} ${Math.round(d.designAmt).toLocaleString()}</td></tr>
+      <tr><td>VAT</td><td style="text-align:right;font-family:monospace;">${d.currency} ${Math.round(d.vatAmt).toLocaleString()}</td></tr>
+      <tr class="total-row"><td><strong>TOTAL PROJECT COST</strong></td><td style="text-align:right;font-family:monospace;color:#B8860B;"><strong>${d.currency} ${Math.round(d.total).toLocaleString()}</strong></td></tr>
+    </table>
+  </div>
+  <div class="cta-box">
+    <h3>📞 Looking for a Reliable EPC Contractor in Saudi Arabia?</h3>
+    <p>Send us this BOQ file and we will assist you with procurement, construction, and project delivery — end to end.</p>
+    <p style="margin-top:12px;">
+      📧 info@qaswasharwia.com &nbsp;&nbsp; 📧 qaswasharqia@gmail.com<br>
+      📞 +966 511759092 &nbsp;&nbsp; 📞 +966 573524746<br><br>
+      <strong style="color:#C9A84C;">Al Qaswaa Al Sharqia Trading EST</strong> · EPC Contractor · Eastern Province, Saudi Arabia
+    </p>
+  </div>
+  <div class="footer">Generated by BOQ Pro · boqpro.app · Powered by Al Qaswaa Al Sharqia Trading EST</div>
+  </body></html>`);
+  win.document.close();
+  setTimeout(() => win.print(), 500);
+}
+
+// ============ RESET ============
+function resetApp() {
+  state.rooms = [];
+  state.selectedScopes = [];
+  state.boqData = null;
+  roomId = 0;
+  renderScopeGrid();
+  renderRooms();
+  goToStep(1);
+  // Clear form fields
+  ['proj-name','proj-type','proj-country','proj-finish','proj-floors','proj-area','proj-location','proj-desc'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+}
+
+// ============ BOOT ============
+init();
+
+// Add initial rooms
+addRoom(); addRoom(); addRoom();
+
+// Auto-select common scopes
+state.selectedScopes = ['civil', 'masonry', 'mep', 'fitout'];
+renderScopeGrid();
+</script>
+</body>
+</html>
